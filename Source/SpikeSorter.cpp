@@ -122,7 +122,8 @@ void SpikeSorter::handleSpike(const SpikeChannel* spikeChannel, const EventPacke
         electrode->spikePlot->processSpikeObject(sorterSpike);
     }
 
-    setSortedID(rawData, sorterSpike->sortedId);
+    if (sorterSpike->sortedId > 0)
+        setSortedID(rawData, sorterSpike->sortedId);
     
 }
 

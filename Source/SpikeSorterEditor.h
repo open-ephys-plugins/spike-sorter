@@ -66,6 +66,7 @@ public:
 
 private:
 
+    ScopedPointer<Label> electrodeSelectionLabel;
 	ScopedPointer<ComboBox> electrodeList;
 
     Array<Electrode*> currentElectrodes;

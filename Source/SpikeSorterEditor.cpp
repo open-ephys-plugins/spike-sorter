@@ -28,17 +28,19 @@
 #include <stdio.h>
 
 SpikeSorterEditor::SpikeSorterEditor(GenericProcessor* parentNode)
-    : VisualizerEditor(parentNode, 300)
+    : VisualizerEditor(parentNode, 205)
 
 {
-    tabText = "Spike Detector";
-
-    desiredWidth = 300;
+    tabText = "Spike Sorter";
 
     electrodeList = new ComboBox("Electrode List");
     electrodeList->addListener(this);
-    electrodeList->setBounds(65,30,130,20);
+    electrodeList->setBounds(20,70,140,20);
     addAndMakeVisible(electrodeList);
+
+    electrodeSelectionLabel = new Label("Label", "Active Electrode:");
+    electrodeSelectionLabel->setBounds(17, 40, 180, 20);
+    addAndMakeVisible(electrodeSelectionLabel);
 }
 
 Visualizer* SpikeSorterEditor::createNewCanvas()
@@ -70,6 +72,8 @@ void SpikeSorterEditor::selectedStreamHasChanged()
     {
         electrodeList->addItem(electrode->name, id++);
     }
+
+    electrodeList->setSelectedId(1, true);
 }
 
 void SpikeSorterEditor::comboBoxChanged(ComboBox* comboBox)
