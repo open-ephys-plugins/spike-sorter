@@ -26,6 +26,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "SpikeSortBoxes.h"
 #include "SpikeSorter.h"
 
+int SpikeSortBoxes::nextUnitId = 1;
+
 PointD::PointD()
 {
     X = Y = 0;
@@ -592,9 +594,9 @@ void BoxUnit::updateWaveform(SorterSpikePtr so)
 
 /***********************************************/
 
-SpikeSortBoxes::SpikeSortBoxes(UniqueIDgenerator* uniqueIDgenerator_,PCAcomputingThread* pth, int numch, double SamplingRate, int WaveFormLength)
+SpikeSortBoxes::SpikeSortBoxes(String name, PCAcomputingThread* pth, int numch, double SamplingRate, int WaveFormLength)
 {
-    uniqueIDgenerator = uniqueIDgenerator_;
+
     computingThread = pth;
     pc1 = pc2 = nullptr;
     bufferSize = 200;
@@ -948,12 +950,12 @@ int SpikeSortBoxes::addBoxUnit(int channel)
 {
     const ScopedLock myScopedLock(mut);
     //StartCriticalSection();
-    int unusedID = uniqueIDgenerator->generateUniqueID(); //generateUnitID();
-    BoxUnit unit(unusedID, generateLocalID());
+    
+    BoxUnit unit(nextUnitId++, generateLocalID());
     boxUnits.push_back(unit);
-    setSelectedUnitAndBox(unusedID, 0);
+    setSelectedUnitAndBox(nextUnitId, 0);
     //EndCriticalSection();
-    return unusedID;
+    return nextUnitId;
 }
 /*
 void  SpikeSortBoxes::StartCriticalSection()
@@ -970,12 +972,11 @@ int SpikeSortBoxes::addBoxUnit(int channel, Box B)
 {
     const ScopedLock myScopedLock(mut);
     //StartCriticalSection();
-    int unusedID = uniqueIDgenerator->generateUniqueID(); //generateUnitID();
-    BoxUnit unit(B, unusedID,generateLocalID());
+    BoxUnit unit(B, nextUnitId++, generateLocalID());
     boxUnits.push_back(unit);
-    setSelectedUnitAndBox(unusedID, 0);
+    setSelectedUnitAndBox(nextUnitId, 0);
     //EndCriticalSection();
-    return unusedID;
+    return nextUnitId;
 }
 
 void SpikeSortBoxes::getUnitColor(int UnitID, uint8& R, uint8& G, uint8& B)
@@ -1039,7 +1040,7 @@ int SpikeSortBoxes::generateLocalID()
 int SpikeSortBoxes::generateUnitID()
 {
 
-    int ID = uniqueIDgenerator->generateUniqueID();
+    int ID = ++nextUnitId;
     return ID;
 }
 
@@ -2223,16 +2224,18 @@ int microSecondsToSpikeTimeBin(SorterSpikePtr s, float t, int ch)
 }
 
 
-SorterSpikeContainer::SorterSpikeContainer(const SpikeChannel* channel, Spike::Buffer& spikedata, int64 timestamp)
+SorterSpikeContainer::SorterSpikeContainer(const SpikeChannel* channel, SpikePtr spike)
 {
 	color[0] = color[1] = color[2] = 127;
 	pcProj[0] = pcProj[1] = 0;
 	sortedId = 0;
-	this->timestamp = timestamp;
+
 	chan = channel;
 	int nSamples = chan->getNumChannels() * chan->getTotalSamples();
-	data.malloc(nSamples);
-	memcpy(data.getData(), spikedata.getRawPointer(), nSamples*sizeof(float));
+	
+    //data.malloc(nSamples);
+	//memcpy(data.getData(), spikedata.getRawPointer(), nSamples*sizeof(float));
+
 }
 
 const float* SorterSpikeContainer::getData() const

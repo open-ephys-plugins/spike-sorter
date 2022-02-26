@@ -54,7 +54,7 @@ typedef ReferenceCountedObjectPtr<SorterSpikeContainer> SorterSpikePtr;
 typedef ReferenceCountedArray<SorterSpikeContainer, CriticalSection> SorterSpikeArray;
 
 class PCAcomputingThread;
-class UniqueIDgenerator;
+
 class PointD
 {
 public:
@@ -65,7 +65,6 @@ public:
     const PointD operator+(const PointD& c1) const;
     PointD& operator+=(const PointD& rhs);
     PointD& operator-=(const PointD& rhs);
-
 
     const PointD operator-(const PointD& c1) const;
     const PointD operator*(const PointD& c1) const;
@@ -249,11 +248,10 @@ public:
 class SpikeSortBoxes
 {
 public:
-    SpikeSortBoxes(UniqueIDgenerator* uniqueIDgenerator_, PCAcomputingThread* pth, int numch, double SamplingRate, int WaveFormLength);
+    SpikeSortBoxes(String name, PCAcomputingThread* pth, int numch, double SamplingRate, int WaveFormLength);
     ~SpikeSortBoxes();
 
     void resizeWaveform(int numSamples);
-
 
 	void projectOnPrincipalComponents(SorterSpikePtr so);
 	bool sortSpike(SorterSpikePtr so, bool PCAfirst);
@@ -291,7 +289,9 @@ public:
 private:
     //void  StartCriticalSection();
     //void  EndCriticalSection();
-    UniqueIDgenerator* uniqueIDgenerator;
+    
+    static int nextUnitId;
+
     int numChannels, waveformLength;
     int selectedUnit, selectedBox;
     CriticalSection mut;

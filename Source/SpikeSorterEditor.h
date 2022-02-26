@@ -26,85 +26,51 @@
 
 #include <VisualizerEditorHeaders.h>
 
+class Electrode;
 class SpikeSorterCanvas;
 
 /**
 
   User interface for the SpikeSorter processor.
 
-  Allows the user to add single electrodes, stereotrodes, or tetrodes.
-
-  Parameters of individual channels, such as channel mapping, threshold,
-  and enabled state, can be edited.
+  Allows the user to select an electrode to add box / PCA units to
 
   @see SpikeSorter
 
 */
 
 class SpikeSorterEditor : public VisualizerEditor,
-    public Label::Listener,
-    public ComboBox::Listener,
-    public Button::Listener,
-    public Slider::Listener
-
+    public ComboBox::Listener
 {
 public:
     /** Constructor*/
     SpikeSorterEditor(GenericProcessor* parentNode);
 
     /** Destructor*/
-    virtual ~SpikeSorterEditor();
+    virtual ~SpikeSorterEditor() { }
 
-    /** Button::Listener callback */
-    void buttonClicked(Button* button);
-
-    /** Label::Listener callback*/
-    void labelTextChanged(Label* label);
+    /** Creates the SpikeSorterCanvas */
+    Visualizer* createNewCanvas();
 
     /** ComboBox::Listener callback*/
     void comboBoxChanged(ComboBox* comboBox);
 
-    /** Slider::Listener callback*/
-    void sliderValueChanged(Slider* slider);
+    /** Selects the next available electrode */
+    void nextElectrode();
 
-    /** Creates the SpikeSorterCanvas */
-    Visualizer* createNewCanvas();
-    void checkSettings();
-    void setThresholdValue(int chan, double threshold);
-    OwnedArray<ElectrodeButton> electrodeButtons;
-    SpikeSorterCanvas* spikeSorterCanvas;
+    /** Selects the previous electrode */
+    void previousElectrode();
 
-    void refreshElectrodeList(int selected = 0);
-    void setSelectedElectrode(int i);
-    int getSelectedElectrode();
-    void setElectrodeComboBox(int direction);
+    /** Called when selected stream is updated*/
+    void SpikeSorterEditor::selectedStreamHasChanged() override;
 
 private:
-    void drawElectrodeButtons(int);
-   
-    //  ComboBox* electrodeTypes;
-	ScopedPointer<ComboBox> electrodeList;// , dacCombo;
-    ScopedPointer<ComboBox> advancerList;
-    ScopedPointer<Label> advancerLabel, depthOffsetLabel, depthOffsetEdit;
-    ScopedPointer<Label> numElectrodes;
-	ScopedPointer<Label> thresholdLabel; // , dacAssignmentLabel;
-    ScopedPointer<TriangleButton> upButton;
-    ScopedPointer<TriangleButton> downButton;
-    ScopedPointer<UtilityButton> plusButton;
-    ScopedPointer<UtilityButton> configButton;
-    ScopedPointer<UtilityButton> removeElectrodeButton;
-    ScopedPointer<UtilityButton> audioMonitorButton;
-    ScopedPointer<ThresholdSlider> thresholdSlider;
 
-    Array<String> advancerNames ;
-    Array<int> advancerIDs;
-    void removeElectrode(int index);
-    void editElectrode(int index, int chan, int newChan);
+	ScopedPointer<ComboBox> electrodeList;
 
-    int lastId;
-    bool isPlural;
+    Array<Electrode*> currentElectrodes;
 
-    //Font font;
+    SpikeSorterCanvas* spikeSorterCanvas;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeSorterEditor);
 
