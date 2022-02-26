@@ -1174,7 +1174,7 @@ void SpikeSortBoxes::updateBoxUnits(std::vector<BoxUnit> _units)
 
 
 // tests whether a candidate spike belongs to one of the defined units
-bool SpikeSortBoxes::sortSpike(SorterSpikePtr so, bool PCAfirst)
+bool SpikeSortBoxes::sortSpike(SorterSpikePtr spike, bool PCAfirst)
 {
     const ScopedLock myScopedLock(mut);
     if (PCAfirst)
@@ -1182,25 +1182,25 @@ bool SpikeSortBoxes::sortSpike(SorterSpikePtr so, bool PCAfirst)
 
         for (int k=0; k<pcaUnits.size(); k++)
         {
-            if (pcaUnits[k].isWaveFormInsidePolygon(so))
+            if (pcaUnits[k].isWaveFormInsidePolygon(spike))
             {
-                so->sortedId = pcaUnits[k].getUnitID();
-                so->color[0] = pcaUnits[k].ColorRGB[0];
-                so->color[1] = pcaUnits[k].ColorRGB[1];
-                so->color[2] = pcaUnits[k].ColorRGB[2];
+                spike->sortedId = pcaUnits[k].getUnitID();
+                spike->color[0] = pcaUnits[k].ColorRGB[0];
+                spike->color[1] = pcaUnits[k].ColorRGB[1];
+                spike->color[2] = pcaUnits[k].ColorRGB[2];
                 return true;
             }
         }
 
         for (int k=0; k<boxUnits.size(); k++)
         {
-            if (boxUnits[k].isWaveFormInsideAllBoxes(so))
+            if (boxUnits[k].isWaveFormInsideAllBoxes(spike))
             {
-                so->sortedId = boxUnits[k].getUnitID();
-                so->color[0] = boxUnits[k].ColorRGB[0];
-                so->color[1] = boxUnits[k].ColorRGB[1];
-                so->color[2] = boxUnits[k].ColorRGB[2];
-                boxUnits[k].updateWaveform(so);
+                spike->sortedId = boxUnits[k].getUnitID();
+                spike->color[0] = boxUnits[k].ColorRGB[0];
+                spike->color[1] = boxUnits[k].ColorRGB[1];
+                spike->color[2] = boxUnits[k].ColorRGB[2];
+                boxUnits[k].updateWaveform(spike);
                 return true;
             }
         }
@@ -1210,25 +1210,25 @@ bool SpikeSortBoxes::sortSpike(SorterSpikePtr so, bool PCAfirst)
 
         for (int k=0; k<boxUnits.size(); k++)
         {
-            if (boxUnits[k].isWaveFormInsideAllBoxes(so))
+            if (boxUnits[k].isWaveFormInsideAllBoxes(spike))
             {
-                so->sortedId = boxUnits[k].getUnitID();
-                so->color[0] = boxUnits[k].ColorRGB[0];
-                so->color[1] = boxUnits[k].ColorRGB[1];
-                so->color[2] = boxUnits[k].ColorRGB[2];
-                boxUnits[k].updateWaveform(so);
+                spike->sortedId = boxUnits[k].getUnitID();
+                spike->color[0] = boxUnits[k].ColorRGB[0];
+                spike->color[1] = boxUnits[k].ColorRGB[1];
+                spike->color[2] = boxUnits[k].ColorRGB[2];
+                boxUnits[k].updateWaveform(spike);
                 return true;
             }
         }
         for (int k=0; k<pcaUnits.size(); k++)
         {
-            if (pcaUnits[k].isWaveFormInsidePolygon(so))
+            if (pcaUnits[k].isWaveFormInsidePolygon(spike))
             {
-                so->sortedId = pcaUnits[k].getUnitID();
-                so->color[0] = pcaUnits[k].ColorRGB[0];
-                so->color[1] = pcaUnits[k].ColorRGB[1];
-                so->color[2] = pcaUnits[k].ColorRGB[2];
-                pcaUnits[k].updateWaveform(so);
+                spike->sortedId = pcaUnits[k].getUnitID();
+                spike->color[0] = pcaUnits[k].ColorRGB[0];
+                spike->color[1] = pcaUnits[k].ColorRGB[1];
+                spike->color[2] = pcaUnits[k].ColorRGB[2];
+                pcaUnits[k].updateWaveform(spike);
                 return true;
             }
         }
@@ -1242,20 +1242,19 @@ bool SpikeSortBoxes::sortSpike(SorterSpikePtr so, bool PCAfirst)
 bool  SpikeSortBoxes::removeBoxFromUnit(int unitID, int boxIndex)
 {
     const ScopedLock myScopedLock(mut);
-    //StartCriticalSection();
+
     for (int k=0; k<boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitID() == unitID)
         {
             bool s= boxUnits[k].deleteBox(boxIndex);
             setSelectedUnitAndBox(-1,-1);
-            //EndCriticalSection();
+
             return s;
         }
 
     }
 
-    //EndCriticalSection();
     return false;
 }
 
@@ -1263,18 +1262,18 @@ std::vector<Box> SpikeSortBoxes::getUnitBoxes(int unitID)
 {
     std::vector<Box> boxes;
     const ScopedLock myScopedLock(mut);
-    //StartCriticalSection();
+
     for (int k=0; k< boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitID() == unitID)
         {
 
             boxes = boxUnits[k].getBoxes();
-            // EndCriticalSection();
+
             return boxes;
         }
     }
-    //EndCriticalSection();
+
     return boxes;
 }
 

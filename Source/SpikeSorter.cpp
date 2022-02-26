@@ -865,10 +865,49 @@ void SpikeSorter::clearRunningStatForSelectedElectrode()
     electrodes[currentElectrode]->runningStats[0].Clear();
 }
 
+void SpikeSorter::setSortedID(const uint8* rawData, uint16 sortedID)
+{
+    uint8* modifiableBuffer = const_cast<uint8*>(rawData);
+
+    *(reinterpret_cast<uint16*>(modifiableBuffer + 16)) = sortedID;
+}
+
+void SpikeSorter::handleSpike(const SpikeChannel* spikeChannel, const EventPacket& spike, int samplePosition, const uint8* rawData)
+{
+    SpikePtr newSpike = Spike::deserialize(spike, spikeChannel);
+
+    SorterSpikePtr sorterSpike = new SorterSpikeContainer(spikeChannel, newSpike);
+
+    //for (int xxx = 0; xxx < 1000; xxx++) // overload with spikes for testing purposes
+    electrode->spikeSort->projectOnPrincipalComponents(sorterSpike);
+
+    // Add spike to drawing buffer....
+    electrode->spikeSort->sortSpike(sorterSpike, PCAbeforeBoxes);
+
+    // transfer buffered spikes to spike plot
+    if (electrode->spikePlot != nullptr)
+    {
+        if (electrode->spikeSort->isPCAfinished())
+        {
+            electrode->spikeSort->resetJobStatus();
+            float p1min, p2min, p1max, p2max;
+            electrode->spikeSort->getPCArange(p1min, p2min, p1max, p2max);
+            electrode->spikePlot->setPCARange(p1min, p2min, p1max, p2max);
+        }
+
+        electrode->spikePlot->processSpikeObject(sorterSpike);
+    }
+
+    setSortedID(rawData, sorterSpike->sortedId);
+    
+}
+
 void SpikeSorter::process(AudioBuffer<float>& buffer)
 {
 
-    //printf("Entering Spike Detector::process\n");
+    checkForEvents(true);
+
+    /*//printf("Entering Spike Detector::process\n");
     mut.enter();
     // cycle through electrodes
     Electrode* electrode;
@@ -964,18 +1003,6 @@ void SpikeSorter::process(AudioBuffer<float>& buffer)
 
 						SorterSpikePtr sorterSpike = new SorterSpikeContainer(spikeChan, spikeData, timestamp);
 
-                        /*
-                        bool perfectMatch = true;
-                        for (int k=0;k<40;k++) {
-                        	perfectMatch = perfectMatch & (prevSpike.data[k] == newSpike.data[k]);
-                        }
-                        if (perfectMatch)
-                        {
-                        	int x;
-                        	x++;
-                        }
-                        */
-
                         //for (int xxx = 0; xxx < 1000; xxx++) // overload with spikes for testing purposes
 						electrode->spikeSort->projectOnPrincipalComponents(sorterSpike);
 
@@ -1051,7 +1078,7 @@ void SpikeSorter::process(AudioBuffer<float>& buffer)
 
 
     mut.exit();
-    //printf("Exitting Spike Detector::process\n");
+    //printf("Exitting Spike Detector::process\n");*/
 }
 
 float SpikeSorter::getNextSample(int& chan)

@@ -224,12 +224,14 @@ public:
     /** destructor */
     ~SpikeSorter();
 
+    /** Calls checkForEvents(true) */
+    void process(AudioBuffer<float>& buffer) override;
 
-    // PROCESSOR METHODS //
+    /** Handles incoming spikes */
+    void handleSpike(const SpikeChannel* spikeChannel, const EventPacket& spike, int samplePosition, const uint8* rawData) override;
 
-    /** Processes an incoming continuous buffer and places new
-        spikes into the event buffer. */
-    void process(AudioSampleBuffer& buffer) override;
+    /** Updates the sortedID of an incoming spike*/
+    void setSortedID(const uint8* rawData, uint16 sortedID);
 
     /** Used to alter parameters of data acquisition. */
     void setParameter(int parameterIndex, float newValue) override;

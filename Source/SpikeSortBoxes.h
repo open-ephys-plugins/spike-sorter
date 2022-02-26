@@ -35,8 +35,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class SorterSpikeContainer : public ReferenceCountedObject
 {
 public:
-	//This invalidates the original SpikeEventPtr, so be careful
-	SorterSpikeContainer(const SpikeChannel* channel, Spike::Buffer& data, int64 timestamp);
+
+	SorterSpikeContainer(const SpikeChannel* channel, SpikePtr spike);
 	SorterSpikeContainer() = delete;
 
 	const float* getData() const;
@@ -173,12 +173,6 @@ public:
 
 };
 
-/*
-class PCAjob
-{
-public:
-PCAjob();
-};*/
 class PCAjob : public ReferenceCountedObject
 {
 public:
