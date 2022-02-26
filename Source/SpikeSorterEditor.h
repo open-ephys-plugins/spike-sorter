@@ -43,23 +43,37 @@ class SpikeSorterCanvas;
 
 class SpikeSorterEditor : public VisualizerEditor,
     public Label::Listener,
-    public ComboBox::Listener
+    public ComboBox::Listener,
+    public Button::Listener,
+    public Slider::Listener
 
 {
 public:
     /** Constructor*/
-    SpikeSorterEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors);
+    SpikeSorterEditor(GenericProcessor* parentNode);
+
+    /** Destructor*/
     virtual ~SpikeSorterEditor();
-    void buttonEvent(Button* button);
+
+    /** Button::Listener callback */
+    void buttonClicked(Button* button);
+
+    /** Label::Listener callback*/
     void labelTextChanged(Label* label);
+
+    /** ComboBox::Listener callback*/
     void comboBoxChanged(ComboBox* comboBox);
-    void sliderEvent(Slider* slider);
+
+    /** Slider::Listener callback*/
+    void sliderValueChanged(Slider* slider);
+
+    /** Creates the SpikeSorterCanvas */
     Visualizer* createNewCanvas();
     void checkSettings();
     void setThresholdValue(int chan, double threshold);
     OwnedArray<ElectrodeButton> electrodeButtons;
     SpikeSorterCanvas* spikeSorterCanvas;
-    //void updateAdvancerList();
+
     void refreshElectrodeList(int selected = 0);
     void setSelectedElectrode(int i);
     int getSelectedElectrode();
@@ -68,9 +82,6 @@ public:
 private:
     void drawElectrodeButtons(int);
    
-
-
-
     //  ComboBox* electrodeTypes;
 	ScopedPointer<ComboBox> electrodeList;// , dacCombo;
     ScopedPointer<ComboBox> advancerList;

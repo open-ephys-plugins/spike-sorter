@@ -34,7 +34,6 @@ SpikeSorter::SpikeSorter()
       overflowBufferSize(100), currentElectrode(-1),
       numPreSamples(8),numPostSamples(32)
 {
-    setProcessorType (PROCESSOR_TYPE_FILTER);
 
     uniqueID = 0; // for electrode count
     uniqueSpikeID = 0;
@@ -169,7 +168,7 @@ SpikeSorter::~SpikeSorter()
 
 AudioProcessorEditor* SpikeSorter::createEditor()
 {
-    editor = std::make_unique<SpikeSorterEditor>(this, true);
+    editor = std::make_unique<SpikeSorterEditor>(this);
 
     return editor.get();
 }
@@ -202,28 +201,30 @@ void SpikeSorter::updateSettings()
     {
 		Electrode* elec = electrodes[i];
 		unsigned int nChans = elec->numChannels;
-		Array<const ContinuousChannel*> chans;
+		Array<int> chans;
+
 		for (int c = 0; c < nChans; c++)
 		{
 
 			const ContinuousChannel* ch = continuousChannels[elec->channels[c]];
-			if (!ch)
+			
+            if (!ch)
 			{
 				//not enough channels for the electrodes
 				return;
 			}
-			chans.add(ch);
+			chans.add(ch->getLocalIndex());
 
 		}
 
         SpikeChannel::Settings settings{
 
            SpikeChannel::typeFromNumChannels(nChans),
+
            "Electrode",
            "Description",
            "identifier",
 
-           getDataStream(chans[0]->getStreamId()),
            chans,
 
            elec->prePeakSamples,
@@ -1006,9 +1007,8 @@ void SpikeSorter::process(AudioBuffer<float>& buffer)
                             md,
                             sorterSpike->sortedId);
 
-                        addSpike(spikeChan, newSpike, peakIndex);
-                        //prevSpike = newSpike;
-                        // advance the sample index
+                        //addSpike(spikeChan, newSpike, peakIndex);
+
                         sampleIndex = peakIndex + electrode->postPeakSamples;
 
                         break; // quit spike "for" loop

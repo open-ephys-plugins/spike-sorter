@@ -29,21 +29,15 @@
 
 
 
-SpikeSorterEditor::SpikeSorterEditor(GenericProcessor* parentNode, bool useDefaultParameterEditors=true)
-    : VisualizerEditor(parentNode, 300, useDefaultParameterEditors), spikeSorterCanvas(nullptr), isPlural(true)
+SpikeSorterEditor::SpikeSorterEditor(GenericProcessor* parentNode)
+    : VisualizerEditor(parentNode, 300), 
+      spikeSorterCanvas(nullptr), 
+      isPlural(true)
 
 {
     tabText = "Spike Detector";
 
-	//int silksize;
-	//const char* silk = CoreServices::getApplicationResource("silkscreenserialized", silksize);
-    //MemoryInputStream mis(silk, silksize, false);
-    //Typeface::Ptr typeface = new CustomTypeface(mis);
-    //font = Font(typeface);
-
     desiredWidth = 300;
-
-    //SpikeSorter* processor = (SpikeSorter*) getProcessor();
 
     advancerList = new ComboBox("Advancers");
     advancerList->addListener(this);
@@ -137,19 +131,19 @@ SpikeSorterEditor::SpikeSorterEditor(GenericProcessor* parentNode, bool useDefau
     addAndMakeVisible(thresholdLabel);
 
     // create a custom channel selector
-    channelSelector.reset();
+    //channelSelector.reset();
 
     //Visual Studio, it works fine because of a compiler extension enabled by default. But GCC will complain.
     //channelSelector = std::make_unique< ChannelSelector>(true, Font("Small Text", 12, Font::plain));
 
-    Font channelSelectorFont = Font("Small Text", 12, Font::plain);
-    channelSelector = std::make_unique< ChannelSelector>(true, channelSelectorFont);
-    addChildComponent(channelSelector.get());
-    channelSelector->setVisible(false);
+   // Font channelSelectorFont = Font("Small Text", 12, Font::plain);
+    //channelSelector = std::make_unique< ChannelSelector>(true, channelSelectorFont);
+    //addChildComponent(channelSelector.get());
+    //channelSelector->setVisible(false);
 
-    channelSelector->activateButtons();
-    channelSelector->setRadioStatus(true);
-    channelSelector->paramButtonsToggledByDefault(false);
+    //channelSelector->activateButtons();
+    //channelSelector->setRadioStatus(true);
+    //channelSelector->paramButtonsToggledByDefault(false);
 
 }
 
@@ -173,7 +167,7 @@ SpikeSorterEditor::~SpikeSorterEditor()
 
 }
 
-void SpikeSorterEditor::sliderEvent(Slider* slider)
+void SpikeSorterEditor::sliderValueChanged(Slider* slider)
 {
     int electrodeNum = -1;
 
@@ -213,10 +207,10 @@ void SpikeSorterEditor::sliderEvent(Slider* slider)
 }
 
 
-void SpikeSorterEditor::buttonEvent(Button* button)
+void SpikeSorterEditor::buttonClicked(Button* button)
 {
  
-    SpikeSorter* processor = (SpikeSorter*) getProcessor();
+    /*SpikeSorter* processor = (SpikeSorter*) getProcessor();
     
     if (electrodeButtons.contains((ElectrodeButton*) button))
     {
@@ -432,7 +426,7 @@ void SpikeSorterEditor::buttonEvent(Button* button)
     else if (button == audioMonitorButton)
     {
 
-        /*channelSelector->clearAudio();
+        channelSelector->clearAudio();
 
         SpikeSorter* processor = (SpikeSorter*) getProcessor();
 
@@ -458,9 +452,9 @@ void SpikeSorterEditor::buttonEvent(Button* button)
             int channelNum = e->channels[i];
             channelSelector->setAudioStatus(channelNum, audioMonitorButton->getToggleState());
 
-        }*/
+        }
 
-    }
+    }*/
 
 
 
@@ -473,7 +467,7 @@ void SpikeSorterEditor::setThresholdValue(int channel, double threshold)
     repaint();
 }
 
-void SpikeSorterEditor::channelChanged (int channel, bool newState)
+/*void SpikeSorterEditor::channelChanged (int channel, bool newState)
 {
     //std::cout << "New channel: " << chan << std::endl;
     if (channel <= 0)
@@ -496,7 +490,7 @@ void SpikeSorterEditor::channelChanged (int channel, bool newState)
                                   i,
                                   channel - 1);
 
-         /*   // if DAC is selected, update the mapping.
+            // if DAC is selected, update the mapping.
             int dacchannel = dacCombo->getSelectedId() - 2;
             if (dacchannel >=0)
             {
@@ -507,10 +501,10 @@ void SpikeSorterEditor::channelChanged (int channel, bool newState)
                 processor->assignDACtoChannel (0, channel - 1);
                 processor->assignDACtoChannel (1, channel - 1);
                 break;
-            }*/
+            }
         }
     }
-}
+}*/
 
 int SpikeSorterEditor::getSelectedElectrode()
 {
@@ -782,7 +776,7 @@ void SpikeSorterEditor::drawElectrodeButtons(int ID)
 
     }
 
-    channelSelector->setActiveChannels(activeChannels);
+   // channelSelector->setActiveChannels(activeChannels);
 
     thresholdSlider->setValues(thresholds);
     thresholdSlider->setActive(true);
