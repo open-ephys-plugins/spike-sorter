@@ -26,6 +26,38 @@
 
 #include <ProcessorHeaders.h>
 
+#ifndef MAX
+#define MAX(x,y)((x)>(y))?(x):(y)
+#endif
+
+#ifndef MIN
+#define MIN(x,y)((x)<(y))?(x):(y)
+#endif
+
+/** 
+    Represents a point in 2D space
+*/
+class PointD
+{
+public:
+
+    PointD();
+    PointD(float x, float y);
+    PointD(const PointD& P);
+    const PointD operator+(const PointD& c1) const;
+    PointD& operator+=(const PointD& rhs);
+    PointD& operator-=(const PointD& rhs);
+
+    const PointD operator-(const PointD& c1) const;
+    const PointD operator*(const PointD& c1) const;
+
+    float cross(PointD c) const;
+    float X, Y;
+};
+
+/** 
+    Holds data about an individual spike
+*/
 class SorterSpikeContainer : public ReferenceCountedObject
 {
 public:
@@ -53,6 +85,35 @@ public:
 
     /** Sorted ID (> 0) */
     uint16 sortedId;
+
+    float spikeDataBinToMicrovolts(int bin, int ch)
+    {
+        jassert(ch >= 0 && ch < chan->getNumChannels());
+        jassert(bin >= 0 && bin <= chan->getTotalSamples());
+        float v = getData()[bin + ch * chan->getTotalSamples()];
+        return v;
+    }
+
+    float spikeDataIndexToMicrovolts(int index)
+    {
+        float v = getData()[index];
+        return v;
+    }
+
+    float spikeTimeBinToMicrosecond(int bin, int ch = 0)
+    {
+        float spikeTimeSpan = 1.0f / chan->getSampleRate() * chan->getTotalSamples() * 1e6;
+        return float(bin) / (chan->getTotalSamples() - 1) * spikeTimeSpan;
+    }
+
+    int microSecondsToSpikeTimeBin(float t, int ch = 0)
+    {
+        // Lets say we have 32 samples per wave form
+
+        // t = 0 corresponds to the left most index.
+        float spikeTimeSpan = (1.0f / chan->getSampleRate() * chan->getTotalSamples()) * 1e6;
+        return MIN(chan->getTotalSamples() - 1, MAX(0, t / spikeTimeSpan * (chan->getTotalSamples() - 1)));
+    }
 
 private:
     int64 timestamp;

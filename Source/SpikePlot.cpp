@@ -26,7 +26,6 @@
 #include "SpikeSorter.h"
 #include "PCAProjectionAxes.h"
 #include "WaveformAxes.h"
-#include "SpikeSortBoxes.h"
 
 SpikePlot::SpikePlot(Electrode* electrode_) :
     electrode(electrode_),
@@ -88,13 +87,13 @@ SpikePlot::~SpikePlot()
 void SpikePlot::setSelectedUnitAndBox(int unitID, int boxID)
 {
     const ScopedLock myScopedLock(mut);
-    electrode->spikeSort->setSelectedUnitAndBox(unitID, boxID);
+    electrode->sorter->setSelectedUnitAndBox(unitID, boxID);
 }
 
 void SpikePlot::getSelectedUnitAndBox(int& unitID, int& boxID)
 {
     const ScopedLock myScopedLock(mut);
-    electrode->spikeSort->getSelectedUnitAndBox(unitID, boxID);
+    electrode->sorter->getSelectedUnitAndBox(unitID, boxID);
 }
 
 
@@ -120,8 +119,8 @@ void SpikePlot::setPolygonDrawingMode(bool on)
 void SpikePlot::updateUnits()
 {
     const ScopedLock myScopedLock(mut);
-    boxUnits = electrode->spikeSort->getBoxUnits();
-    pcaUnits = electrode->spikeSort->getPCAUnits();
+    boxUnits = electrode->sorter->getBoxUnits();
+    pcaUnits = electrode->sorter->getPCAUnits();
 
     if (nWaveAx > 0)
     {
@@ -130,7 +129,7 @@ void SpikePlot::updateUnits()
     pAxes[0]->updateUnits(pcaUnits);
 
     int selectedUnitID, selectedBoxID;
-    electrode->spikeSort->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
+    electrode->sorter->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
 
 }
 
@@ -174,7 +173,7 @@ void SpikePlot::initAxes(std::vector<float> scales)
 
     PCAProjectionAxes* pAx = new PCAProjectionAxes(electrode);
     float p1min, p2min, p1max, p2max;
-    electrode->spikeSort->getPCArange(p1min, p2min, p1max, p2max);
+    electrode->sorter->getPCArange(p1min, p2min, p1max, p2max);
     pAx->setPCARange(p1min, p2min, p1max, p2max);
 
     pAxes.add(pAx);

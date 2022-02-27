@@ -26,7 +26,8 @@
 
 #include <ProcessorHeaders.h>
 
-#include "SpikeSortBoxes.h"
+#include "PCAComputingThread.h"
+#include "Sorter.h"
 #include "SpikePlot.h"
 
 #include <algorithm>    // Needed for std::sort
@@ -41,7 +42,7 @@ class Electrode
 public:
 
     /** Constructor */
-    Electrode(SpikeChannel* channel, PCAcomputingThread* computingThread);
+    Electrode(SpikeChannel* channel, PCAComputingThread* computingThread);
 
     /** Destructor */
     ~Electrode() { }
@@ -51,10 +52,10 @@ public:
     int numSamples;
     uint16 streamId;
   
-    std::unique_ptr<SpikePlot> spikePlot;
-    std::unique_ptr<SpikeSortBoxes> spikeSort;
+    std::unique_ptr<SpikePlot> plot;
+    std::unique_ptr<Sorter> sorter;
 
-    PCAcomputingThread* computingThread;
+    PCAComputingThread* computingThread;
 
 };
 
@@ -99,7 +100,8 @@ private:
 
     OwnedArray<Electrode> electrodes;
     std::map<const SpikeChannel*, Electrode*> electrodeMap;
-    PCAcomputingThread computingThread;
+    
+    PCAComputingThread computingThread;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeSorter);
 

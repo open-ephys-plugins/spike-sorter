@@ -28,6 +28,8 @@
 
 #include "SpikeSorterCanvas.h"
 #include "Containers.h"
+#include "BoxUnit.h"
+#include "PCAUnit.h"
 
 #include <vector>
 
@@ -36,8 +38,6 @@ class SpikeSorterCanvas;
 class Electrode;
 class PCAProjectionAxes;
 class WaveformAxes;
-class BoxUnit;
-class PCAUnit;
 
 #define MAX_N_CHAN 4
 

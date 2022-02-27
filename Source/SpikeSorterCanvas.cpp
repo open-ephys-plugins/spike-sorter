@@ -23,9 +23,11 @@
 
 #include "SpikeSorterCanvas.h"
 
+#include "SpikeSorterEditor.h"
 #include "SpikeSorter.h"
 #include "SpikePlot.h"
-
+#include "PCAUnit.h"
+#include "BoxUnit.h"
 
 SpikeSorterCanvas::SpikeSorterCanvas(SpikeSorter* n) :
     processor(n), newSpike(false)
@@ -109,7 +111,7 @@ void SpikeSorterCanvas::update()
     std::cout << "Updating SpikeSorterCanvas" << std::endl;
 
     /*int nPlots = processor->getNumElectrodes();
-    processor->removeSpikePlots();
+    processor->removeplots();
     spikeDisplay->removePlots();
 
     if (nPlots > 0)
@@ -117,11 +119,11 @@ void SpikeSorterCanvas::update()
         // Plot only active electrode
         int currentElectrode = processor->getCurrentElectrodeIndex();
         electrode = processor->getActiveElectrode();
-        SpikeHistogramPlot* sp = spikeDisplay->addSpikePlot(processor->getNumberOfChannelsForElectrode(currentElectrode), electrode->electrodeID,
+        SpikeHistogramPlot* sp = spikeDisplay->addplot(processor->getNumberOfChannelsForElectrode(currentElectrode), electrode->electrodeID,
                                                             processor->getNameForElectrode(currentElectrode));
-        processor->addSpikePlotForElectrode(sp, currentElectrode);
-        electrode->spikePlot->setFlipSignal(processor->getFlipSignalState());
-        electrode->spikePlot->updateUnitsFromProcessor();
+        processor->addplotForElectrode(sp, currentElectrode);
+        electrode->plot->setFlipSignal(processor->getFlipSignalState());
+        electrode->plot->updateUnitsFromProcessor();
 
     }
     spikeDisplay->resized();
@@ -172,13 +174,13 @@ void SpikeSorterCanvas::setActiveElectrode(Electrode* electrode_)
 {
     electrode = electrode_;
 
-    spikeDisplay->setSpikePlot(electrode->spikePlot.get());
+    spikeDisplay->setSpikePlot(electrode->plot.get());
 }
 
 void SpikeSorterCanvas::removeUnitOrBox()
 {
     int unitID, boxID;
-    electrode->spikePlot->getSelectedUnitAndBox(unitID, boxID);
+    electrode->plot->getSelectedUnitAndBox(unitID, boxID);
     bool selectNewBoxUnit = false;
     bool selectNewPCAUnit = false;
 
@@ -187,23 +189,23 @@ void SpikeSorterCanvas::removeUnitOrBox()
         if (boxID >= 0)
         {
             // box unit
-            int numBoxes = electrode->spikeSort->getNumBoxes(unitID);
+            int numBoxes = electrode->sorter->getNumBoxes(unitID);
 
             if (numBoxes > 1)
             {
                 // delete box, but keep unit
-                electrode->spikeSort->removeBoxFromUnit(unitID, boxID);
-                electrode->spikePlot->updateUnits();
-                electrode->spikePlot->setSelectedUnitAndBox(unitID, 0);
+                electrode->sorter->removeBoxFromUnit(unitID, boxID);
+                electrode->plot->updateUnits();
+                electrode->plot->setSelectedUnitAndBox(unitID, 0);
             }
             else
             {
                 // delete unit
-                electrode->spikeSort->removeUnit(unitID);
-                electrode->spikePlot->updateUnits();
+                electrode->sorter->removeUnit(unitID);
+                electrode->plot->updateUnits();
 
-                std::vector<BoxUnit> boxunits = electrode->spikeSort->getBoxUnits();
-                std::vector<PCAUnit> pcaunits = electrode->spikeSort->getPCAUnits();
+                std::vector<BoxUnit> boxunits = electrode->sorter->getBoxUnits();
+                std::vector<PCAUnit> pcaunits = electrode->sorter->getPCAUnits();
                 if (boxunits.size() > 0)
                 {
                     selectNewBoxUnit = true;
@@ -214,18 +216,18 @@ void SpikeSorterCanvas::removeUnitOrBox()
                 }
                 else
                 {
-                    electrode->spikePlot->setSelectedUnitAndBox(-1, -1);
+                    electrode->plot->setSelectedUnitAndBox(-1, -1);
                 }
             }
         }
         else
         {
             // pca unit
-            electrode->spikeSort->removeUnit(unitID);
-            electrode->spikePlot->updateUnits();
+            electrode->sorter->removeUnit(unitID);
+            electrode->plot->updateUnits();
 
-            std::vector<BoxUnit> boxunits = electrode->spikeSort->getBoxUnits();
-            std::vector<PCAUnit> pcaunits = electrode->spikeSort->getPCAUnits();
+            std::vector<BoxUnit> boxunits = electrode->sorter->getBoxUnits();
+            std::vector<PCAUnit> pcaunits = electrode->sorter->getPCAUnits();
             if (pcaunits.size() > 0)
             {
                 selectNewPCAUnit = true;
@@ -236,7 +238,7 @@ void SpikeSorterCanvas::removeUnitOrBox()
             }
             else
             {
-                electrode->spikePlot->setSelectedUnitAndBox(-1, -1);
+                electrode->plot->setSelectedUnitAndBox(-1, -1);
             }
 
 
@@ -244,27 +246,27 @@ void SpikeSorterCanvas::removeUnitOrBox()
         if (selectNewPCAUnit)
         {
             // set new selected unit to be the last existing unit
-            std::vector<PCAUnit> u = electrode->spikeSort->getPCAUnits();
+            std::vector<PCAUnit> u = electrode->sorter->getPCAUnits();
             if (u.size() > 0)
             {
-                electrode->spikePlot->setSelectedUnitAndBox(u[u.size() - 1].getUnitID(), -1);
+                electrode->plot->setSelectedUnitAndBox(u[u.size() - 1].getUnitID(), -1);
             }
             else
             {
-                electrode->spikePlot->setSelectedUnitAndBox(-1, -1);
+                electrode->plot->setSelectedUnitAndBox(-1, -1);
             }
         }
         if (selectNewBoxUnit)
         {
             // set new selected unit to be the last existing unit
-            std::vector<BoxUnit> u = electrode->spikeSort->getBoxUnits();
+            std::vector<BoxUnit> u = electrode->sorter->getBoxUnits();
             if (u.size() > 0)
             {
-                electrode->spikePlot->setSelectedUnitAndBox(u[u.size() - 1].getUnitID(), 0);
+                electrode->plot->setSelectedUnitAndBox(u[u.size() - 1].getUnitID(), 0);
             }
             else
             {
-                electrode->spikePlot->setSelectedUnitAndBox(-1, -1);
+                electrode->plot->setSelectedUnitAndBox(-1, -1);
             }
         }
     }
@@ -311,19 +313,19 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
     {
         inDrawingPolygonMode = true;
         addPolygonUnitButton->setToggleState(true, dontSendNotification);
-        electrode->spikePlot->setPolygonDrawingMode(true);
+        electrode->plot->setPolygonDrawingMode(true);
     }
     else if (button == addUnitButton)
     {
 
         if (electrode != nullptr)
         {
-            int newUnitID = electrode->spikeSort->addBoxUnit(0);
+            int newUnitID = electrode->sorter->addBoxUnit(0);
 
             uint8 r, g, b;
-            electrode->spikeSort->getUnitColor(newUnitID, r, g, b);
-            electrode->spikePlot->updateUnits();
-            electrode->spikePlot->setSelectedUnitAndBox(newUnitID, 0);
+            electrode->sorter->getUnitColor(newUnitID, r, g, b);
+            electrode->plot->updateUnits();
+            electrode->plot->setSelectedUnitAndBox(newUnitID, 0);
         }
 
     }
@@ -335,18 +337,18 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
     else if (button == addBoxButton)
     {
 
-        electrode->spikePlot->getSelectedUnitAndBox(unitID, boxID);
+        electrode->plot->getSelectedUnitAndBox(unitID, boxID);
 
         if (unitID > 0)
         {
             std::cout << "Adding box to channel " << channel << " with unitID " << unitID << std::endl;
-            electrode->spikeSort->addBoxToUnit(channel, unitID);
-            electrode->spikePlot->updateUnits();
+            electrode->sorter->addBoxToUnit(channel, unitID);
+            electrode->plot->updateUnits();
         }
     }
     else if (button == rePCAButton)
     {
-        electrode->spikeSort->RePCA();
+        electrode->sorter->RePCA();
     }
     else if (button == nextElectrode)
     {
@@ -363,13 +365,13 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
     }
     else if (button == newIDbuttons)
     {
-        electrode->spikeSort->generateNewIDs();
-        electrode->spikePlot->updateUnits();
+        electrode->sorter->generateNewIDs();
+        electrode->plot->updateUnits();
     }
     else if (button == deleteAllUnits)
     {
         // delete unit
-        electrode->spikeSort->removeAllUnits();
+        electrode->sorter->removeAllUnits();
     }
 
 

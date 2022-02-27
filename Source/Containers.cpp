@@ -23,6 +23,71 @@
 
 #include "Containers.h"
 
+
+
+PointD::PointD()
+{
+    X = Y = 0;
+}
+
+
+PointD::PointD(float x, float y)
+{
+    X = x;
+    Y = y;
+}
+
+PointD::PointD(const PointD& P)
+{
+    X = P.X;
+    Y = P.Y;
+}
+
+PointD& PointD::operator+=(const PointD& rhs)
+{
+    X += rhs.X;
+    Y += rhs.Y;
+    return *this;
+}
+
+PointD& PointD::operator-=(const PointD& rhs)
+{
+    X -= rhs.X;
+    Y -= rhs.Y;
+    return *this;
+}
+
+const PointD PointD::operator+(const PointD& other) const
+{
+    PointD result = *this;
+    result += other;
+    return result;
+}
+
+
+const PointD PointD::operator-(const PointD& other) const
+{
+    PointD result = *this;
+    result -= other;
+    return result;
+}
+
+
+const PointD PointD::operator*(const PointD& other) const
+{
+    PointD result = *this;
+    result.X *= other.X;
+    result.Y *= other.Y;
+    return result;
+
+}
+
+float PointD::cross(PointD c) const
+{
+    return X * c.Y - Y * c.X;
+}
+
+
 SorterSpikeContainer::SorterSpikeContainer(const SpikeChannel* channel, SpikePtr spike)
 {
     color[0] = color[1] = color[2] = 127;

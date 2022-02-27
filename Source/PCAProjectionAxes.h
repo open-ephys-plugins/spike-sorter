@@ -26,9 +26,12 @@
 
 #include <VisualizerWindowHeaders.h>
 
-#include "SpikeSorterCanvas.h"
-#include "SpikeSortBoxes.h"
 #include "Containers.h"
+#include "SpikeSorterCanvas.h"
+#include "PCAUnit.h"
+
+class Electrode;
+class SpikeSorterCanvas;
 
 class PCAProjectionAxes : public GenericDrawAxes,  
                           public Button::Listener

@@ -24,7 +24,6 @@
 
 #include "PCAProjectionAxes.h"
 
-#include "SpikeSortBoxes.h"
 #include "SpikeSorter.h"
 
 PCAProjectionAxes::PCAProjectionAxes(Electrode* electrode_) :
@@ -90,7 +89,7 @@ void PCAProjectionAxes::drawUnit(Graphics& g, PCAUnit unit)
 
     int selectedUnitID, selectedBoxID;
 
-    electrode->spikeSort->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
+    electrode->sorter->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
 
     g.setColour(Colour(unit.ColorRGB[0], unit.ColorRGB[1], unit.ColorRGB[2]));
     if (unit.poly.pts.size() > 2)
@@ -233,7 +232,7 @@ void PCAProjectionAxes::setPCARange(float p1min, float p2min, float p1max, float
     pcaMax[1] = p2max;
     rangeSet = true;
     redrawSpikes = true;
-    electrode->spikeSort->setPCArange(p1min, p2min, p1max, p2max);
+    electrode->sorter->setPCArange(p1min, p2min, p1max, p2max);
 
 }
 
@@ -277,7 +276,7 @@ void PCAProjectionAxes::mouseDrag(const juce::MouseEvent& event)
 
         setMouseCursor(MouseCursor::DraggingHandCursor);
         int selectedUnitID, selectedBoxID;
-        electrode->spikeSort->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
+        electrode->sorter->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
 
         if (isOverUnit > 0 && selectedUnitID == isOverUnit)
         {
@@ -326,7 +325,7 @@ void PCAProjectionAxes::mouseDrag(const juce::MouseEvent& event)
             pcaMin[1] += dy;
             pcaMax[0] += dx;
             pcaMax[1] += dy;
-            electrode->spikeSort->setPCArange(pcaMin[0], pcaMin[1], pcaMax[0], pcaMax[1]);
+            electrode->sorter->setPCArange(pcaMin[0], pcaMin[1], pcaMax[0], pcaMax[1]);
 
             // draw polygon
             prevx = event.x;
@@ -361,7 +360,7 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
     setMouseCursor(MouseCursor::NormalCursor);
     if (updateProcessor)
     {
-        electrode->spikeSort->updatePCAUnits(units);
+        electrode->sorter->updatePCAUnits(units);
         updateProcessor = false;
 
     }
@@ -390,10 +389,10 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
         units.push_back(drawnUnit);
 
         // add a new PCA unit
-        electrode->spikeSort->addPCAunit(drawnUnit);
+        electrode->sorter->addPCAunit(drawnUnit);
 
         uint8 r, g, b;
-        electrode->spikeSort->getUnitColor(drawnUnit.getUnitID(), r, g, b);
+        electrode->sorter->getUnitColor(drawnUnit.getUnitID(), r, g, b);
 
         drawnPolygon.clear();
     }
@@ -431,15 +430,15 @@ void PCAProjectionAxes::mouseDown(const juce::MouseEvent& event)
     }
     if (inPolygonDrawingMode)
     {
-        drawnUnit = PCAUnit(electrode->spikeSort->generateUnitID(), electrode->spikeSort->generateLocalID());
+        drawnUnit = PCAUnit(electrode->sorter->generateUnitID(), electrode->sorter->generateLocalID());
         drawnPolygon.push_back(PointD(event.x, event.y));
     }
     else
     {
         if (isOverUnit > 0)
-            electrode->spikeSort->setSelectedUnitAndBox(isOverUnit, -1);
+            electrode->sorter->setSelectedUnitAndBox(isOverUnit, -1);
         else
-            electrode->spikeSort->setSelectedUnitAndBox(-1, -1);
+            electrode->sorter->setSelectedUnitAndBox(-1, -1);
     }
 }
 

@@ -59,7 +59,7 @@ void SpikeSorter::updateSettings()
 }
 
 
-Electrode::Electrode(SpikeChannel* channel, PCAcomputingThread* computingThread_)
+Electrode::Electrode(SpikeChannel* channel, PCAComputingThread* computingThread_)
     : computingThread(computingThread_)
 {
 
@@ -68,9 +68,9 @@ Electrode::Electrode(SpikeChannel* channel, PCAcomputingThread* computingThread_
     numSamples = channel->getPrePeakSamples() + channel->getPostPeakSamples();
     streamId = channel->getStreamId();
 
-    spikeSort = std::make_unique<SpikeSortBoxes>(this, computingThread);
+    sorter = std::make_unique<Sorter>(this, computingThread);
 
-    spikePlot = std::make_unique<SpikePlot>(this);
+    plot = std::make_unique<SpikePlot>(this);
 
 }
 
@@ -102,21 +102,21 @@ void SpikeSorter::handleSpike(const SpikeChannel* spikeChannel, const EventPacke
 
     Electrode* electrode = electrodeMap[spikeChannel];
 
-    electrode->spikeSort->projectOnPrincipalComponents(sorterSpike);
-    electrode->spikeSort->sortSpike(sorterSpike, true);
+    electrode->sorter->projectOnPrincipalComponents(sorterSpike);
+    electrode->sorter->sortSpike(sorterSpike, true);
 
     // transfer buffered spikes to spike plot
-    if (electrode->spikePlot != nullptr)
+    if (electrode->plot->isVisible())
     {
-        if (electrode->spikeSort->isPCAfinished())
+        if (electrode->sorter->isPCAfinished())
         {
-            electrode->spikeSort->resetJobStatus();
+            electrode->sorter->resetJobStatus();
             float p1min, p2min, p1max, p2max;
-            electrode->spikeSort->getPCArange(p1min, p2min, p1max, p2max);
-            electrode->spikePlot->setPCARange(p1min, p2min, p1max, p2max);
+            electrode->sorter->getPCArange(p1min, p2min, p1max, p2max);
+            electrode->plot->setPCARange(p1min, p2min, p1max, p2max);
         }
 
-        electrode->spikePlot->processSpikeObject(sorterSpike);
+        electrode->plot->processSpikeObject(sorterSpike);
     }
 
     if (sorterSpike->sortedId > 0)

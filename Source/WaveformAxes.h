@@ -26,12 +26,13 @@
 
 #include <VisualizerWindowHeaders.h>
 
-#include "SpikeSorterCanvas.h"
 #include "Containers.h"
+#include "SpikeSorterCanvas.h"
 
 #include <vector>
 
 class BoxUnit;
+class Electrode;
 
 class WaveformAxes : public GenericDrawAxes
 {

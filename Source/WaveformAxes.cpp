@@ -24,7 +24,7 @@
 #include "WaveformAxes.h"
 
 #include "SpikeSorter.h"
-#include "SpikeSortBoxes.h"
+#include "BoxUnit.h"
 
 WaveformAxes::WaveformAxes(Electrode* electrode_, int channelIndex) : 
     GenericDrawAxes(GenericDrawAxes::AxesType(channelIndex)),
@@ -272,7 +272,7 @@ void WaveformAxes::mouseDown(const juce::MouseEvent& event)
 
     if (isOverUnit > 0)
     {
-        electrode->spikeSort->setSelectedUnitAndBox(isOverUnit, isOverBox);
+        electrode->sorter->setSelectedUnitAndBox(isOverUnit, isOverBox);
         int indx = findUnitIndexByID(isOverUnit);
         jassert(indx >= 0);
         mouseOffsetX = mouseDownX - units[indx].lstBoxes[isOverBox].x;
@@ -280,7 +280,7 @@ void WaveformAxes::mouseDown(const juce::MouseEvent& event)
     }
     else
     {
-        electrode->spikeSort->setSelectedUnitAndBox(-1, -1);
+        electrode->sorter->setSelectedUnitAndBox(-1, -1);
 
     }
     //	MouseUnitOffset = ScreenToMS_uV(e.X, e.Y) - new PointD(boxOnDown.x, boxOnDown.y);
@@ -297,7 +297,7 @@ void WaveformAxes::mouseUp(const MouseEvent& event)
     if (bDragging)
     {
         bDragging = false;
-        electrode->spikeSort->updateBoxUnits(units);
+        electrode->sorter->updateBoxUnits(units);
     }
 }
 
@@ -595,7 +595,7 @@ void WaveformAxes::drawBoxes(Graphics& g)
     float microvolt_span = range / 2;
 
     int selectedUnitID, selectedBoxID;
-    electrode->spikeSort->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
+    electrode->sorter->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
 
     // Typical spike is 40 samples, at 30kHz ~ 1.3 ms or 1300 usecs.
     for (int k = 0; k < units.size(); k++)
