@@ -375,9 +375,7 @@ void Sorter::RePCA()
 void Sorter::addPCAunit(PCAUnit unit)
 {
     const ScopedLock myScopedLock(mut);
-    //StartCriticalSection();
     pcaUnits.push_back(unit);
-    //EndCriticalSection();
 }
 
 // Adds a new unit with a single box at some default location.
@@ -493,13 +491,12 @@ void Sorter::removeAllUnits()
 bool Sorter::removeUnit(int unitID)
 {
     const ScopedLock myScopedLock(mut);
-    //StartCriticalSection();
+
     for (int k=0; k<boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitID() == unitID)
         {
             boxUnits.erase(boxUnits.begin()+k);
-            //EndCriticalSection();
             return true;
         }
     }
@@ -509,12 +506,10 @@ bool Sorter::removeUnit(int unitID)
         if (pcaUnits[k].getUnitID() == unitID)
         {
             pcaUnits.erase(pcaUnits.begin()+k);
-            //EndCriticalSection();
             return true;
         }
     }
 
-    // EndCriticalSection();
     return false;
 
 }
@@ -522,8 +517,6 @@ bool Sorter::removeUnit(int unitID)
 bool Sorter::addBoxToUnit(int channel, int unitID)
 {
     const ScopedLock myScopedLock(mut);
-
-    //StartCriticalSection();
 
     for (int k = 0; k < boxUnits.size(); k++)
     {
@@ -535,11 +528,10 @@ bool Sorter::addBoxToUnit(int channel, int unitID)
             B.channel = channel;
             boxUnits[k].addBox(B);
             setSelectedUnitAndBox(unitID, (int) boxUnits[k].lstBoxes.size() - 1);
-            // EndCriticalSection();
             return true;
         }
     }
-    // EndCriticalSection();
+
     return false;
 }
 
@@ -547,56 +539,45 @@ bool Sorter::addBoxToUnit(int channel, int unitID)
 bool Sorter::addBoxToUnit(int channel, int unitID, Box B)
 {
     const ScopedLock myScopedLock(mut);
-    //StartCriticalSection();
+
     for (int k=0; k<boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitID() == unitID)
         {
             boxUnits[k].addBox(B);
-            // EndCriticalSection();
             return true;
         }
     }
-    //EndCriticalSection();
+
     return false;
 }
 
 std::vector<BoxUnit> Sorter::getBoxUnits()
 {
-    //StartCriticalSection();
     const ScopedLock myScopedLock(mut);
     std::vector<BoxUnit> unitsCopy = boxUnits;
-    //EndCriticalSection();
     return unitsCopy;
 }
 
 
 std::vector<PCAUnit> Sorter::getPCAUnits()
 {
-    //StartCriticalSection();
     const ScopedLock myScopedLock(mut);
     std::vector<PCAUnit> unitsCopy = pcaUnits;
-    //EndCriticalSection();
     return unitsCopy;
 }
 
 void Sorter::updatePCAUnits(std::vector<PCAUnit> _units)
 {
-    //StartCriticalSection();
     const ScopedLock myScopedLock(mut);
     pcaUnits = _units;
-    //EndCriticalSection();
 }
 
 void Sorter::updateBoxUnits(std::vector<BoxUnit> _units)
 {
     const ScopedLock myScopedLock(mut);
-    //StartCriticalSection();
     boxUnits = _units;
-    //EndCriticalSection();
 }
-
-
 
 
 // tests whether a candidate spike belongs to one of the defined units
@@ -707,17 +688,15 @@ std::vector<Box> Sorter::getUnitBoxes(int unitID)
 int Sorter::getNumBoxes(int unitID)
 {
     const ScopedLock myScopedLock(mut);
-    // StartCriticalSection();
+
     for (int k=0; k< boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitID() == unitID)
         {
 
             int n =boxUnits[k].getNumBoxes();
-            // EndCriticalSection();
             return n;
         }
     }
-    //EndCriticalSection();
     return -1;
 }

@@ -41,17 +41,34 @@ class PointD
 {
 public:
 
+    /** Default constructor */
     PointD();
+
+    /** Constructor with X/Y location*/
     PointD(float x, float y);
+
+    /** Copy constructor */
     PointD(const PointD& P);
+
+    /** Overload "+" operator */
     const PointD operator+(const PointD& c1) const;
+
+    /** Overload "+= operator */
     PointD& operator+=(const PointD& rhs);
+
+    /** Overload "-=" operator */
     PointD& operator-=(const PointD& rhs);
 
+    /** Overload "-" operator */
     const PointD operator-(const PointD& c1) const;
+
+    /** Overload "*" operator */
     const PointD operator*(const PointD& c1) const;
 
+    /** Cross-product with another point */
     float cross(PointD c) const;
+
+    /** X and Y coordinates*/
     float X, Y;
 };
 
@@ -86,31 +103,35 @@ public:
     /** Sorted ID (> 0) */
     uint16 sortedId;
 
+    /** Helper function to find the microvolts value at a given bin for one channel*/
     float spikeDataBinToMicrovolts(int bin, int ch)
     {
         jassert(ch >= 0 && ch < chan->getNumChannels());
         jassert(bin >= 0 && bin <= chan->getTotalSamples());
+
         float v = getData()[bin + ch * chan->getTotalSamples()];
+
         return v;
     }
 
+    /** Helper function to find the microvolts value at a given index*/
     float spikeDataIndexToMicrovolts(int index)
     {
         float v = getData()[index];
         return v;
     }
 
+    /** Helper function to find the microsecond value at a given bin for one channel*/
     float spikeTimeBinToMicrosecond(int bin, int ch = 0)
     {
         float spikeTimeSpan = 1.0f / chan->getSampleRate() * chan->getTotalSamples() * 1e6;
         return float(bin) / (chan->getTotalSamples() - 1) * spikeTimeSpan;
     }
 
+    /** Helper function to convert from microseconds to a time bin*/
     int microSecondsToSpikeTimeBin(float t, int ch = 0)
     {
-        // Lets say we have 32 samples per wave form
-
-        // t = 0 corresponds to the left most index.
+        // t = 0 corresponds to the left-most index.
         float spikeTimeSpan = (1.0f / chan->getSampleRate() * chan->getTotalSamples()) * 1e6;
         return MIN(chan->getTotalSamples() - 1, MAX(0, t / spikeTimeSpan * (chan->getTotalSamples() - 1)));
     }
@@ -121,10 +142,11 @@ private:
     const SpikeChannel* chan;
 };
 
+/** Reference-counted object pointer to a spike container*/
 typedef ReferenceCountedObjectPtr<SorterSpikeContainer> SorterSpikePtr;
+
+/** Reference-counted array of spike containers*/
 typedef ReferenceCountedArray<SorterSpikeContainer, CriticalSection> SorterSpikeArray;
-
-
 
 
 #endif  // __CONTAINERS_H__

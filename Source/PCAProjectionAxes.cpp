@@ -358,6 +358,7 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
     repaint();
     //redraw(false);
     setMouseCursor(MouseCursor::NormalCursor);
+
     if (updateProcessor)
     {
         electrode->sorter->updatePCAUnits(units);
@@ -368,7 +369,6 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
     if (inPolygonDrawingMode)
     {
         inPolygonDrawingMode = false;
-        //canvas->addPolygonUnitButton->setToggleState(false, dontSendNotification);
 
         // convert pixel coordinates to pca space coordinates and update unit
         cPolygon poly;

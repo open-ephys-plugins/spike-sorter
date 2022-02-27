@@ -174,6 +174,8 @@ void SpikeSorterCanvas::setActiveElectrode(Electrode* electrode_)
 {
     electrode = electrode_;
 
+    std::cout << "Setting active electrode to " << electrode->name << std::endl;
+
     spikeDisplay->setSpikePlot(electrode->plot.get());
 }
 
@@ -312,7 +314,6 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
     if (button == addPolygonUnitButton)
     {
         inDrawingPolygonMode = true;
-        addPolygonUnitButton->setToggleState(true, dontSendNotification);
         electrode->plot->setPolygonDrawingMode(true);
     }
     else if (button == addUnitButton)
@@ -398,6 +399,8 @@ void SpikeDisplay::setSpikePlot(SpikePlot* plot)
         activePlot->setVisible(false);
         removeChildComponent(activePlot);
     }
+
+    std::cout << "Spike display updating active plot" << std::endl;
     
     activePlot = plot;
     addAndMakeVisible(activePlot);
@@ -422,8 +425,6 @@ void SpikeDisplay::resized()
 
     if (activePlot != nullptr)
         activePlot->setBounds(0, 0, getWidth(), totalHeight);
-
-    setBounds(0, 0, getWidth(), totalHeight);
 
 }
 

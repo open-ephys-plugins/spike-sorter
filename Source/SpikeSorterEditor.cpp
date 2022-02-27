@@ -100,7 +100,7 @@ void SpikeSorterEditor::nextElectrode()
     if (nextID > numAvailable)
         nextID = 1;
 
-    electrodeList->setSelectedId(nextID, true);
+    electrodeList->setSelectedId(nextID, sendNotification);
 }
 
 void SpikeSorterEditor::previousElectrode()
@@ -114,5 +114,5 @@ void SpikeSorterEditor::previousElectrode()
     if (previousID == 0)
         previousID = numAvailable;
 
-    electrodeList->setSelectedId(previousID, true);
+    electrodeList->setSelectedId(previousID, sendNotification);
 }

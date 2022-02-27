@@ -62,7 +62,7 @@ SpikePlot::SpikePlot(Electrode* electrode_) :
     }
 
     std::vector<float> scales = { 250, 250, 250, 250 }; // processor->getElectrodeVoltageScales(electrodeID);
-    //initAxes(scales);
+    initAxes(scales);
 
     for (int i = 0; i < electrode->numChannels; i++)
     {

@@ -23,13 +23,10 @@
 
 #include "Containers.h"
 
-
-
 PointD::PointD()
 {
     X = Y = 0;
 }
-
 
 PointD::PointD(float x, float y)
 {
@@ -64,14 +61,12 @@ const PointD PointD::operator+(const PointD& other) const
     return result;
 }
 
-
 const PointD PointD::operator-(const PointD& other) const
 {
     PointD result = *this;
     result -= other;
     return result;
 }
-
 
 const PointD PointD::operator*(const PointD& other) const
 {
@@ -92,13 +87,15 @@ SorterSpikeContainer::SorterSpikeContainer(const SpikeChannel* channel, SpikePtr
 {
     color[0] = color[1] = color[2] = 127;
     pcProj[0] = pcProj[1] = 0;
-    sortedId = 0;
+    sortedId = spike->getSortedID();
 
     chan = channel;
+    timestamp = spike->getTimestamp();
+
     int nSamples = chan->getNumChannels() * chan->getTotalSamples();
 
-    //data.malloc(nSamples);
-    //memcpy(data.getData(), spikedata.getRawPointer(), nSamples*sizeof(float));
+    data.malloc(nSamples);
+    memcpy(data.getData(), spike->getDataPointer(), nSamples*sizeof(float));
 
 }
 
