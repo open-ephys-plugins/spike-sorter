@@ -27,33 +27,18 @@
 #include <VisualizerWindowHeaders.h>
 
 #include "SpikeSorterCanvas.h"
+#include "Containers.h"
 
 #include <vector>
 
-#define WAVE1 0
-#define WAVE2 1
-#define WAVE3 2
-#define WAVE4 3
-#define PROJ1x2 4
-#define PROJ1x3 5
-#define PROJ1x4 6
-#define PROJ2x3 7
-#define PROJ2x4 8
-#define PROJ3x4 9
-
-#define TETRODE_PLOT 1004
-#define STEREO_PLOT  1002
-#define SINGLE_PLOT  1001
-
-#define MAX_NUMBER_OF_SPIKE_SOURCES 128
-#define MAX_N_CHAN 4
+class BoxUnit;
 
 class WaveformAxes : public GenericDrawAxes
 {
 public:
 
     /** Constructor */
-    WaveformAxes(SpikeSorterCanvas*, Electrode*);
+    WaveformAxes(Electrode*, int channelIndex);
 
     /** Destructor*/
     ~WaveformAxes() {}
@@ -132,8 +117,9 @@ private:
     String strOverWhere;
 
     std::vector<BoxUnit> units;
-    SpikeSorterCanvas* canvas;
+
     Electrode* electrode;
+
     MouseCursor::StandardCursorType cursorType;
 
 };

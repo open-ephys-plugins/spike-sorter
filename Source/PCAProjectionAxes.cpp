@@ -24,9 +24,11 @@
 
 #include "PCAProjectionAxes.h"
 
-PCAProjectionAxes::PCAProjectionAxes(SpikeSorterCanvas* canvas_, Electrode* electrode_) :
-    GenericDrawAxes(0),
-    canvas(canvas_),
+#include "SpikeSortBoxes.h"
+#include "SpikeSorter.h"
+
+PCAProjectionAxes::PCAProjectionAxes(Electrode* electrode_) :
+    GenericDrawAxes(GenericDrawAxes::PCA),
     electrode(electrode_),
     imageDim(500),
     rangeX(250),
@@ -367,7 +369,7 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
     if (inPolygonDrawingMode)
     {
         inPolygonDrawingMode = false;
-        canvas->addPolygonUnitButton->setToggleState(false, dontSendNotification);
+        //canvas->addPolygonUnitButton->setToggleState(false, dontSendNotification);
 
         // convert pixel coordinates to pca space coordinates and update unit
         cPolygon poly;

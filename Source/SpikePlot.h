@@ -25,33 +25,21 @@
 #define SPIKEPLOT_H_
 
 #include <VisualizerWindowHeaders.h>
+
 #include "SpikeSorterCanvas.h"
+#include "Containers.h"
 
 #include <vector>
-
-#define WAVE1 0
-#define WAVE2 1
-#define WAVE3 2
-#define WAVE4 3
-#define PROJ1x2 4
-#define PROJ1x3 5
-#define PROJ1x4 6
-#define PROJ2x3 7
-#define PROJ2x4 8
-#define PROJ3x4 9
-
-#define TETRODE_PLOT 1004
-#define STEREO_PLOT  1002
-#define SINGLE_PLOT  1001
-
-#define MAX_NUMBER_OF_SPIKE_SOURCES 128
-#define MAX_N_CHAN 4
 
 class SpikeSorter;
 class SpikeSorterCanvas;
 class Electrode;
 class PCAProjectionAxes;
 class WaveformAxes;
+class BoxUnit;
+class PCAUnit;
+
+#define MAX_N_CHAN 4
 
 class SpikePlot : public Component, 
                   public Button::Listener
@@ -59,7 +47,7 @@ class SpikePlot : public Component,
 public:
 
     /** Constructor */
-    SpikePlot(SpikeSorter*, SpikeSorterCanvas*, Electrode*);
+    SpikePlot(Electrode*);
 
     /** Destructor */
     virtual ~SpikePlot();
@@ -88,9 +76,7 @@ public:
     /** Handle an incoming spike object*/
 	void processSpikeObject(SorterSpikePtr s);
 
-    SpikeSorterCanvas* canvas;
     Electrode* electrode;
-    SpikeSorter* processor;
 
     void getSelectedUnitAndBox(int& unitID, int& boxID);
     void setSelectedUnitAndBox(int unitID, int boxID);
@@ -110,10 +96,9 @@ public:
 
 private:
 
-    int plotType;
     int nWaveAx;
     int nProjAx;
-    int electrodeID;
+
     bool limitsChanged;
 
     double limits[MAX_N_CHAN][2];
@@ -136,4 +121,4 @@ private:
 
 };
 
-#endif  // SPIKESORTERCANVAS_H_
+#endif  // SPIKEPLOT_H_

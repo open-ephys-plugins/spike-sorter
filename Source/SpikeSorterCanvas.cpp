@@ -22,14 +22,17 @@
 */
 
 #include "SpikeSorterCanvas.h"
+
+#include "SpikeSorter.h"
 #include "SpikePlot.h"
+
 
 SpikeSorterCanvas::SpikeSorterCanvas(SpikeSorter* n) :
     processor(n), newSpike(false)
 {
     electrode = nullptr;
     viewport = new Viewport();
-    spikeDisplay = new SpikeDisplay(n, this, viewport);
+    spikeDisplay = new SpikeDisplay();
 
     viewport->setViewedComponent(spikeDisplay, false);
     viewport->setScrollBarsShown(true, true);
@@ -169,7 +172,7 @@ void SpikeSorterCanvas::setActiveElectrode(Electrode* electrode_)
 {
     electrode = electrode_;
 
-    //spikeDisplay->addSpikePlot(electrode);
+    spikeDisplay->setSpikePlot(electrode->spikePlot.get());
 }
 
 void SpikeSorterCanvas::removeUnitOrBox()
@@ -374,50 +377,29 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
 }
 
 
-// ----------------------------------------------------------------
-
-SpikeDisplay::SpikeDisplay(SpikeSorter* p, SpikeSorterCanvas* sdc, Viewport* v) :
-    processor(p), canvas(sdc), viewport(v)
-{
-
-    totalHeight = 1000;
-
-}
-
-SpikeDisplay::~SpikeDisplay()
+SpikeDisplay::SpikeDisplay() : totalHeight(430), activePlot(nullptr)
 {
 
 }
 
 void SpikeDisplay::clear()
 {
-    if (spikePlots.size() > 0)
+    activePlot->clear();
+}
+
+
+void SpikeDisplay::setSpikePlot(SpikePlot* plot)
+{
+
+    if (activePlot != nullptr)
     {
-        for (int i = 0; i < spikePlots.size(); i++)
-        {
-            spikePlots[i]->clear();
-        }
+        activePlot->setVisible(false);
+        removeChildComponent(activePlot);
     }
-
-}
-
-
-void SpikeDisplay::removePlots()
-{
-    spikePlots.clear();
-
-}
-
-SpikePlot* SpikeDisplay::addSpikePlot(int numChannels, int electrodeID, String name_)
-{
-
-    std::cout << "Adding new spike plot." << std::endl;
-
-    //SpikePlot* spikePlot = new SpikePlot(processor, canvas, electrode);
-    //spikePlots.add(spikePlot);
-    //addAndMakeVisible(spikePlot);
-
-    return nullptr; // spikePlot;
+    
+    activePlot = plot;
+    addAndMakeVisible(activePlot);
+    resized();
 }
 
 void SpikeDisplay::paint(Graphics& g)
@@ -429,38 +411,22 @@ void SpikeDisplay::paint(Graphics& g)
 
 void SpikeDisplay::setPolygonMode(bool on)
 {
-    if (spikePlots.size() > 0)
-        spikePlots[0]->setPolygonDrawingMode(on);
+    if (activePlot != nullptr)
+        activePlot->setPolygonDrawingMode(on);
 }
 
 void SpikeDisplay::resized()
 {
 
-    if (spikePlots.size() > 0)
-    {
-        int w = getWidth();
-        int h = 430;
+    if (activePlot != nullptr)
+        activePlot->setBounds(0, 0, getWidth(), totalHeight);
 
-        spikePlots[0]->setBounds(0, 0, w, h);
-
-        setBounds(0, 0, w, h);
-    }
-
-}
-
-void SpikeDisplay::mouseDown(const MouseEvent& event)
-{
-
-}
-
-void SpikeDisplay::plotSpike(SorterSpikePtr spike, int electrodeNum)
-{
-    spikePlots[electrodeNum]->processSpikeObject(spike);
+    setBounds(0, 0, getWidth(), totalHeight);
 
 }
 
 
-GenericDrawAxes::GenericDrawAxes(int t)
+GenericDrawAxes::GenericDrawAxes(GenericDrawAxes::AxesType t)
     : gotFirstSpike(false), type(t)
 {
     ylims[0] = 0;
@@ -513,17 +479,18 @@ void GenericDrawAxes::getXLims(double* min, double* max)
 }
 
 
-void GenericDrawAxes::setType(int t)
+void GenericDrawAxes::setType(GenericDrawAxes::AxesType t)
 {
-    if (t < WAVE1 || t > PROJ3x4)
+    if (t < GenericDrawAxes::WAVE1 || t > GenericDrawAxes::PCA)
     {
         std::cout << "Invalid Axes type specified";
         return;
     }
+
     type = t;
 }
 
-int GenericDrawAxes::getType()
+GenericDrawAxes::AxesType GenericDrawAxes::getType()
 {
     return type;
 }

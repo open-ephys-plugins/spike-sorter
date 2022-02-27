@@ -23,9 +23,12 @@
 
 #include "WaveformAxes.h"
 
-WaveformAxes::WaveformAxes(SpikeSorterCanvas* canvas_, Electrode* electrode_) : 
-    GenericDrawAxes(electrode_->numChannels),
-    canvas(canvas_),
+#include "SpikeSorter.h"
+#include "SpikeSortBoxes.h"
+
+WaveformAxes::WaveformAxes(Electrode* electrode_, int channelIndex) : 
+    GenericDrawAxes(GenericDrawAxes::AxesType(channelIndex)),
+    channel(channelIndex),
     electrode(electrode_),
     drawGrid(true),
     displayThresholdLevel(0.0f),

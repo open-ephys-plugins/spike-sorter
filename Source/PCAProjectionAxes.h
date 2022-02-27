@@ -27,6 +27,8 @@
 #include <VisualizerWindowHeaders.h>
 
 #include "SpikeSorterCanvas.h"
+#include "SpikeSortBoxes.h"
+#include "Containers.h"
 
 class PCAProjectionAxes : public GenericDrawAxes,  
                           public Button::Listener
@@ -34,7 +36,7 @@ class PCAProjectionAxes : public GenericDrawAxes,
 public:
 
     /** Constructor */
-    PCAProjectionAxes(SpikeSorterCanvas* , Electrode* );
+    PCAProjectionAxes(Electrode* );
 
     /** Destructor */
     ~PCAProjectionAxes() {}
@@ -50,6 +52,8 @@ public:
 
     /** Turns polygon drawing mode on or off*/
     void setPolygonDrawingMode(bool on);
+
+    /** Clears the axes*/
     void clear();
 
     /** Mouse callbacks*/
@@ -113,4 +117,4 @@ private:
     bool redrawSpikes;
 };
 
-#endif  // SPIKESORTERCANVAS_H_
+#endif  // PCAPROJECTIONAXES_H_

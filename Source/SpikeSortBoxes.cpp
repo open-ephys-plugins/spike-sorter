@@ -594,10 +594,11 @@ void BoxUnit::updateWaveform(SorterSpikePtr so)
 
 /***********************************************/
 
-SpikeSortBoxes::SpikeSortBoxes(String name, PCAcomputingThread* pth, int numch, double SamplingRate, int WaveFormLength)
+SpikeSortBoxes::SpikeSortBoxes(Electrode* electrode_, PCAcomputingThread* pcaThread_)
+    : electrode(electrode_),
+      computingThread(pcaThread_)
 {
 
-    computingThread = pth;
     pc1 = pc2 = nullptr;
     bufferSize = 200;
     spikeBufferIndex = -1;
@@ -611,11 +612,12 @@ SpikeSortBoxes::SpikeSortBoxes(String name, PCAcomputingThread* pth, int numch, 
     pc2min = -1;
     pc1max = 1;
     pc2max = 1;
-    numChannels = numch;
-    waveformLength = WaveFormLength;
+    numChannels = electrode->numChannels;
+    waveformLength = electrode->numSamples;
 
     pc1 = new float[numChannels * waveformLength];
     pc2 = new float[numChannels * waveformLength];
+
     for (int n = 0; n < bufferSize; n++)
     {
 
@@ -626,17 +628,19 @@ SpikeSortBoxes::SpikeSortBoxes(String name, PCAcomputingThread* pth, int numch, 
 void SpikeSortBoxes::resizeWaveform(int numSamples)
 {
     const ScopedLock myScopedLock(mut);
-    //StartCriticalSection();
+
     waveformLength = numSamples;
     delete[] pc1;
     delete[] pc2;
     pc1 = new float[numChannels * waveformLength];
     pc2 = new float[numChannels * waveformLength];
     spikeBuffer.clear();
+    
     for (int n = 0; n < bufferSize; n++)
     {
         spikeBuffer.add(nullptr);
     }
+    
     bPCAcomputed = false;
     spikeBufferIndex = -1;
 	bPCAJobSubmitted = false;
@@ -657,10 +661,8 @@ void SpikeSortBoxes::resizeWaveform(int numSamples)
     {
         boxUnits[k].resizeWaveform(waveformLength);
     }
-    //EndCriticalSection();
+
 }
-
-
 
 void SpikeSortBoxes::loadCustomParametersFromXml(XmlElement* electrodeNode)
 {
@@ -673,7 +675,6 @@ void SpikeSortBoxes::loadCustomParametersFromXml(XmlElement* electrodeNode)
             //int numPCAUnit  = spikesortNode->getIntAttribute("numPCAUnits");
             selectedUnit  = spikesortNode->getIntAttribute("selectedUnit");
             selectedBox =  spikesortNode->getIntAttribute("selectedBox");
-
 
             pcaUnits.clear();
             boxUnits.clear();
@@ -836,10 +837,6 @@ void SpikeSortBoxes::saveCustomParametersToXml(XmlElement* electrodeNode)
         }
     }
 
-
-    //float *pc1, *pc2;
-
-
 }
 
 SpikeSortBoxes::~SpikeSortBoxes()
@@ -949,33 +946,22 @@ void SpikeSortBoxes::addPCAunit(PCAUnit unit)
 int SpikeSortBoxes::addBoxUnit(int channel)
 {
     const ScopedLock myScopedLock(mut);
-    //StartCriticalSection();
-    
+
     BoxUnit unit(nextUnitId++, generateLocalID());
     boxUnits.push_back(unit);
     setSelectedUnitAndBox(nextUnitId, 0);
-    //EndCriticalSection();
+
     return nextUnitId;
 }
-/*
-void  SpikeSortBoxes::StartCriticalSection()
-{
-	mut.enter();
-}
 
-void  SpikeSortBoxes::EndCriticalSection()
-{
-	mut.exit();
-}
-*/
 int SpikeSortBoxes::addBoxUnit(int channel, Box B)
 {
     const ScopedLock myScopedLock(mut);
-    //StartCriticalSection();
+
     BoxUnit unit(B, nextUnitId++, generateLocalID());
     boxUnits.push_back(unit);
     setSelectedUnitAndBox(nextUnitId, 0);
-    //EndCriticalSection();
+
     return nextUnitId;
 }
 
@@ -2221,34 +2207,4 @@ int microSecondsToSpikeTimeBin(SorterSpikePtr s, float t, int ch)
 	// t = 0 corresponds to the left most index.
 	float spikeTimeSpan = (1.0f / s->getChannel()->getSampleRate() * s->getChannel()->getTotalSamples())*1e6;
 	return MIN(s->getChannel()->getTotalSamples() - 1, MAX(0, t / spikeTimeSpan * (s->getChannel()->getTotalSamples() - 1)));
-}
-
-
-SorterSpikeContainer::SorterSpikeContainer(const SpikeChannel* channel, SpikePtr spike)
-{
-	color[0] = color[1] = color[2] = 127;
-	pcProj[0] = pcProj[1] = 0;
-	sortedId = 0;
-
-	chan = channel;
-	int nSamples = chan->getNumChannels() * chan->getTotalSamples();
-	
-    //data.malloc(nSamples);
-	//memcpy(data.getData(), spikedata.getRawPointer(), nSamples*sizeof(float));
-
-}
-
-const float* SorterSpikeContainer::getData() const
-{
-	return data.getData();
-}
-
-const SpikeChannel* SorterSpikeContainer::getChannel() const
-{
-	return chan;
-}
-
-int64 SorterSpikeContainer::getTimestamp() const
-{
-	return timestamp;
 }

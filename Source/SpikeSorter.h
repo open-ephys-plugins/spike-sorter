@@ -25,17 +25,16 @@
 #define __SPIKESORTER_H_3F920F95__
 
 #include <ProcessorHeaders.h>
-#include "SpikeSorterEditor.h"
+
 #include "SpikeSortBoxes.h"
+#include "SpikePlot.h"
+
 #include <algorithm>    // Needed for std::sort
 #include <queue>
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
-class SpikePlot;
-class PCAjob;
-class PCAcomputingThread;
 
 class Electrode
 {
@@ -49,12 +48,14 @@ public:
 
     String name;
     int numChannels;
+    int numSamples;
     uint16 streamId;
   
-    SpikePlot* spikePlot;
+    std::unique_ptr<SpikePlot> spikePlot;
+    std::unique_ptr<SpikeSortBoxes> spikeSort;
+
     PCAcomputingThread* computingThread;
 
-	ScopedPointer<SpikeSortBoxes> spikeSort;
 };
 
 

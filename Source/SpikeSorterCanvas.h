@@ -25,38 +25,19 @@
 #define SPIKESORTERCANVAS_H_
 
 #include <VisualizerWindowHeaders.h>
-#include "SpikeSorter.h"
+
+#include "Containers.h"
 
 #include <vector>
 
-#define WAVE1 0
-#define WAVE2 1
-#define WAVE3 2
-#define WAVE4 3
-#define PROJ1x2 4
-#define PROJ1x3 5
-#define PROJ1x4 6
-#define PROJ2x3 7
-#define PROJ2x4 8
-#define PROJ3x4 9
-
-#define TETRODE_PLOT 1004
-#define STEREO_PLOT  1002
-#define SINGLE_PLOT  1001
-
-#define MAX_NUMBER_OF_SPIKE_SOURCES 128
-#define MAX_N_CHAN 4
-
-class SpikeHistogramPlot;
-class SpikeThresholdDisplay;
-class SpikeDisplayNode;
 class SpikePlot;
 class SpikeDisplay;
 class GenericAxes;
 class ProjectionAxes;
 class WaveAxes;
-class SpikePlot;
-class RecordNode;
+class SpikeSorter;
+class Electrode;
+
 
 /**
 
@@ -144,22 +125,25 @@ class SpikeDisplay : public Component
 public:
 
     /** Constructor */
-    SpikeDisplay(SpikeSorter*, SpikeSorterCanvas*, Viewport*);
+    SpikeDisplay();
 
     /** Destructor */
-    ~SpikeDisplay();
+    ~SpikeDisplay() { }
 
-    void removePlots();
+    /** Clears the current plot*/
     void clear();
-    SpikePlot* addSpikePlot(int numChannels, int electrodeNum, String name);
 
+    /** Sets the spike plot to display */
+    void setSpikePlot(SpikePlot* plot);
+
+    /** Fills the background */
     void paint(Graphics& g);
 
+    /** Resizes spike plot location*/
     void resized();
-    void setPolygonMode(bool on);
-    void mouseDown(const juce::MouseEvent& event);
 
-    void plotSpike(SorterSpikePtr spike, int electrodeNum);
+    /** Sets polygon drawing mode in the active plot*/
+    void setPolygonMode(bool on);
 
     int getTotalHeight()
     {
@@ -173,9 +157,9 @@ private:
     SpikeSorter* processor;
     SpikeSorterCanvas* canvas;
     Viewport* viewport;
+    SpikePlot* activePlot;
 
     OwnedArray<SpikePlot> spikePlots;
-
 
 };
 
@@ -188,10 +172,21 @@ class GenericDrawAxes : public Component
 {
 public:
 
-    GenericDrawAxes(int t);
+    enum AxesType {
+        WAVE1 = 0,
+        WAVE2,
+        WAVE3,
+        WAVE4,
+        PCA = 4
+    };
 
+    /** Constructor */
+    GenericDrawAxes(AxesType t);
+
+    /** Destructor */
     virtual ~GenericDrawAxes();
 
+    /** Add new spike to the plot */
     virtual bool updateSpikeData(SorterSpikePtr s);
 
     void setXLims(double xmin, double xmax);
@@ -199,8 +194,8 @@ public:
     void setYLims(double ymin, double ymax);
     void getYLims(double* ymin, double* ymax);
 
-    void setType(int type);
-    int getType();
+    void setType(AxesType type);
+    AxesType getType();
 
     virtual void paint(Graphics& g) = 0;
 
@@ -215,7 +210,7 @@ protected:
 
     bool gotFirstSpike;
 
-    int type;
+    AxesType type;
 
     Font font;
 
@@ -224,4 +219,4 @@ protected:
 };
 
 
-#endif  // SPIKESORTERCANVAS_H_
+#endif  //

@@ -22,14 +22,15 @@
 */
 
 #include "SpikePlot.h"
+
 #include "SpikeSorter.h"
 #include "PCAProjectionAxes.h"
 #include "WaveformAxes.h"
+#include "SpikeSortBoxes.h"
 
-SpikePlot::SpikePlot(SpikeSorter* processor_, SpikeSorterCanvas* spikeSorterCanvas_,
-    Electrode* electrode_) :
-    canvas(spikeSorterCanvas_), electrode(electrode_),
-    limitsChanged(true), processor(processor_)
+SpikePlot::SpikePlot(Electrode* electrode_) :
+    electrode(electrode_),
+    limitsChanged(true)
 
 {
 
@@ -59,7 +60,6 @@ SpikePlot::SpikePlot(SpikeSorter* processor_, SpikeSorterCanvas* spikeSorterCanv
         std::cout << "SpikePlot as UNKNOWN, defaulting to SINGLE_PLOT" << std::endl;
         nWaveAx = 1;
         nProjAx = 0;
-        plotType = SINGLE_PLOT;
     }
 
     std::vector<float> scales = { 250, 250, 250, 250 }; // processor->getElectrodeVoltageScales(electrodeID);
@@ -143,6 +143,7 @@ void SpikePlot::setPCARange(float p1min, float p2min, float p1max, float p2max)
 void SpikePlot::processSpikeObject(SorterSpikePtr s)
 {
     const ScopedLock myScopedLock(mut);
+
     if (nWaveAx > 0)
     {
         for (int i = 0; i < nWaveAx; i++)
@@ -159,19 +160,19 @@ void SpikePlot::processSpikeObject(SorterSpikePtr s)
 
 void SpikePlot::initAxes(std::vector<float> scales)
 {
-    const ScopedLock myScopedLock(mut);
+    //const ScopedLock myScopedLock(mut);
     initLimits();
 
     for (int i = 0; i < nWaveAx; i++)
     {
-        WaveformAxes* wAx = new WaveformAxes(canvas, electrode);
+        WaveformAxes* wAx = new WaveformAxes(electrode, i);
         //wAx->setDetectorThreshold(electrode->thresholds[i]);
         wAxes.add(wAx);
         addAndMakeVisible(wAx);
         ranges.add(scales[i]);
     }
 
-    PCAProjectionAxes* pAx = new PCAProjectionAxes(canvas, electrode);
+    PCAProjectionAxes* pAx = new PCAProjectionAxes(electrode);
     float p1min, p2min, p1max, p2max;
     electrode->spikeSort->getPCArange(p1min, p2min, p1max, p2max);
     pAx->setPCARange(p1min, p2min, p1max, p2max);
@@ -197,22 +198,22 @@ void SpikePlot::resized()
     int nProjCols = 0;
     int nWaveCols = 0;
 
-    switch (plotType)
+    switch (electrode->numChannels)
     {
-    case SINGLE_PLOT:
+    case 1:
         nProjCols = 1;
         nWaveCols = 1;
         axesWidth = width / 2;
         axesHeight = height;
         break;
 
-    case STEREO_PLOT:
+    case 2:
         nProjCols = 1;
         nWaveCols = 2;
         axesWidth = width / 2;
         axesHeight = height;
         break;
-    case TETRODE_PLOT:
+    case 4:
         nProjCols = 1;
         nWaveCols = 2;
         axesWidth = width / 2;
@@ -323,17 +324,17 @@ void SpikePlot::initLimits()
 
 void SpikePlot::getBestDimensions(int* w, int* h)
 {
-    switch (plotType)
+    switch (electrode->numChannels)
     {
-    case TETRODE_PLOT:
+    case 4:
         *w = 4;
         *h = 2;
         break;
-    case STEREO_PLOT:
+    case 2:
         *w = 2;
         *h = 1;
         break;
-    case SINGLE_PLOT:
+    case 1:
         *w = 1;
         *h = 1;
         break;

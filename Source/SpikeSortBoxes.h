@@ -27,31 +27,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <ProcessorHeaders.h>
 
 #include "SpikeSorterEditor.h"
+#include "Containers.h"
+
 #include <algorithm>    // std::sort
 #include <list>
 #include <queue>
 #include <atomic>
 
-class SorterSpikeContainer : public ReferenceCountedObject
-{
-public:
 
-	SorterSpikeContainer(const SpikeChannel* channel, SpikePtr spike);
-	SorterSpikeContainer() = delete;
-
-	const float* getData() const;
-	const SpikeChannel* getChannel() const;
-	int64 getTimestamp() const;
-	uint8 color[3];
-	float pcProj[2];
-	uint16 sortedId;
-private:
-	int64 timestamp;
-	HeapBlock<float> data;
-	const SpikeChannel* chan;
-};
-typedef ReferenceCountedObjectPtr<SorterSpikeContainer> SorterSpikePtr;
-typedef ReferenceCountedArray<SorterSpikeContainer, CriticalSection> SorterSpikeArray;
 
 class PCAcomputingThread;
 
@@ -248,7 +231,11 @@ public:
 class SpikeSortBoxes
 {
 public:
-    SpikeSortBoxes(String name, PCAcomputingThread* pth, int numch, double SamplingRate, int WaveFormLength);
+
+    /** Constructor */
+    SpikeSortBoxes(Electrode* electrode, PCAcomputingThread* pcaThread);
+
+    /** Destructor */
     ~SpikeSortBoxes();
 
     void resizeWaveform(int numSamples);
@@ -287,9 +274,9 @@ public:
     void saveCustomParametersToXml(XmlElement* electrodeNode);
     void loadCustomParametersFromXml(XmlElement* electrodeNode);
 private:
-    //void  StartCriticalSection();
-    //void  EndCriticalSection();
-    
+
+    Electrode* electrode;
+
     static int nextUnitId;
 
     int numChannels, waveformLength;
@@ -304,7 +291,6 @@ private:
     PCAcomputingThread* computingThread;
     bool bPCAJobSubmitted,bPCAcomputed,bRePCA;
     std::atomic<bool> bPCAjobFinished ;
-
 
 };
 

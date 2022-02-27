@@ -21,14 +21,14 @@
 
 */
 
-#include <stdio.h>
 #include "SpikeSorter.h"
-#include "SpikeSortBoxes.h"
-#include "SpikeSorterCanvas.h"
-#include "SpikePlot.h"
+#include "SpikeSorterEditor.h"
+#include "Containers.h"
 
-SpikeSorter::SpikeSorter()
-    : GenericProcessor("Spike Sorter")
+#include <stdio.h>
+
+
+SpikeSorter::SpikeSorter() : GenericProcessor("Spike Sorter")
 {
 
 }
@@ -65,15 +65,12 @@ Electrode::Electrode(SpikeChannel* channel, PCAcomputingThread* computingThread_
 
     name = channel->getName();
     numChannels = channel->getNumChannels();
+    numSamples = channel->getPrePeakSamples() + channel->getPostPeakSamples();
     streamId = channel->getStreamId();
 
-    if (computingThread != nullptr)
-        spikeSort = new SpikeSortBoxes(name,
-                                       computingThread, 
-                                       numChannels, 
-                                       channel->getSampleRate(), 
-                                       channel->getPrePeakSamples() + channel->getPostPeakSamples());
+    spikeSort = std::make_unique<SpikeSortBoxes>(this, computingThread);
 
+    spikePlot = std::make_unique<SpikePlot>(this);
 
 }
 
