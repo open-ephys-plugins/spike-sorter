@@ -112,7 +112,8 @@ private:
 
     Electrode* electrode;
     int scrollBarThickness;
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeSorterCanvas);
+    
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeSorterCanvas);
 
 };
 
@@ -151,15 +152,10 @@ public:
     }
 
 private:
-    int numColumns;
+
     int totalHeight;
     
-    SpikeSorter* processor;
-    SpikeSorterCanvas* canvas;
-    Viewport* viewport;
     SpikePlot* activePlot;
-
-    OwnedArray<SpikePlot> spikePlots;
 
 };
 

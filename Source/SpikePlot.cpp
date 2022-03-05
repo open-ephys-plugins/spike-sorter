@@ -159,13 +159,13 @@ void SpikePlot::processSpikeObject(SorterSpikePtr s)
 
 void SpikePlot::initAxes(std::vector<float> scales)
 {
-    //const ScopedLock myScopedLock(mut);
+    const ScopedLock myScopedLock(mut);
+    
     initLimits();
 
     for (int i = 0; i < nWaveAx; i++)
     {
         WaveformAxes* wAx = new WaveformAxes(electrode, i);
-        //wAx->setDetectorThreshold(electrode->thresholds[i]);
         wAxes.add(wAx);
         addAndMakeVisible(wAx);
         ranges.add(scales[i]);
@@ -179,7 +179,7 @@ void SpikePlot::initAxes(std::vector<float> scales)
     pAxes.add(pAx);
     addAndMakeVisible(pAx);
 
-    setLimitsOnAxes(); // initialize the ranges
+    setLimitsOnAxes();
 }
 
 void SpikePlot::resized()
@@ -236,8 +236,9 @@ void SpikePlot::resized()
 
 void SpikePlot::modifyRange(std::vector<float> values)
 {
-    const int NUM_RANGE = 7;
-    float range_array[NUM_RANGE] = { 100,250,500,750,1000,1250,1500 };
+
+    const int NUM_RANGE = 4;
+    float range_array[NUM_RANGE] = { 100, 250, 500, 1000 };
     String label;
     int newIndex = 0;
 
@@ -263,9 +264,11 @@ void SpikePlot::modifyRange(std::vector<float> values)
 
 void SpikePlot::modifyRange(int index, bool up)
 {
-    const int NUM_RANGE = 7;
-    float range_array[NUM_RANGE] = { 100,250,500,750,1000,1250,1500 };
+    const int NUM_RANGE = 4;
+    float range_array[NUM_RANGE] = { 100, 250, 500, 1000 };
+    
     String label;
+    
     for (int k = 0; k < NUM_RANGE; k++)
     {
         if (std::abs(ranges[index] - range_array[k]) < 0.1)
@@ -284,12 +287,12 @@ void SpikePlot::modifyRange(int index, bool up)
             rangeButtons[index]->setLabel(label);
             setLimitsOnAxes();
 
-            //processor->setElectrodeVoltageScale(electrodeID, index, range_array[newIndex]);
             return;
         }
 
     }
-    // we shoudl never reach here.
+
+    // we should never reach here
     jassert(false);
     return;
 
@@ -307,16 +310,18 @@ void SpikePlot::buttonClicked(Button* button)
 void SpikePlot::setLimitsOnAxes()
 {
     const ScopedLock myScopedLock(mut);
+
     for (int i = 0; i < nWaveAx; i++)
         wAxes[i]->setRange(ranges[i]);
 }
 
 void SpikePlot::initLimits()
 {
+    
     for (int i = 0; i < electrode->numChannels; i++)
     {
-        limits[i][0] = 1209;//-1*pow(2,11);
-        limits[i][1] = 11059;//pow(2,14)*1.6;
+        limits[i][0] = 1209;
+        limits[i][1] = 11059;
     }
 
 }
@@ -346,6 +351,7 @@ void SpikePlot::getBestDimensions(int* w, int* h)
 
 void SpikePlot::clear()
 {
+
     const ScopedLock myScopedLock(mut);
     std::cout << "SpikePlot::clear()" << std::endl;
 
@@ -354,26 +360,24 @@ void SpikePlot::clear()
     for (int i = 0; i < nProjAx; i++)
         pAxes[i]->clear();
 
-
 }
 
 
 void SpikePlot::setDisplayThresholdForChannel(int i, float f)
 {
+
     const ScopedLock myScopedLock(mut);
+
     if (i < wAxes.size())
         wAxes[i]->setDetectorThreshold(f);
 
-    return;
 }
 
 
 float SpikePlot::getDisplayThresholdForChannel(int i)
 {
+
     const ScopedLock myScopedLock(mut);
-    float f = wAxes[i]->getDisplayThreshold();
 
-    return f;
+    return wAxes[i]->getDisplayThreshold();
 }
-
-/********************************/

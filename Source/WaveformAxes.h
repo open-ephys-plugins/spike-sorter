@@ -60,6 +60,7 @@ public:
 
     /** Clears internal spike buffer */
     void clear();
+
     int findUnitIndexByID(int ID);
 
     /** Mouse callbacks*/
@@ -67,7 +68,6 @@ public:
     void mouseExit(const MouseEvent& event);
     void mouseDown(const MouseEvent& event);
     void mouseDrag(const MouseEvent& event);
-    void mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel);
     void mouseUp(const MouseEvent& event);
 
     void setRange(float);
@@ -83,9 +83,10 @@ public:
     void updateUnits(std::vector<BoxUnit> _units);
 
 private:
+
     int electrodeID;
     bool editAll = false;
-    bool signalFlipped;
+    bool signalFlipped = false;
     bool bDragging ;
     Colour waveColour;
     Colour thresholdColour;
@@ -104,7 +105,8 @@ private:
 
     Font font;
     float mouseDownX, mouseDownY;
-    float mouseOffsetX,mouseOffsetY;
+    float mouseOffsetX, mouseOffsetY;
+
     SorterSpikeArray spikeBuffer;
 
     int spikeIndex;

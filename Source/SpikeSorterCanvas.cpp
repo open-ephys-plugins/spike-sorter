@@ -91,7 +91,7 @@ SpikeSorterCanvas::SpikeSorterCanvas(SpikeSorter* n) :
 
     setWantsKeyboardFocus(true);
 
-    update();
+    refreshRate = 10;
 
 }
 
@@ -110,24 +110,6 @@ void SpikeSorterCanvas::update()
 
     std::cout << "Updating SpikeSorterCanvas" << std::endl;
 
-    /*int nPlots = processor->getNumElectrodes();
-    processor->removeplots();
-    spikeDisplay->removePlots();
-
-    if (nPlots > 0)
-    {
-        // Plot only active electrode
-        int currentElectrode = processor->getCurrentElectrodeIndex();
-        electrode = processor->getActiveElectrode();
-        SpikeHistogramPlot* sp = spikeDisplay->addplot(processor->getNumberOfChannelsForElectrode(currentElectrode), electrode->electrodeID,
-                                                            processor->getNameForElectrode(currentElectrode));
-        processor->addplotForElectrode(sp, currentElectrode);
-        electrode->plot->setFlipSignal(processor->getFlipSignalState());
-        electrode->plot->updateUnitsFromProcessor();
-
-    }
-    spikeDisplay->resized();
-    spikeDisplay->repaint();*/
 }
 
 
@@ -380,14 +362,17 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
 }
 
 
-SpikeDisplay::SpikeDisplay() : totalHeight(430), activePlot(nullptr)
+SpikeDisplay::SpikeDisplay() : 
+    activePlot(nullptr),
+    totalHeight(430)
 {
 
 }
 
 void SpikeDisplay::clear()
 {
-    activePlot->clear();
+    if (activePlot != nullptr)
+        activePlot->clear();
 }
 
 
@@ -410,7 +395,8 @@ void SpikeDisplay::setSpikePlot(SpikePlot* plot)
 void SpikeDisplay::paint(Graphics& g)
 {
 
-    g.fillAll(Colours::grey);
+    if (activePlot != nullptr)
+        activePlot->repaint();
 
 }
 

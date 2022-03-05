@@ -76,25 +76,39 @@ public:
     /** Handle an incoming spike object*/
 	void processSpikeObject(SorterSpikePtr s);
 
-    Electrode* electrode;
-
+    /** Gets the ID of the currently selected unit and box */
     void getSelectedUnitAndBox(int& unitID, int& boxID);
+
+    /** Sets the selected unit and box*/
     void setSelectedUnitAndBox(int unitID, int boxID);
 
+    /** Initializes the waveform and PC axes */
     void initAxes(std::vector<float> scales);
+
+    /** Gets the desired aspect ratio for the plot */
     void getBestDimensions(int*, int*);
 
+    /** Clears the waveform and PCA axes*/
     void clear();
+
+    /** Respond to range button clicks*/
+    void buttonClicked(Button* button);
+
+    /** Returns the threshold level for displaying spikes */
+    float getDisplayThresholdForChannel(int);
+
+    /** Sets the threshold level for displaying spikes*/
+    void setDisplayThresholdForChannel(int channelNum, float thres);
+
+    Electrode* electrode;
 
     float minWidth;
     float aspectRatio;
 
-    void buttonClicked(Button* button);
-
-    float getDisplayThresholdForChannel(int);
-    void setDisplayThresholdForChannel(int channelNum, float thres);
-
 private:
+
+    void initLimits();
+    void setLimitsOnAxes();
 
     int nWaveAx;
     int nProjAx;
@@ -109,11 +123,8 @@ private:
     OwnedArray<PCAProjectionAxes> pAxes;
     OwnedArray<WaveformAxes> wAxes;
     OwnedArray<UtilityButton> rangeButtons;
+    
     Array<float> ranges;
-
-    void initLimits();
-    void setLimitsOnAxes();
-    void updateAxesPositions();
 
     String name;
     CriticalSection mut;

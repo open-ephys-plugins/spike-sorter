@@ -59,21 +59,8 @@ WaveformAxes::WaveformAxes(Electrode* electrode_, int channelIndex) :
     }
 }
 
-void WaveformAxes::mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel)
-{
-    // weirdly enough, sometimes we get twice of this event even though a single wheel move was made...
-   //if (wheel.deltaY < 0)
-   //     spikeHistogramPlot->modifyRange(channel, true);
-   // else
-   //     spikeHistogramPlot->modifyRange(channel, false);
-
-}
-
 void WaveformAxes::setRange(float r)
 {
-
-    //std::cout << "Setting range to " << r << std::endl;
-
     range = r;
 
     repaint();
@@ -85,24 +72,15 @@ void WaveformAxes::plotSpike(SorterSpikePtr s, Graphics& g)
     float h = getHeight();
 
     g.setColour(Colour(s->color[0], s->color[1], s->color[2]));
-    //g.setColour(Colours::pink);
+
     //compute the spatial width for each waveform sample
     float dx = getWidth() / float(s->getChannel()->getTotalSamples());
 
-    /*
-    float align = 8 * getWidth()/float(spikeBuffer[0].nSamples);
-    g.drawLine(align,
-                       0,
-                       align,
-                       h);
-    */
-
     int spikeSamples = s->getChannel()->getTotalSamples();
+
     // type corresponds to channel so we need to calculate the starting
     // sample based upon which channel is getting plotted
-    int offset = channel * spikeSamples; //spikeBuffer[0].nSamples * type; //
-
-    //int dSamples = 1;
+    int offset = channel * spikeSamples;
 
     float x = 0.0f;
 
@@ -129,8 +107,8 @@ void WaveformAxes::plotSpike(SorterSpikePtr s, Graphics& g)
 void WaveformAxes::drawThresholdSlider(Graphics& g)
 {
 
-    // draw display threshold (editable)
     g.setColour(thresholdColour);
+
     if (signalFlipped)
     {
         float h = getHeight() - (getHeight() * (0.5f - displayThresholdLevel / range));
@@ -192,7 +170,6 @@ bool WaveformAxes::updateSpikeData(SorterSpikePtr s)
 
 void WaveformAxes::clear()
 {
-    //processor->clearRunningStatForSelectedElectrode();
     spikeBuffer.clear();
     spikeIndex = 0;
     int numSamples = 40;
@@ -264,7 +241,9 @@ void WaveformAxes::mouseDown(const juce::MouseEvent& event)
     float w = getWidth();
     float microsec_span = 40.0 / 30000.0 * 1e6;
     float microvolt_span = range / 2;
+    
     mouseDownX = event.x / w * microsec_span;
+    
     if (signalFlipped)
         mouseDownY = (h / 2 - (h - event.y)) / (h / 2) * microvolt_span;
     else
@@ -283,12 +262,11 @@ void WaveformAxes::mouseDown(const juce::MouseEvent& event)
         electrode->sorter->setSelectedUnitAndBox(-1, -1);
 
     }
-    //	MouseUnitOffset = ScreenToMS_uV(e.X, e.Y) - new PointD(boxOnDown.x, boxOnDown.y);
 
-    // if (isOverThresholdSlider)
-    // {
-    //     cursorType = MouseCursor::DraggingHandCursor;
-    // }
+    if (isOverThresholdSlider)
+    {
+         cursorType = MouseCursor::DraggingHandCursor;
+    }
 }
 
 

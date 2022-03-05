@@ -35,31 +35,29 @@ int Sorter::nextUnitId = 1;
 
 Sorter::Sorter(Electrode* electrode_, PCAComputingThread* pcaThread_)
     : electrode(electrode_),
-      computingThread(pcaThread_)
+      computingThread(pcaThread_),
+      bufferSize(200),
+      spikeBufferIndex(-1),
+      bPCAComputed(false),
+      bPCAJobFinished(false),
+      bPCAJobSubmitted(false),
+      bRePCA(false),
+      selectedUnit(-1),
+      selectedBox(-1),
+      pc1min(-1),
+      pc2min(-1),
+      pc1max(-1),
+      pc2max(-1),
+      numChannels(electrode_->numChannels),
+      waveformLength(electrode_->numSamples)
+     
 {
 
-    pc1 = pc2 = nullptr;
-    bufferSize = 200;
-    spikeBufferIndex = -1;
-    bPCAcomputed = false;
-    bPCAJobSubmitted = false;
-    bPCAjobFinished = false;
-    selectedUnit = -1;
-    selectedBox = -1;
-    bRePCA = false;
-    pc1min = -1;
-    pc2min = -1;
-    pc1max = 1;
-    pc2max = 1;
-    numChannels = electrode->numChannels;
-    waveformLength = electrode->numSamples;
-
-    pc1 = new float[numChannels * waveformLength];
-    pc2 = new float[numChannels * waveformLength];
+    pc1 = new float[int64(numChannels) * waveformLength];
+    pc2 = new float[int64(numChannels) * waveformLength];
 
     for (int n = 0; n < bufferSize; n++)
     {
-
         spikeBuffer.add(nullptr);
     }
 }
@@ -69,10 +67,13 @@ void Sorter::resizeWaveform(int numSamples)
     const ScopedLock myScopedLock(mut);
 
     waveformLength = numSamples;
+    
     delete[] pc1;
     delete[] pc2;
-    pc1 = new float[numChannels * waveformLength];
-    pc2 = new float[numChannels * waveformLength];
+
+    pc1 = new float[int64(numChannels) * waveformLength];
+    pc2 = new float[int64(numChannels) * waveformLength];
+
     spikeBuffer.clear();
     
     for (int n = 0; n < bufferSize; n++)
@@ -80,10 +81,10 @@ void Sorter::resizeWaveform(int numSamples)
         spikeBuffer.add(nullptr);
     }
     
-    bPCAcomputed = false;
+    bPCAComputed = false;
     spikeBufferIndex = -1;
 	bPCAJobSubmitted = false;
-	bPCAjobFinished = false;
+	bPCAJobFinished = false;
 	selectedUnit = -1;
 	selectedBox = -1;
 	bRePCA = false;
@@ -92,11 +93,11 @@ void Sorter::resizeWaveform(int numSamples)
 	pc1max = 1;
 	pc2max = 1;
 
-    for (int k=0; k<pcaUnits.size(); k++)
+    for (int k = 0; k < pcaUnits.size(); k++)
     {
         pcaUnits[k].resizeWaveform(waveformLength);
     }
-    for (int k=0; k<boxUnits.size(); k++)
+    for (int k = 0; k < boxUnits.size(); k++)
     {
         boxUnits[k].resizeWaveform(waveformLength);
     }
@@ -130,8 +131,8 @@ void Sorter::loadCustomParametersFromXml(XmlElement* electrodeNode)
                     pc1max = UnitNode->getDoubleAttribute("pc1max");
                     pc2max = UnitNode->getDoubleAttribute("pc2max");
 
-                    bPCAjobFinished = UnitNode->getBoolAttribute("PCAjobFinished");
-                    bPCAcomputed = UnitNode->getBoolAttribute("PCAcomputed");
+                    bPCAJobFinished = UnitNode->getBoolAttribute("PCAjobFinished");
+                    bPCAComputed = UnitNode->getBoolAttribute("PCAcomputed");
 
                     delete[] pc1;
                     delete[] pc2;
@@ -217,7 +218,6 @@ void Sorter::saveCustomParametersToXml(XmlElement* electrodeNode)
     spikesortNode->setAttribute("selectedUnit",selectedUnit);
     spikesortNode->setAttribute("selectedBox",selectedBox);
 
-
     XmlElement* pcaNode = electrodeNode->createNewChildElement("PCA");
     pcaNode->setAttribute("numChannels",numChannels);
     pcaNode->setAttribute("waveformLength",waveformLength);
@@ -226,8 +226,8 @@ void Sorter::saveCustomParametersToXml(XmlElement* electrodeNode)
     pcaNode->setAttribute("pc1max", pc1max);
     pcaNode->setAttribute("pc2max", pc2max);
 
-    pcaNode->setAttribute("PCAjobFinished", bPCAjobFinished);
-    pcaNode->setAttribute("PCAcomputed", bPCAcomputed);
+    pcaNode->setAttribute("PCAjobFinished", bPCAJobFinished);
+    pcaNode->setAttribute("PCAcomputed", bPCAComputed);
 
     for (int k=0; k<numChannels*waveformLength; k++)
     {
@@ -280,7 +280,6 @@ void Sorter::saveCustomParametersToXml(XmlElement* electrodeNode)
 
 Sorter::~Sorter()
 {
-    // wait until PCA job is done (if one was submitted).
     delete[] pc1;
     delete[] pc2;
     pc1 = nullptr;
@@ -301,42 +300,52 @@ void Sorter::getSelectedUnitAndBox(int& unitID, int& boxid)
 
 void Sorter::projectOnPrincipalComponents(SorterSpikePtr so)
 {
+
+    // 1. Add spike to buffer
     spikeBufferIndex++;
     spikeBufferIndex %= bufferSize;
     spikeBuffer.set(spikeBufferIndex, so);
-    if (bPCAjobFinished)
+
+    // 2. Check whether current PCA job has finished
+    if (bPCAJobFinished)
     {
-        bPCAcomputed = true;
+        bPCAComputed = true;
     }
 
-    if (bPCAcomputed)
+    // 3. If job has finished, project spike onto PC axes
+    if (bPCAComputed)
     {
+        
+
         so->pcProj[0] = so->pcProj[1] = 0;
-        for (int k=0; k<so->getChannel()->getNumChannels()*so->getChannel()->getTotalSamples(); k++)
+
+        const int maxSample = so->getChannel()->getNumChannels() * so->getChannel()->getTotalSamples();
+
+        for (int k = 0; k < maxSample; k++)
         {
+            
             float v = so->spikeDataIndexToMicrovolts(k);
+
             so->pcProj[0] += pc1[k]* v;
             so->pcProj[1] += pc2[k]* v;
+
         }
-        if (so->pcProj[0] > 1e5 || so->pcProj[0] < -1e5 || so->pcProj[1] > 1e5 || so->pcProj[1] < -1e5)
-        {
-            //int dbg = 1;
-        }
+
+        return;
+
     }
-    else
+
+    // 4. If we have enough spikes, start a new PCA job
+    if ((spikeBufferIndex == bufferSize -1 && !bPCAComputed && !bPCAJobSubmitted) || bRePCA)
     {
-        // add a spike object to the buffer.
-        // if we have enough spikes, start the PCA computation thread.
-        if ((spikeBufferIndex == bufferSize -1 && !bPCAcomputed && !bPCAJobSubmitted) || bRePCA)
-        {
-            bPCAJobSubmitted = true;
-	    bPCAcomputed = false;
-            bRePCA = false;
-            // submit a new job to compute the spike buffer.
-            PCAJobPtr job = new PCAjob(spikeBuffer,pc1,pc2, pc1min, pc2min, pc1max, pc2max, bPCAjobFinished);
-            computingThread->addPCAjob(job);
-        }
+        bPCAJobSubmitted = true;
+	    bPCAComputed = false;
+        bRePCA = false;
+
+        PCAJobPtr job = new PCAjob(spikeBuffer, pc1, pc2, pc1min, pc2min, pc1max, pc2max, bPCAJobFinished);
+        computingThread->addPCAjob(job);
     }
+
 }
 
 void Sorter::getPCArange(float& p1min,float& p2min, float& p1max,  float& p2max)
@@ -349,25 +358,25 @@ void Sorter::getPCArange(float& p1min,float& p2min, float& p1max,  float& p2max)
 
 void Sorter::setPCArange(float p1min,float p2min, float p1max,  float p2max)
 {
-    pc1min=p1min;
-    pc2min=p2min;
-    pc1max=p1max;
-    pc2max=p2max;
+    pc1min = p1min;
+    pc2min = p2min;
+    pc1max = p1max;
+    pc2max = p2max;
 }
-
 
 void Sorter::resetJobStatus()
 {
-    bPCAjobFinished = false;
+    bPCAJobFinished = false;
 }
 
 bool Sorter::isPCAfinished()
 {
-    return bPCAjobFinished;
+    return bPCAJobFinished;
 }
+
 void Sorter::RePCA()
 {
-    bPCAcomputed = false;
+    bPCAComputed = false;
     bPCAJobSubmitted = false;
     bRePCA = true;
 }
@@ -378,8 +387,6 @@ void Sorter::addPCAunit(PCAUnit unit)
     pcaUnits.push_back(unit);
 }
 
-// Adds a new unit with a single box at some default location.
-// returns the unit id
 int Sorter::addBoxUnit(int channel)
 {
     const ScopedLock myScopedLock(mut);
@@ -404,6 +411,7 @@ int Sorter::addBoxUnit(int channel, Box B)
 
 void Sorter::getUnitColor(int UnitID, uint8& R, uint8& G, uint8& B)
 {
+    
     for (int k = 0; k < boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitID() == UnitID)
@@ -414,6 +422,7 @@ void Sorter::getUnitColor(int UnitID, uint8& R, uint8& G, uint8& B)
             break;
         }
     }
+
     for (int k = 0; k < pcaUnits.size(); k++)
     {
         if (pcaUnits[k].getUnitID() == UnitID)
@@ -463,19 +472,19 @@ int Sorter::generateLocalID()
 int Sorter::generateUnitID()
 {
 
-    int ID = ++nextUnitId;
-    return ID;
-}
+    return ++nextUnitId;;
 
+}
 
 void Sorter::generateNewIDs()
 {
     const ScopedLock myScopedLock(mut);
-    for (int k=0; k<boxUnits.size(); k++)
+
+    for (int k = 0; k < boxUnits.size(); k++)
     {
         boxUnits[k].UnitID = generateUnitID();
     }
-    for (int k=0; k<pcaUnits.size(); k++)
+    for (int k = 0; k < pcaUnits.size(); k++)
     {
         pcaUnits[k].UnitID = generateUnitID();
     }
@@ -540,7 +549,7 @@ bool Sorter::addBoxToUnit(int channel, int unitID, Box B)
 {
     const ScopedLock myScopedLock(mut);
 
-    for (int k=0; k<boxUnits.size(); k++)
+    for (int k = 0; k < boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitID() == unitID)
         {
@@ -580,73 +589,63 @@ void Sorter::updateBoxUnits(std::vector<BoxUnit> _units)
 }
 
 
-// tests whether a candidate spike belongs to one of the defined units
+bool Sorter::checkBoxUnits(SorterSpikePtr spike)
+{
+    for (int k = 0; k < boxUnits.size(); k++)
+    {
+        if (boxUnits[k].isWaveFormInsideAllBoxes(spike))
+        {
+            spike->sortedId = boxUnits[k].getUnitID();
+            spike->color[0] = boxUnits[k].ColorRGB[0];
+            spike->color[1] = boxUnits[k].ColorRGB[1];
+            spike->color[2] = boxUnits[k].ColorRGB[2];
+            boxUnits[k].updateWaveform(spike);
+            return true;
+        }
+    }
+}
+
+bool Sorter::checkPCAUnits(SorterSpikePtr spike)
+{
+    for (int k = 0; k < pcaUnits.size(); k++)
+    {
+        if (pcaUnits[k].isWaveFormInsidePolygon(spike))
+        {
+            spike->sortedId = pcaUnits[k].getUnitID();
+            spike->color[0] = pcaUnits[k].ColorRGB[0];
+            spike->color[1] = pcaUnits[k].ColorRGB[1];
+            spike->color[2] = pcaUnits[k].ColorRGB[2];
+            return true;
+        }
+    }
+}
+
 bool Sorter::sortSpike(SorterSpikePtr spike, bool PCAfirst)
 {
     const ScopedLock myScopedLock(mut);
+
     if (PCAfirst)
     {
+        if (checkPCAUnits(spike))
+            return true;
 
-        for (int k=0; k<pcaUnits.size(); k++)
-        {
-            if (pcaUnits[k].isWaveFormInsidePolygon(spike))
-            {
-                spike->sortedId = pcaUnits[k].getUnitID();
-                spike->color[0] = pcaUnits[k].ColorRGB[0];
-                spike->color[1] = pcaUnits[k].ColorRGB[1];
-                spike->color[2] = pcaUnits[k].ColorRGB[2];
-                return true;
-            }
-        }
-
-        for (int k=0; k<boxUnits.size(); k++)
-        {
-            if (boxUnits[k].isWaveFormInsideAllBoxes(spike))
-            {
-                spike->sortedId = boxUnits[k].getUnitID();
-                spike->color[0] = boxUnits[k].ColorRGB[0];
-                spike->color[1] = boxUnits[k].ColorRGB[1];
-                spike->color[2] = boxUnits[k].ColorRGB[2];
-                boxUnits[k].updateWaveform(spike);
-                return true;
-            }
-        }
+        if (checkBoxUnits(spike))
+            return true;
     }
     else
     {
+        if (checkBoxUnits(spike))
+            return true;
 
-        for (int k=0; k<boxUnits.size(); k++)
-        {
-            if (boxUnits[k].isWaveFormInsideAllBoxes(spike))
-            {
-                spike->sortedId = boxUnits[k].getUnitID();
-                spike->color[0] = boxUnits[k].ColorRGB[0];
-                spike->color[1] = boxUnits[k].ColorRGB[1];
-                spike->color[2] = boxUnits[k].ColorRGB[2];
-                boxUnits[k].updateWaveform(spike);
-                return true;
-            }
-        }
-        for (int k=0; k<pcaUnits.size(); k++)
-        {
-            if (pcaUnits[k].isWaveFormInsidePolygon(spike))
-            {
-                spike->sortedId = pcaUnits[k].getUnitID();
-                spike->color[0] = pcaUnits[k].ColorRGB[0];
-                spike->color[1] = pcaUnits[k].ColorRGB[1];
-                spike->color[2] = pcaUnits[k].ColorRGB[2];
-                pcaUnits[k].updateWaveform(spike);
-                return true;
-            }
-        }
-
+        if (checkPCAUnits(spike))
+            return true;
     }
 
     return false;
 }
 
 
-bool  Sorter::removeBoxFromUnit(int unitID, int boxIndex)
+bool Sorter::removeBoxFromUnit(int unitID, int boxIndex)
 {
     const ScopedLock myScopedLock(mut);
 
@@ -659,7 +658,6 @@ bool  Sorter::removeBoxFromUnit(int unitID, int boxIndex)
 
             return s;
         }
-
     }
 
     return false;
@@ -689,14 +687,15 @@ int Sorter::getNumBoxes(int unitID)
 {
     const ScopedLock myScopedLock(mut);
 
-    for (int k=0; k< boxUnits.size(); k++)
+    for (int k = 0; k < boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitID() == unitID)
         {
 
-            int n =boxUnits[k].getNumBoxes();
+            int n = boxUnits[k].getNumBoxes();
             return n;
         }
     }
+
     return -1;
 }

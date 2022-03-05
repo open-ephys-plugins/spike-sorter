@@ -103,9 +103,9 @@ void SpikeSorter::handleSpike(const SpikeChannel* spikeChannel, const EventPacke
     Electrode* electrode = electrodeMap[spikeChannel];
 
     electrode->sorter->projectOnPrincipalComponents(sorterSpike);
+
     electrode->sorter->sortSpike(sorterSpike, true);
 
-    // transfer buffered spikes to spike plot
     if (electrode->plot->isVisible())
     {
         if (electrode->sorter->isPCAfinished())

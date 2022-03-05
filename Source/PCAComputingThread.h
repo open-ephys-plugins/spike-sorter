@@ -38,7 +38,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     Thread for managing PCA jobs
 
 */
-class PCAComputingThread : juce::Thread
+class PCAComputingThread : public Thread
 {
 public:
 
