@@ -87,10 +87,7 @@ public:
     void process(AudioBuffer<float>& buffer) override;
 
     /** Handles incoming spikes */
-    void handleSpike(const SpikeChannel* spikeChannel, const EventPacket& spike, int samplePosition, const uint8* rawData) override;
-
-    /** Updates the sortedID of an incoming spike*/
-    void setSortedID(const uint8* rawData, uint16 sortedID);
+    void handleSpike(SpikePtr spike) override;
 
     /** Called whenever the signal chain is altered. */
     void updateSettings() override;

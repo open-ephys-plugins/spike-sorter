@@ -132,20 +132,15 @@ Array<Electrode*> SpikeSorter::getElectrodesForStream(uint16 streamId)
     return electrodesForStream;
 }
 
-void SpikeSorter::setSortedID(const uint8* rawData, uint16 sortedID)
+void SpikeSorter::handleSpike(SpikePtr newSpike)
 {
-    uint8* modifiableBuffer = const_cast<uint8*>(rawData);
 
-    *(reinterpret_cast<uint16*>(modifiableBuffer + 16)) = sortedID;
-}
+    if (newSpike == nullptr)
+        return;
 
-void SpikeSorter::handleSpike(const SpikeChannel* spikeChannel, const EventPacket& spike, int samplePosition, const uint8* rawData)
-{
-    SpikePtr newSpike = Spike::deserialize(spike, spikeChannel);
+    SorterSpikePtr sorterSpike = new SorterSpikeContainer(newSpike->getChannelInfo(), newSpike);
 
-    SorterSpikePtr sorterSpike = new SorterSpikeContainer(spikeChannel, newSpike);
-
-    Electrode* electrode = electrodeMap[spikeChannel];
+    Electrode* electrode = electrodeMap[newSpike->getChannelInfo()];
 
     electrode->sorter->projectOnPrincipalComponents(sorterSpike);
 
@@ -165,7 +160,7 @@ void SpikeSorter::handleSpike(const SpikeChannel* spikeChannel, const EventPacke
     }
 
     if (sorterSpike->sortedId > 0)
-        setSortedID(rawData, sorterSpike->sortedId);
+        newSpike->setSortedID(sorterSpike->sortedId);
     
 }
 
