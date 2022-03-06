@@ -28,7 +28,8 @@
 #include <stdio.h>
 
 SpikeSorterEditor::SpikeSorterEditor(GenericProcessor* parentNode)
-    : VisualizerEditor(parentNode, 205)
+    : VisualizerEditor(parentNode, 205),
+      spikeSorterCanvas(nullptr)
 
 {
     tabText = "Spike Sorter";
@@ -49,6 +50,8 @@ Visualizer* SpikeSorterEditor::createNewCanvas()
     SpikeSorter* processor = (SpikeSorter*) getProcessor();
     spikeSorterCanvas = new SpikeSorterCanvas(processor);
 
+    selectedStreamHasChanged();
+
     return spikeSorterCanvas;
 }
 
@@ -66,25 +69,30 @@ void SpikeSorterEditor::selectedStreamHasChanged()
 
     currentElectrodes = processor->getElectrodesForStream(selectedStream);
 
-    int id = 1;
+    int id = 0;
+    int viewedPlot = 1;
 
     for (auto electrode : currentElectrodes)
     {
-        electrodeList->addItem(electrode->name, id++);
+
+        electrodeList->addItem(electrode->name, ++id);
+            
+        if (electrode->plot->isVisible())
+            viewedPlot = id;
+            
     }
 
-    electrodeList->setSelectedId(1, true);
+    electrodeList->setSelectedId(viewedPlot, true);
 }
 
 void SpikeSorterEditor::comboBoxChanged(ComboBox* comboBox)
 {
-    SpikeSorter* processor = (SpikeSorter*) getProcessor();
-
     if (comboBox == electrodeList)
     {
         int index = electrodeList->getSelectedId() - 1;
 
-        spikeSorterCanvas->setActiveElectrode(currentElectrodes[index]);
+        if (spikeSorterCanvas != nullptr)
+            spikeSorterCanvas->setActiveElectrode(currentElectrodes[index]);
     }
    
 }

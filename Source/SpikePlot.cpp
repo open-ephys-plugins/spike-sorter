@@ -29,7 +29,8 @@
 
 SpikePlot::SpikePlot(Electrode* electrode_) :
     electrode(electrode_),
-    limitsChanged(true)
+    limitsChanged(true),
+    name(electrode_->name)
 
 {
 
@@ -94,6 +95,13 @@ void SpikePlot::getSelectedUnitAndBox(int& unitID, int& boxID)
 {
     const ScopedLock myScopedLock(mut);
     electrode->sorter->getSelectedUnitAndBox(unitID, boxID);
+}
+
+void SpikePlot::setName(const String& name_)
+{
+    name = name_;
+
+    repaint();
 }
 
 

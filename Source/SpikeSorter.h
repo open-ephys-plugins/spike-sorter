@@ -47,10 +47,23 @@ public:
     /** Destructor */
     ~Electrode() { }
 
+    /** Returns true if stream name and local index are the same */
+    bool matchesChannel(SpikeChannel* channel);
+
+    /** Updates settings with new SpikeChannel object */
+    void updateSettings(SpikeChannel* channel);
+
+    /** Sets 'isActive' to false */
+    void reset() { isActive = false; }
+
     String name;
+    Uuid uniqueId;
+
     int numChannels;
     int numSamples;
     uint16 streamId;
+
+    bool isActive;
   
     std::unique_ptr<SpikePlot> plot;
     std::unique_ptr<Sorter> sorter;

@@ -91,7 +91,7 @@ SpikeSorterCanvas::SpikeSorterCanvas(SpikeSorter* n) :
 
     setWantsKeyboardFocus(true);
 
-    refreshRate = 10;
+    refreshRate = 5;
 
 }
 

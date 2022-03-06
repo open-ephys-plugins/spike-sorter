@@ -28,6 +28,47 @@
 #include <stdio.h>
 
 
+
+
+
+Electrode::Electrode(SpikeChannel* channel, PCAComputingThread* computingThread_)
+    : computingThread(computingThread_),
+      isActive(true)
+{
+
+    name = channel->getName();
+    streamId = channel->getStreamId();
+    uniqueId = channel->getUniqueId();
+
+    numChannels = channel->getNumChannels();
+    numSamples = channel->getPrePeakSamples() + channel->getPostPeakSamples();
+    
+    sorter = std::make_unique<Sorter>(this, computingThread);
+
+    plot = std::make_unique<SpikePlot>(this);
+
+}
+
+bool Electrode::matchesChannel(SpikeChannel* channel)
+{
+    if (channel->getUniqueId() == uniqueId)
+    {
+        isActive = true;
+        return true;
+    }
+    else {
+        return false;
+    }
+
+}
+
+void Electrode::updateSettings(SpikeChannel* channel)
+{
+    name = channel->getName();
+
+    plot->setName(name);
+}
+
 SpikeSorter::SpikeSorter() : GenericProcessor("Spike Sorter")
 {
 
@@ -43,34 +84,38 @@ AudioProcessorEditor* SpikeSorter::createEditor()
 void SpikeSorter::updateSettings()
 {
 
-    electrodes.clear();
-    electrodeMap.clear();
+    for (auto electrode : electrodes)
+    {
+        electrode->reset();
+    }
 
     for (auto spikeChannel : spikeChannels)
     {
         if (spikeChannel->isValid())
         {
-            Electrode* e = new Electrode(spikeChannel, &computingThread);
-            electrodes.add(e);
-            electrodeMap[spikeChannel] = e;
+
+            bool foundMatch = false;
+
+            for (auto electrode : electrodes)
+            {
+                if (electrode->matchesChannel(spikeChannel))
+                {
+                    electrode->updateSettings(spikeChannel);
+                    foundMatch = true;
+                    electrodeMap[spikeChannel] = electrode;
+                    break;
+                }
+            }
+
+            if (!foundMatch)
+            {
+                Electrode* e = new Electrode(spikeChannel, &computingThread);
+                electrodes.add(e);
+                electrodeMap[spikeChannel] = e;
+            }
+            
         }
     }
-   
-}
-
-
-Electrode::Electrode(SpikeChannel* channel, PCAComputingThread* computingThread_)
-    : computingThread(computingThread_)
-{
-
-    name = channel->getName();
-    numChannels = channel->getNumChannels();
-    numSamples = channel->getPrePeakSamples() + channel->getPostPeakSamples();
-    streamId = channel->getStreamId();
-
-    sorter = std::make_unique<Sorter>(this, computingThread);
-
-    plot = std::make_unique<SpikePlot>(this);
 
 }
 
@@ -80,7 +125,7 @@ Array<Electrode*> SpikeSorter::getElectrodesForStream(uint16 streamId)
 
     for (auto electrode : electrodes)
     {
-        if (electrode->streamId == streamId)
+        if (electrode->streamId == streamId && electrode->isActive)
             electrodesForStream.add(electrode);
     }
 
@@ -133,175 +178,20 @@ void SpikeSorter::process(AudioBuffer<float>& buffer)
 
 void SpikeSorter::saveCustomParametersToXml(XmlElement* parentElement)
 {
-    /*XmlElement* mainNode = parentElement->createNewChildElement("SpikeSorter");
-    mainNode->setAttribute("numElectrodes", electrodes.size());
-
-    SpikeSorterEditor* ed = (SpikeSorterEditor*) getEditor();
-
-    mainNode->setAttribute("activeElectrode", ed->getSelectedElectrode()-1);
-    mainNode->setAttribute("numPreSamples", numPreSamples);
-    mainNode->setAttribute("numPostSamples", numPostSamples);
-    mainNode->setAttribute("autoDACassignment",	autoDACassignment);
-    mainNode->setAttribute("syncThresholds",syncThresholds);
-    mainNode->setAttribute("uniqueID",uniqueID);
-    mainNode->setAttribute("flipSignal",flipSignal);
-
-    XmlElement* countNode = mainNode->createNewChildElement("ELECTRODE_COUNTER");
-
-    countNode->setAttribute("numElectrodeTypes", (int)electrodeTypes.size());
-    for (int k=0; k<electrodeTypes.size(); k++)
+    
+    for (auto electrode : electrodes)
     {
-        XmlElement* countNode2 = countNode->createNewChildElement("ELECTRODE_TYPE");
-        countNode2->setAttribute("type", electrodeTypes[k]);
-        countNode2->setAttribute("count", electrodeCounter[k]);
+        
+        XmlElement* electrodeNode = parentElement->createNewChildElement("ELECTRODE");
+
+        electrode->sorter->saveCustomParametersToXml(electrodeNode);
+
     }
-
-    for (int i = 0; i < electrodes.size(); i++)
-    {
-        XmlElement* electrodeNode = mainNode->createNewChildElement("ELECTRODE");
-        electrodeNode->setAttribute("name", electrodes[i]->name);
-        electrodeNode->setAttribute("numChannels", electrodes[i]->numChannels);
-        electrodeNode->setAttribute("prePeakSamples", electrodes[i]->prePeakSamples);
-        electrodeNode->setAttribute("postPeakSamples", electrodes[i]->postPeakSamples);
-        electrodeNode->setAttribute("advancerID", electrodes[i]->advancerID);
-        electrodeNode->setAttribute("depthOffsetMM", electrodes[i]->depthOffsetMM);
-        electrodeNode->setAttribute("electrodeID", electrodes[i]->electrodeID);
-
-        for (int j = 0; j < electrodes[i]->numChannels; j++)
-        {
-            XmlElement* channelNode = electrodeNode->createNewChildElement("SUBCHANNEL");
-            channelNode->setAttribute("ch",*(electrodes[i]->channels+j));
-            channelNode->setAttribute("thresh",*(electrodes[i]->thresholds+j));
-            channelNode->setAttribute("isActive",*(electrodes[i]->isActive+j));
-
-        }
-
-        // save spike sorting data.
-        electrodes[i]->spikeSort->saveCustomParametersToXml(electrodeNode);
-
-    }*/
-
 
 }
 
 void SpikeSorter::loadCustomParametersFromXml(XmlElement* xml)
 {
 
-    /*if (parametersAsXml != nullptr)
-    {
-
-        int electrodeIndex = -1;
-
-        forEachXmlChildElement(*xml, mainNode)
-        {
-
-            // use parametersAsXml to restore state
-
-            if (mainNode->hasTagName("SpikeSorter"))
-            {
-                //int numElectrodes = mainNode->getIntAttribute("numElectrodes");
-                currentElectrode = mainNode->getIntAttribute("activeElectrode");
-                numPreSamples = mainNode->getIntAttribute("numPreSamples");
-                numPostSamples = mainNode->getIntAttribute("numPostSamples");
-                autoDACassignment = mainNode->getBoolAttribute("autoDACassignment");
-                syncThresholds = mainNode->getBoolAttribute("syncThresholds");
-                uniqueID = mainNode->getIntAttribute("uniqueID");
-                flipSignal = mainNode->getBoolAttribute("flipSignal");
-
-                forEachXmlChildElement(*mainNode, xmlNode)
-                {
-
-                    if (xmlNode->hasTagName("ELECTRODE_COUNTER"))
-                    {
-                        int numElectrodeTypes = xmlNode->getIntAttribute("numElectrodeTypes");
-                        electrodeCounter.resize(numElectrodeTypes);
-                        electrodeTypes.resize(numElectrodeTypes);
-                        int counter = 0;
-                        forEachXmlChildElement(*xmlNode, xmltype)
-                        {
-                            if (xmltype->hasTagName("ELECTRODE_TYPE"))
-                            {
-                                electrodeTypes[counter] = xmltype->getStringAttribute("type");
-                                electrodeCounter[counter] = xmltype->getIntAttribute("count");
-                                counter++;
-                            }
-                        }
-                    }
-                    else if (xmlNode->hasTagName("ELECTRODE"))
-                    {
-
-                        electrodeIndex++;
-
-                        int channelsPerElectrode = xmlNode->getIntAttribute("numChannels");
-
-                        int advancerID = xmlNode->getIntAttribute("advancerID");
-                        float depthOffsetMM = xmlNode->getDoubleAttribute("depthOffsetMM");
-                        int electrodeID = xmlNode->getIntAttribute("electrodeID");
-                        String electrodeName=xmlNode->getStringAttribute("name");
-
-
-                        int channelIndex = -1;
-
-                        int* channels = new int[channelsPerElectrode];
-                        float* thres = new float[channelsPerElectrode];
-                        bool* isActive = new bool[channelsPerElectrode];
-
-                        forEachXmlChildElement(*xmlNode, channelNode)
-                        {
-                            if (channelNode->hasTagName("SUBCHANNEL"))
-                            {
-                                channelIndex++;
-                                channels[channelIndex] = channelNode->getIntAttribute("ch");
-                                thres[channelIndex] = channelNode->getDoubleAttribute("thresh");
-                                isActive[channelIndex] = channelNode->getBoolAttribute("isActive");
-                            }
-                        }
-
-                        int sourceNodeId = 102010; // some number
-
-                        Electrode* newElectrode = new Electrode(electrodeID, 
-                            &uniqueIDgenerator,
-                            &computingThread, 
-                            electrodeName, 
-                            channelsPerElectrode, 
-                            channels,getDefaultThreshold(),
-                            numPreSamples,
-                            numPostSamples, 
-                            continuousChannels[0]->getSampleRate(), 
-                            sourceNodeId,
-                            0);
-
-                        for (int k=0; k<channelsPerElectrode; k++)
-                        {
-                            newElectrode->thresholds[k] = thres[k];
-                            newElectrode->isActive[k] = isActive[k];
-                        }
-			            delete[] channels;
-			            delete[] thres;
-			            delete[] isActive;
-
-                        newElectrode->advancerID = advancerID;
-                        newElectrode->depthOffsetMM = depthOffsetMM;
-                        // now read sorted units information
-                        newElectrode->spikeSort->loadCustomParametersFromXml(xmlNode);
-                        addElectrode(newElectrode);
-
-                    }
-                }
-            }
-        }
-    }
-    SpikeSorterEditor* ed = (SpikeSorterEditor*) getEditor();
-    //	ed->updateAdvancerList();
-
-    if (currentElectrode >= 0)
-    {
-        ed->refreshElectrodeList(currentElectrode);
-        ed->setSelectedElectrode(1+currentElectrode);
-    }
-    else
-    {
-        ed->refreshElectrodeList();
-    }*/
 
 }

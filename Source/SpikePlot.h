@@ -55,6 +55,9 @@ public:
     /** Draws outline and electrode name*/
     void paint(Graphics& g);
 
+    /** Updates the name of this electrode */
+    void setName(const String& name);
+
     /** Sets bounds of sub-plots*/
     void resized();
 
