@@ -135,12 +135,18 @@ Array<Electrode*> SpikeSorter::getElectrodesForStream(uint16 streamId)
 void SpikeSorter::handleSpike(SpikePtr newSpike)
 {
 
-    if (newSpike == nullptr)
-        return;
+    const SpikeChannel* channelInfo = newSpike->getChannelInfo();
 
-    SorterSpikePtr sorterSpike = new SorterSpikeContainer(newSpike->getChannelInfo(), newSpike);
+    //std::cout << newSpike->getSortedID() << std::endl;
 
-    Electrode* electrode = electrodeMap[newSpike->getChannelInfo()];
+    SorterSpikePtr sorterSpike = new SorterSpikeContainer(channelInfo, 
+                                                          newSpike->getSortedID(),
+                                                          newSpike->getTimestamp(),
+                                                          newSpike->getDataPointer());
+
+    //std::cout << newSpike->getSortedID() << std::endl;
+
+    Electrode* electrode = electrodeMap[channelInfo];
 
     electrode->sorter->projectOnPrincipalComponents(sorterSpike);
 
@@ -158,6 +164,8 @@ void SpikeSorter::handleSpike(SpikePtr newSpike)
 
         electrode->plot->processSpikeObject(sorterSpike);
     }
+
+    //std::cout << newSpike->getSortedID() << std::endl;
 
     if (sorterSpike->sortedId > 0)
         newSpike->setSortedID(sorterSpike->sortedId);

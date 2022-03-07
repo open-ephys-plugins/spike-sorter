@@ -156,9 +156,15 @@ void SpikeSorterCanvas::setActiveElectrode(Electrode* electrode_)
 {
     electrode = electrode_;
 
-    std::cout << "Setting active electrode to " << electrode->name << std::endl;
+    if (electrode != nullptr)
+    {
+        spikeDisplay->setSpikePlot(electrode->plot.get());
+    }
+    else {
+        spikeDisplay->setSpikePlot(nullptr);
+    }
 
-    spikeDisplay->setSpikePlot(electrode->plot.get());
+    
 }
 
 void SpikeSorterCanvas::removeUnitOrBox()
@@ -388,7 +394,12 @@ void SpikeDisplay::setSpikePlot(SpikePlot* plot)
     std::cout << "Spike display updating active plot" << std::endl;
     
     activePlot = plot;
-    addAndMakeVisible(activePlot);
+
+    if (activePlot != nullptr)
+    {
+        addAndMakeVisible(activePlot);
+    }
+    
     resized();
 }
 

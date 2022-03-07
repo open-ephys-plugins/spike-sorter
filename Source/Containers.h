@@ -80,7 +80,7 @@ class SorterSpikeContainer : public ReferenceCountedObject
 public:
 
     /** Constructor */
-    SorterSpikeContainer(const SpikeChannel* channel, SpikePtr spike);
+    SorterSpikeContainer(const SpikeChannel* channel, uint16 sortedId, int64 timestamp, const float* data);
 
     /** Delete default constructor */
     SorterSpikeContainer() = delete;

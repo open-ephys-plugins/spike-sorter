@@ -92,7 +92,17 @@ void SpikeSorterEditor::comboBoxChanged(ComboBox* comboBox)
         int index = electrodeList->getSelectedId() - 1;
 
         if (spikeSorterCanvas != nullptr)
+        {
+
+            if (currentElectrodes.size() == 0)
+            {
+                spikeSorterCanvas->setActiveElectrode(nullptr);
+                return;
+            }
+
             spikeSorterCanvas->setActiveElectrode(currentElectrodes[index]);
+        }
+            
     }
    
 }

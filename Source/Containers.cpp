@@ -83,19 +83,18 @@ float PointD::cross(PointD c) const
 }
 
 
-SorterSpikeContainer::SorterSpikeContainer(const SpikeChannel* channel, SpikePtr spike)
+SorterSpikeContainer::SorterSpikeContainer(const SpikeChannel* channel, uint16 sortedId_, int64 timestamp_, const float* waveform)
+    : chan(channel),
+      sortedId(sortedId_),
+      timestamp(timestamp_)
 {
     color[0] = color[1] = color[2] = 127;
     pcProj[0] = pcProj[1] = 0;
-    sortedId = spike->getSortedID();
-
-    chan = channel;
-    timestamp = spike->getTimestamp();
 
     int nSamples = chan->getNumChannels() * chan->getTotalSamples();
 
     data.malloc(nSamples);
-    memcpy(data.getData(), spike->getDataPointer(), nSamples*sizeof(float));
+    memcpy(data.getData(), waveform, nSamples*sizeof(float));
 
 }
 
