@@ -81,13 +81,19 @@ public:
     BoxUnit() { }
 
     /** Constructor based on unit ID*/
-    BoxUnit(int ID, int localID);
+    BoxUnit(int id, int localId);
 
     /** Constructor with a Box*/
-    BoxUnit(Box B, int ID, int localID);
+    BoxUnit(Box B, int id, int localId);
 
     /** Returns true if spike waveform is inside all boxes*/
     bool isWaveFormInsideAllBoxes(SorterSpikePtr so);
+
+    /** Returns the global ID for this unit */
+    int getUnitId();
+
+    /** Returns the local ID for this unit */
+    int getLocalId();
 
     /** Returns true if unit is active */
     bool isActivated();
@@ -106,17 +112,17 @@ public:
     void setBoxSize(int boxid, double W, double H);
     void MoveBox(int boxid, int dx, int dy);
     std::vector<Box> getBoxes();
-    int getUnitID();
-    int getLocalID();
+    
 	void updateWaveform(SorterSpikePtr so);
+
     static void setDefaultColors(uint8_t col[3], int ID);
-    void resizeWaveform(int newlength);
+
 public:
-    int UnitID;
-    int localID; // used internally, for colors and position.
+    int unitId;
+    int localId; // used internally, for colors and position.
     std::vector<Box> lstBoxes;
     uint8_t ColorRGB[3];
-    WaveformStats WaveformStat;
+    WaveformStats stats;
     bool Active;
     juce::int64 Activated_TS_S;
     Time timer;

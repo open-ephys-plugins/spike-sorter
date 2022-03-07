@@ -137,38 +137,38 @@ void SpikeSorter::handleSpike(SpikePtr newSpike)
 
     const SpikeChannel* channelInfo = newSpike->getChannelInfo();
 
-    //std::cout << newSpike->getSortedID() << std::endl;
-
     SorterSpikePtr sorterSpike = new SorterSpikeContainer(channelInfo, 
-                                                          newSpike->getSortedID(),
+                                                          newSpike->getSortedId(),
                                                           newSpike->getTimestamp(),
                                                           newSpike->getDataPointer());
 
-    //std::cout << newSpike->getSortedID() << std::endl;
+    
 
     Electrode* electrode = electrodeMap[channelInfo];
 
-    electrode->sorter->projectOnPrincipalComponents(sorterSpike);
-
-    electrode->sorter->sortSpike(sorterSpike, true);
-
-    if (electrode->plot->isVisible())
+    if (sorterSpike->checkThresholds(electrode->plot->getDisplayThresholds()))
     {
-        if (electrode->sorter->isPCAfinished())
+        electrode->sorter->projectOnPrincipalComponents(sorterSpike);
+
+        electrode->sorter->sortSpike(sorterSpike, true);
+
+        if (electrode->plot->isVisible())
         {
-            electrode->sorter->resetJobStatus();
-            float p1min, p2min, p1max, p2max;
-            electrode->sorter->getPCArange(p1min, p2min, p1max, p2max);
-            electrode->plot->setPCARange(p1min, p2min, p1max, p2max);
+            if (electrode->sorter->isPCAfinished())
+            {
+                electrode->sorter->resetJobStatus();
+                float p1min, p2min, p1max, p2max;
+                electrode->sorter->getPCArange(p1min, p2min, p1max, p2max);
+                electrode->plot->setPCARange(p1min, p2min, p1max, p2max);
+            }
+
+            electrode->plot->processSpikeObject(sorterSpike);
         }
 
-        electrode->plot->processSpikeObject(sorterSpike);
+        if (sorterSpike->sortedId > 0)
+            newSpike->setSortedId(sorterSpike->sortedId);
     }
 
-    //std::cout << newSpike->getSortedID() << std::endl;
-
-    if (sorterSpike->sortedId > 0)
-        newSpike->setSortedID(sorterSpike->sortedId);
     
 }
 

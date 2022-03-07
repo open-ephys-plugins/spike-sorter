@@ -24,11 +24,13 @@
 #include "WaveformAxes.h"
 
 #include "SpikeSorter.h"
+#include "SpikePlot.h"
 #include "BoxUnit.h"
 
-WaveformAxes::WaveformAxes(Electrode* electrode_, int channelIndex) : 
+WaveformAxes::WaveformAxes(SpikePlot* plot_, Electrode* electrode_, int channelIndex) : 
     GenericDrawAxes(GenericDrawAxes::AxesType(channelIndex)),
     channel(channelIndex),
+    plot(plot_),
     electrode(electrode_),
     drawGrid(true),
     displayThresholdLevel(0.0f),
@@ -189,6 +191,7 @@ void WaveformAxes::mouseMove(const MouseEvent& event)
     float y = event.y;
 
     float h = getHeight() * (0.5f - displayThresholdLevel / range);
+
     if (signalFlipped)
     {
         h = getHeight() - h;
@@ -221,10 +224,10 @@ void WaveformAxes::mouseMove(const MouseEvent& event)
 
 }
 
-int WaveformAxes::findUnitIndexByID(int ID)
+int WaveformAxes::findUnitIndexById(int id)
 {
     for (int k = 0; k < units.size(); k++)
-        if (units[k].UnitID == ID)
+        if (units[k].unitId == id)
             return k;
     return -1;
 }
@@ -252,7 +255,7 @@ void WaveformAxes::mouseDown(const juce::MouseEvent& event)
     if (isOverUnit > 0)
     {
         electrode->sorter->setSelectedUnitAndBox(isOverUnit, isOverBox);
-        int indx = findUnitIndexByID(isOverUnit);
+        int indx = findUnitIndexById(isOverUnit);
         jassert(indx >= 0);
         mouseOffsetX = mouseDownX - units[indx].lstBoxes[isOverBox].x;
         mouseOffsetY = mouseDownY - units[indx].lstBoxes[isOverBox].y;
@@ -261,11 +264,6 @@ void WaveformAxes::mouseDown(const juce::MouseEvent& event)
     {
         electrode->sorter->setSelectedUnitAndBox(-1, -1);
 
-    }
-
-    if (isOverThresholdSlider)
-    {
-         cursorType = MouseCursor::DraggingHandCursor;
     }
 }
 
@@ -303,7 +301,7 @@ void WaveformAxes::mouseDrag(const MouseEvent& event)
 
         for (int k = 0; k < units.size(); k++)
         {
-            if (units[k].getUnitID() == isOverUnit)
+            if (units[k].getUnitId() == isOverUnit)
             {
                 float oldx = units[k].lstBoxes[isOverBox].x;
                 float oldy = units[k].lstBoxes[isOverBox].y;
@@ -419,28 +417,9 @@ void WaveformAxes::mouseDrag(const MouseEvent& event)
 
 
         displayThresholdLevel = (0.5f - thresholdSliderPosition) * range;
-        // update processor
 
-       /* if (processor->getEditAllState()) {
-            int numElectrodes = processor->getNumElectrodes();
-            for (int electrodeIt = 0; electrodeIt < numElectrodes; electrodeIt++) {
-                //processor->setChannelThreshold(electrodeList->getSelectedItemIndex(),i,slider->getValue());
-                for (int channelIt = 0; channelIt < processor->getNumChannels(electrodeIt); channelIt++) {
-                    processor->setChannelThreshold(electrodeIt, channelIt, displayThresholdLevel);
-                }
-            }
-        }
-        else {
-            processor->getActiveElectrode()->thresholds[channel] = displayThresholdLevel;
-        }
+        plot->setDisplayThresholdForChannel(channel, displayThresholdLevel);
 
-        SpikeSorterEditor* edt = (SpikeSorterEditor*)processor->getEditor();
-        for (int k = 0; k < processor->getActiveElectrode()->numChannels; k++)
-            edt->electrodeButtons[k]->setToggleState(false, dontSendNotification);
-
-        edt->electrodeButtons[channel]->setToggleState(true, dontSendNotification);
-
-        edt->setThresholdValue(channel, displayThresholdLevel);*/
     }
 
     repaint();
@@ -505,7 +484,7 @@ void WaveformAxes::isOverUnitBox(float x, float y, int& UnitID, int& BoxID, Stri
             if (x >= rectx1 - 10 & y >= recty1 - 10 & x <= rectx2 + 10 & y <= recty2 + 10)
             {
                 //setMouseCursor(MouseCursor::DraggingHandCursor);
-                UnitID = units[k].UnitID;
+                UnitID = units[k].unitId;
                 BoxID = boxiter;
                 if (x >= rectx1 - 10 & x <= rectx1 + 10 && y >= recty1 - 10 & y <= recty1 + 10)
                 {
@@ -585,9 +564,9 @@ void WaveformAxes::drawBoxes(Graphics& g)
             Box B = units[k].lstBoxes[boxiter];
 
             float thickness = 2;
-            if (units[k].getUnitID() == selectedUnitID && boxiter == selectedBoxID)
+            if (units[k].getUnitId() == selectedUnitID && boxiter == selectedBoxID)
                 thickness = 3;
-            else if (units[k].getUnitID() == isOverUnit && boxiter == isOverBox)
+            else if (units[k].getUnitId() == isOverUnit && boxiter == isOverBox)
                 thickness = 2;
             else
                 thickness = 1;
@@ -613,7 +592,7 @@ void WaveformAxes::drawBoxes(Graphics& g)
                 drawRecty2 = recty2;
             }
             g.drawRect(rectx1, drawRecty1, rectx2 - rectx1, drawRecty2 - drawRecty1, thickness);
-            g.drawText(String(units[k].UnitID), rectx1, drawRecty1 - 15, rectx2 - rectx1, 15, juce::Justification::centred, false);
+            g.drawText(String(units[k].unitId), rectx1, drawRecty1 - 15, rectx2 - rectx1, 15, juce::Justification::centred, false);
 
         }
     }

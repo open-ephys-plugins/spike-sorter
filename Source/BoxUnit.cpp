@@ -105,17 +105,17 @@ bool Box::isWaveFormInside(SorterSpikePtr so)
 }
 
 
-BoxUnit::BoxUnit(Box B, int ID, int localID_) : UnitID(ID), localID(localID_)
+BoxUnit::BoxUnit(Box B, int id, int localId_) : unitId(id), localId(localId_)
 {
     addBox(B);
 }
 
-BoxUnit::BoxUnit(int ID, int localID_) : UnitID(ID), localID(localID_)
+BoxUnit::BoxUnit(int id, int localId_) : unitId(id), localId(localId_)
 {
     Active = false;
     Activated_TS_S = -1;
-    setDefaultColors(ColorRGB, localID);
-    Box B(50, -20 - localID * 20, 300, 40);
+    setDefaultColors(ColorRGB, localId);
+    Box B(50, -20 - localId * 20, 300, 40);
     addBox(B);
 }
 
@@ -136,13 +136,6 @@ void BoxUnit::setDefaultColors(uint8_t col[3], int ID)
     col[1] = colors[IDmodule][1];
     col[2] = colors[IDmodule][2];
 }
-
-
-void BoxUnit::resizeWaveform(int newlength)
-{
-    WaveformStat.resizeWaveform(newlength);
-}
-
 
 bool BoxUnit::isWaveFormInsideAllBoxes(SorterSpikePtr so)
 {
@@ -195,7 +188,7 @@ void BoxUnit::addBox(Box b)
 
 void BoxUnit::addBox()
 {
-    Box B(50 + 350 * lstBoxes.size(), -20 - UnitID * 20, 300, 40);
+    Box B(50 + 350 * lstBoxes.size(), -20 - unitId * 20, 300, 40);
     lstBoxes.push_back(B);
 }
 
@@ -258,17 +251,17 @@ std::vector<Box> BoxUnit::getBoxes()
     return lstBoxes;
 }
 
-int BoxUnit::getUnitID()
+int BoxUnit::getUnitId()
 {
-    return UnitID;
+    return unitId;
 }
 
-int BoxUnit::getLocalID()
+int BoxUnit::getLocalId()
 {
-    return localID;
+    return localId;
 }
 
 void BoxUnit::updateWaveform(SorterSpikePtr so)
 {
-    WaveformStat.update(so);
+    stats.update(so);
 }

@@ -113,3 +113,37 @@ int64 SorterSpikeContainer::getTimestamp() const
     return timestamp;
 }
 
+float SorterSpikeContainer::getMinimum(int channelIndex)
+{
+    int offset = channelIndex * chan->getTotalSamples() + chan->getPrePeakSamples() + 1;
+
+    return data[offset];
+}
+
+float SorterSpikeContainer::getMaximum(int channelIndex)
+{
+    int offset = channelIndex * chan->getTotalSamples();
+
+    float maximum = -99999.9f;
+
+    for (int i = offset; i < offset + chan->getTotalSamples(); i++)
+    {
+        if (data[i] > maximum)
+            maximum = data[i];
+    }
+
+    return maximum;
+}
+
+bool SorterSpikeContainer::checkThresholds(Array<float> thresholds)
+{
+
+    bool belowThresh = true;
+
+    for (int i = 0; i < thresholds.size(); i++)
+    {
+        belowThresh &= getMinimum(i) < thresholds[i];
+    }
+
+    return belowThresh;
+}

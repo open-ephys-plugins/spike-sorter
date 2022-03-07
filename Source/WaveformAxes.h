@@ -33,13 +33,14 @@
 
 class BoxUnit;
 class Electrode;
+class SpikePlot;
 
 class WaveformAxes : public GenericDrawAxes
 {
 public:
 
     /** Constructor */
-    WaveformAxes(Electrode*, int channelIndex);
+    WaveformAxes(SpikePlot*, Electrode*, int channelIndex);
 
     /** Destructor*/
     ~WaveformAxes() {}
@@ -61,7 +62,7 @@ public:
     /** Clears internal spike buffer */
     void clear();
 
-    int findUnitIndexByID(int ID);
+    int findUnitIndexById(int id);
 
     /** Mouse callbacks*/
     void mouseMove(const MouseEvent& event);
@@ -122,6 +123,7 @@ private:
     std::vector<BoxUnit> units;
 
     Electrode* electrode;
+    SpikePlot* plot;
 
     MouseCursor::StandardCursorType cursorType;
 

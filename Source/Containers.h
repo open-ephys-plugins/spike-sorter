@@ -94,6 +94,15 @@ public:
     /** Return the timestamp of this spike*/
     int64 getTimestamp() const;
 
+    /** Returns the minimum value of this spike's waveform on a particular channel*/
+    float getMinimum(int chan = 0);
+
+    /** Returns the maximum value of this spike's waveform on a particular channel*/
+    float getMaximum(int chan = 0);
+
+    /** Check that the minimum is below all thresholds */
+    bool checkThresholds(Array<float> thresholds);
+
     /** Spike color (RGB) */
     uint8 color[3];
 

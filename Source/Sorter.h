@@ -70,7 +70,7 @@ public:
 	void projectOnPrincipalComponents(SorterSpikePtr so);
 
     /** Gets the RGB color values for a unit */
-    void getUnitColor(int unitID, uint8& R, uint8& G, uint8& B);
+    void getUnitColor(int unitId, uint8& R, uint8& G, uint8& B);
 	
     /** Triggers re-calculation of PCs */
     void RePCA();
@@ -85,19 +85,19 @@ public:
     int addBoxUnit(int channel, Box B);
 
     /** Adds a new box to a unit at a default location */
-    bool addBoxToUnit(int channel, int unitID);
+    bool addBoxToUnit(int channel, int unitId);
 
     /** Adds a new custom box to a unit */
-    bool addBoxToUnit(int channel, int unitID, Box B);
+    bool addBoxToUnit(int channel, int unitId, Box B);
 
     /** Removes a box from a unit based on index */
-    bool removeBoxFromUnit(int unitID, int boxIndex);
+    bool removeBoxFromUnit(int unitId, int boxIndex);
 
     /** Returns the number of boxes for a given unit*/
-    int getNumBoxes(int unitID);
+    int getNumBoxes(int unitId);
 
     /** Removes a unit by ID */
-    bool removeUnit(int unitID);
+    bool removeUnit(int unitId);
 
     /** Removes all units from this sorter */
     void removeAllUnits();
@@ -115,7 +115,7 @@ public:
     bool isPCAfinished();
 
     /** Returns a vector of all boxes for a BoxUnit */
-    std::vector<Box> getUnitBoxes(int unitID);
+    std::vector<Box> getUnitBoxes(int unitId);
 
     /** Returns a vector of all BoxUnits */
     std::vector<BoxUnit> getBoxUnits();
@@ -130,19 +130,19 @@ public:
     void updatePCAUnits(std::vector<PCAUnit> _units);
 
     /** Generates the next global unit ID (across all Sorters) */
-    int generateUnitID();
+    int generateUnitId();
 
     /** Generates the next available local unit ID (for this Sorter) */
-    int generateLocalID();
+    int generateLocalId();
 
     /** Re-generates IDs for all units */
-    void generateNewIDs();
+    void generateNewIds();
 
     /** Selects a box for a particular unit */
-    void setSelectedUnitAndBox(int unitID, int boxID);
+    void setSelectedUnitAndBox(int unitId, int boxId);
 
     /** Returns the selected unit and box*/
-    void getSelectedUnitAndBox(int& unitID, int& boxid);
+    void getSelectedUnitAndBox(int& unitId, int& boxId);
 
     /** Saves sorting parameters for one electrode */
     void saveCustomParametersToXml(XmlElement* electrodeNode);

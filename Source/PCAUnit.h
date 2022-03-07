@@ -34,37 +34,67 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <queue>
 #include <atomic>
 
-
+/** 
+    Represents a polygon in 2D PCA space
+*/
 class cPolygon
 {
 public:
-    cPolygon();
+
+    /** Constructor */
+    cPolygon() { }
+
+    /** Returns true if 2D point is inside polygon */
     bool isPointInside(PointD p);
+
     std::vector<PointD> pts;
+
     PointD offset;
 };
 
-
+/** 
+    A unit defined by a polygon in principal component space
+*/
 class PCAUnit
 {
 public:
-    PCAUnit();
-    PCAUnit(int ID, int localID);
-    PCAUnit(cPolygon B, int ID, int localID_);
+
+    /** Default constructor */
+    PCAUnit() { }
+
+    /** Constructor with global and local IDs specified */
+    PCAUnit(int id, int localId);
+
+    /** Constructor with polygon + global and local IDs specified */
+    PCAUnit(cPolygon B, int id, int localId);
+
+    /** Destructor */
     ~PCAUnit();
-    int getUnitID();
-    int getLocalID();
+
+    /** Returns global ID for this unit */
+    int getUnitId();
+
+    /** Returns the local ID for this unit */
+    int getLocalId();
+
+    /** Checks whether waveform is inside this unit's polygon */
 	bool isWaveFormInsidePolygon(SorterSpikePtr so);
+
+    /** Checks whether a point is inside this unit's polygone */
     bool isPointInsidePolygon(PointD p);
-    void resizeWaveform(int newlength);
+
+    /** Updates the waveform for this unit */
 	void updateWaveform(SorterSpikePtr so);
+
 public:
-    int UnitID;
-    int localID; // used internally, for colors and position.
+    
+    int unitId;
+    int localId; // used internally, for colors and position.
+
     cPolygon poly;
     uint8_t ColorRGB[3];
     static void setDefaultColors(uint8_t col[3], int ID);
-    WaveformStats WaveformStat;
+    WaveformStats stats;
     bool Active;
     juce::int64 Activated_TS_S;
     Time timer;

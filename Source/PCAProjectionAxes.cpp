@@ -87,17 +87,17 @@ void PCAProjectionAxes::drawUnit(Graphics& g, PCAUnit unit)
     float w = getWidth();
     float h = getHeight();
 
-    int selectedUnitID, selectedBoxID;
+    int selectedUnitId, selectedBoxId;
 
-    electrode->sorter->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
+    electrode->sorter->getSelectedUnitAndBox(selectedUnitId, selectedBoxId);
 
     g.setColour(Colour(unit.ColorRGB[0], unit.ColorRGB[1], unit.ColorRGB[2]));
     if (unit.poly.pts.size() > 2)
     {
         float thickness;
-        if (unit.getUnitID() == selectedUnitID)
+        if (unit.getUnitId() == selectedUnitId)
             thickness = 3;
-        else if (unit.getUnitID() == isOverUnit)
+        else if (unit.getUnitId() == isOverUnit)
             thickness = 2;
         else
             thickness = 1;
@@ -123,7 +123,11 @@ void PCAProjectionAxes::drawUnit(Graphics& g, PCAUnit unit)
         cx += x2;
         cy += y2;
 
-        g.drawText(String(unit.UnitID), (cx / unit.poly.pts.size()) - 10, (cy / unit.poly.pts.size()) - 10, 20, 15, juce::Justification::centred, false);
+        g.drawText(String(unit.unitId), 
+                   (cx / unit.poly.pts.size()) - 10, 
+                   (cy / unit.poly.pts.size()) - 10, 
+                   20, 15, juce::Justification::centred, 
+                   false);
     }
 }
 
@@ -141,7 +145,6 @@ void PCAProjectionAxes::paint(Graphics& g)
     {
         drawUnit(g, units[k]);
     }
-
 
     if (inPolygonDrawingMode)
     {
@@ -285,7 +288,7 @@ void PCAProjectionAxes::mouseDrag(const juce::MouseEvent& event)
 
             for (int k = 0; k < units.size(); k++)
             {
-                if (units[k].getUnitID() == selectedUnitID)
+                if (units[k].getUnitId() == selectedUnitID)
                 {
                     unitindex = k;
                     break;
@@ -356,7 +359,7 @@ void PCAProjectionAxes::mouseDrag(const juce::MouseEvent& event)
 void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
 {
     repaint();
-    //redraw(false);
+
     setMouseCursor(MouseCursor::NormalCursor);
 
     if (updateProcessor)
@@ -385,6 +388,7 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
             poly.pts[k].X = (*it).X / w * range0 + pcaMin[0];
             poly.pts[k].Y = (*it).Y / h * range1 + pcaMin[1];
         }
+        
         drawnUnit.poly = poly;
         units.push_back(drawnUnit);
 
@@ -392,7 +396,7 @@ void PCAProjectionAxes::mouseUp(const juce::MouseEvent& event)
         electrode->sorter->addPCAunit(drawnUnit);
 
         uint8 r, g, b;
-        electrode->sorter->getUnitColor(drawnUnit.getUnitID(), r, g, b);
+        electrode->sorter->getUnitColor(drawnUnit.getUnitId(), r, g, b);
 
         drawnPolygon.clear();
     }
@@ -412,7 +416,7 @@ void PCAProjectionAxes::mouseMove(const juce::MouseEvent& event)
         float y1 = ((float)event.y / h) * (pcaMax[1] - pcaMin[1]) + pcaMin[1];
         if (units[k].isPointInsidePolygon(PointD(x1, y1)))
         {
-            isOverUnit = units[k].getUnitID();
+            isOverUnit = units[k].getUnitId();
             break;
         }
 
@@ -430,7 +434,7 @@ void PCAProjectionAxes::mouseDown(const juce::MouseEvent& event)
     }
     if (inPolygonDrawingMode)
     {
-        drawnUnit = PCAUnit(electrode->sorter->generateUnitID(), electrode->sorter->generateLocalID());
+        drawnUnit = PCAUnit(electrode->sorter->generateUnitId(), electrode->sorter->generateLocalId());
         drawnPolygon.push_back(PointD(event.x, event.y));
     }
     else

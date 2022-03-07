@@ -93,15 +93,6 @@ void Sorter::resizeWaveform(int numSamples)
 	pc1max = 1;
 	pc2max = 1;
 
-    for (int k = 0; k < pcaUnits.size(); k++)
-    {
-        pcaUnits[k].resizeWaveform(waveformLength);
-    }
-    for (int k = 0; k < boxUnits.size(); k++)
-    {
-        boxUnits[k].resizeWaveform(waveformLength);
-    }
-
 }
 
 void Sorter::loadCustomParametersFromXml(XmlElement* electrodeNode)
@@ -111,8 +102,6 @@ void Sorter::loadCustomParametersFromXml(XmlElement* electrodeNode)
     {
         if (spikesortNode->hasTagName("SPIKESORTING"))
         {
-            //int numBoxUnit  = spikesortNode->getIntAttribute("numBoxUnits");
-            //int numPCAUnit  = spikesortNode->getIntAttribute("numPCAUnits");
             selectedUnit  = spikesortNode->getIntAttribute("selectedUnit");
             selectedBox =  spikesortNode->getIntAttribute("selectedBox");
 
@@ -154,7 +143,7 @@ void Sorter::loadCustomParametersFromXml(XmlElement* electrodeNode)
                 if (UnitNode->hasTagName("BOXUNIT"))
                 {
                     BoxUnit boxUnit;
-                    boxUnit.UnitID = UnitNode->getIntAttribute("UnitID");
+                    boxUnit.unitId = UnitNode->getIntAttribute("UnitID");
                     boxUnit.ColorRGB[0] = UnitNode->getIntAttribute("ColorR");
                     boxUnit.ColorRGB[1] = UnitNode->getIntAttribute("ColorG");
                     boxUnit.ColorRGB[2] = UnitNode->getIntAttribute("ColorB");
@@ -181,7 +170,7 @@ void Sorter::loadCustomParametersFromXml(XmlElement* electrodeNode)
                 {
                     PCAUnit pcaUnit;
 
-                    pcaUnit.UnitID = UnitNode->getIntAttribute("UnitID");
+                    pcaUnit.unitId = UnitNode->getIntAttribute("UnitID");
                     pcaUnit.ColorRGB[0] = UnitNode->getIntAttribute("ColorR");
                     pcaUnit.ColorRGB[1] = UnitNode->getIntAttribute("ColorG");
                     pcaUnit.ColorRGB[2] = UnitNode->getIntAttribute("ColorB");
@@ -240,7 +229,7 @@ void Sorter::saveCustomParametersToXml(XmlElement* electrodeNode)
     {
         XmlElement* BoxUnitNode = spikesortNode->createNewChildElement("BOXUNIT");
 
-        BoxUnitNode->setAttribute("UnitID",boxUnits[boxUnitIter].UnitID);
+        BoxUnitNode->setAttribute("UnitID",boxUnits[boxUnitIter].unitId);
         BoxUnitNode->setAttribute("ColorR",boxUnits[boxUnitIter].ColorRGB[0]);
         BoxUnitNode->setAttribute("ColorG",boxUnits[boxUnitIter].ColorRGB[1]);
         BoxUnitNode->setAttribute("ColorB",boxUnits[boxUnitIter].ColorRGB[2]);
@@ -260,7 +249,7 @@ void Sorter::saveCustomParametersToXml(XmlElement* electrodeNode)
     {
         XmlElement* PcaUnitNode = spikesortNode->createNewChildElement("PCAUNIT");
 
-        PcaUnitNode->setAttribute("UnitID",pcaUnits[pcaUnitIter].UnitID);
+        PcaUnitNode->setAttribute("UnitID",pcaUnits[pcaUnitIter].unitId);
         PcaUnitNode->setAttribute("ColorR",pcaUnits[pcaUnitIter].ColorRGB[0]);
         PcaUnitNode->setAttribute("ColorG",pcaUnits[pcaUnitIter].ColorRGB[1]);
         PcaUnitNode->setAttribute("ColorB",pcaUnits[pcaUnitIter].ColorRGB[2]);
@@ -391,7 +380,7 @@ int Sorter::addBoxUnit(int channel)
 {
     const ScopedLock myScopedLock(mut);
 
-    BoxUnit unit(nextUnitId++, generateLocalID());
+    BoxUnit unit(nextUnitId++, generateLocalId());
     boxUnits.push_back(unit);
     setSelectedUnitAndBox(nextUnitId, 0);
 
@@ -402,19 +391,19 @@ int Sorter::addBoxUnit(int channel, Box B)
 {
     const ScopedLock myScopedLock(mut);
 
-    BoxUnit unit(B, nextUnitId++, generateLocalID());
+    BoxUnit unit(B, nextUnitId++, generateLocalId());
     boxUnits.push_back(unit);
     setSelectedUnitAndBox(nextUnitId, 0);
 
     return nextUnitId;
 }
 
-void Sorter::getUnitColor(int UnitID, uint8& R, uint8& G, uint8& B)
+void Sorter::getUnitColor(int unitId, uint8& R, uint8& G, uint8& B)
 {
     
     for (int k = 0; k < boxUnits.size(); k++)
     {
-        if (boxUnits[k].getUnitID() == UnitID)
+        if (boxUnits[k].getUnitId() == unitId)
         {
             R = boxUnits[k].ColorRGB[0];
             G = boxUnits[k].ColorRGB[1];
@@ -425,7 +414,7 @@ void Sorter::getUnitColor(int UnitID, uint8& R, uint8& G, uint8& B)
 
     for (int k = 0; k < pcaUnits.size(); k++)
     {
-        if (pcaUnits[k].getUnitID() == UnitID)
+        if (pcaUnits[k].getUnitId() == unitId)
         {
             R = pcaUnits[k].ColorRGB[0];
             G = pcaUnits[k].ColorRGB[1];
@@ -435,7 +424,7 @@ void Sorter::getUnitColor(int UnitID, uint8& R, uint8& G, uint8& B)
     }
 }
 
-int Sorter::generateLocalID()
+int Sorter::generateLocalId()
 {
     // finds the first unused ID and return it
 
@@ -446,7 +435,7 @@ int Sorter::generateLocalID()
         bool used=false;
         for (int k = 0; k < boxUnits.size(); k++)
         {
-            if (boxUnits[k].getLocalID() == ID)
+            if (boxUnits[k].getLocalId() == ID)
             {
                 used = true;
                 break;
@@ -454,7 +443,7 @@ int Sorter::generateLocalID()
         }
         for (int k = 0; k < pcaUnits.size(); k++)
         {
-            if (pcaUnits[k].getLocalID() == ID)
+            if (pcaUnits[k].getLocalId() == ID)
             {
                 used = true;
                 break;
@@ -469,24 +458,24 @@ int Sorter::generateLocalID()
     return ID;
 }
 
-int Sorter::generateUnitID()
+int Sorter::generateUnitId()
 {
 
     return ++nextUnitId;;
 
 }
 
-void Sorter::generateNewIDs()
+void Sorter::generateNewIds()
 {
     const ScopedLock myScopedLock(mut);
 
     for (int k = 0; k < boxUnits.size(); k++)
     {
-        boxUnits[k].UnitID = generateUnitID();
+        boxUnits[k].unitId = generateUnitId();
     }
     for (int k = 0; k < pcaUnits.size(); k++)
     {
-        pcaUnits[k].UnitID = generateUnitID();
+        pcaUnits[k].unitId = generateUnitId();
     }
 }
 
@@ -503,7 +492,7 @@ bool Sorter::removeUnit(int unitID)
 
     for (int k=0; k<boxUnits.size(); k++)
     {
-        if (boxUnits[k].getUnitID() == unitID)
+        if (boxUnits[k].getUnitId() == unitID)
         {
             boxUnits.erase(boxUnits.begin()+k);
             return true;
@@ -512,7 +501,7 @@ bool Sorter::removeUnit(int unitID)
 
     for (int k=0; k<pcaUnits.size(); k++)
     {
-        if (pcaUnits[k].getUnitID() == unitID)
+        if (pcaUnits[k].getUnitId() == unitID)
         {
             pcaUnits.erase(pcaUnits.begin()+k);
             return true;
@@ -529,7 +518,7 @@ bool Sorter::addBoxToUnit(int channel, int unitID)
 
     for (int k = 0; k < boxUnits.size(); k++)
     {
-        if (boxUnits[k].getUnitID() == unitID)
+        if (boxUnits[k].getUnitId() == unitID)
         {
             Box B = boxUnits[k].lstBoxes[boxUnits[k].lstBoxes.size() - 1];
             B.x += 100;
@@ -551,7 +540,7 @@ bool Sorter::addBoxToUnit(int channel, int unitID, Box B)
 
     for (int k = 0; k < boxUnits.size(); k++)
     {
-        if (boxUnits[k].getUnitID() == unitID)
+        if (boxUnits[k].getUnitId() == unitID)
         {
             boxUnits[k].addBox(B);
             return true;
@@ -595,7 +584,7 @@ bool Sorter::checkBoxUnits(SorterSpikePtr spike)
     {
         if (boxUnits[k].isWaveFormInsideAllBoxes(spike))
         {
-            spike->sortedId = boxUnits[k].getUnitID();
+            spike->sortedId = boxUnits[k].getUnitId();
             spike->color[0] = boxUnits[k].ColorRGB[0];
             spike->color[1] = boxUnits[k].ColorRGB[1];
             spike->color[2] = boxUnits[k].ColorRGB[2];
@@ -611,7 +600,7 @@ bool Sorter::checkPCAUnits(SorterSpikePtr spike)
     {
         if (pcaUnits[k].isWaveFormInsidePolygon(spike))
         {
-            spike->sortedId = pcaUnits[k].getUnitID();
+            spike->sortedId = pcaUnits[k].getUnitId();
             spike->color[0] = pcaUnits[k].ColorRGB[0];
             spike->color[1] = pcaUnits[k].ColorRGB[1];
             spike->color[2] = pcaUnits[k].ColorRGB[2];
@@ -645,13 +634,13 @@ bool Sorter::sortSpike(SorterSpikePtr spike, bool PCAfirst)
 }
 
 
-bool Sorter::removeBoxFromUnit(int unitID, int boxIndex)
+bool Sorter::removeBoxFromUnit(int unitId, int boxIndex)
 {
     const ScopedLock myScopedLock(mut);
 
     for (int k=0; k<boxUnits.size(); k++)
     {
-        if (boxUnits[k].getUnitID() == unitID)
+        if (boxUnits[k].getUnitId() == unitId)
         {
             bool s= boxUnits[k].deleteBox(boxIndex);
             setSelectedUnitAndBox(-1,-1);
@@ -663,14 +652,14 @@ bool Sorter::removeBoxFromUnit(int unitID, int boxIndex)
     return false;
 }
 
-std::vector<Box> Sorter::getUnitBoxes(int unitID)
+std::vector<Box> Sorter::getUnitBoxes(int unitId)
 {
     std::vector<Box> boxes;
     const ScopedLock myScopedLock(mut);
 
     for (int k=0; k< boxUnits.size(); k++)
     {
-        if (boxUnits[k].getUnitID() == unitID)
+        if (boxUnits[k].getUnitId() == unitId)
         {
 
             boxes = boxUnits[k].getBoxes();
@@ -683,13 +672,13 @@ std::vector<Box> Sorter::getUnitBoxes(int unitID)
 }
 
 
-int Sorter::getNumBoxes(int unitID)
+int Sorter::getNumBoxes(int unitId)
 {
     const ScopedLock myScopedLock(mut);
 
     for (int k = 0; k < boxUnits.size(); k++)
     {
-        if (boxUnits[k].getUnitID() == unitID)
+        if (boxUnits[k].getUnitId() == unitId)
         {
 
             int n = boxUnits[k].getNumBoxes();

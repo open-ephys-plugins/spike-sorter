@@ -239,7 +239,7 @@ void SpikeSorterCanvas::removeUnitOrBox()
             std::vector<PCAUnit> u = electrode->sorter->getPCAUnits();
             if (u.size() > 0)
             {
-                electrode->plot->setSelectedUnitAndBox(u[u.size() - 1].getUnitID(), -1);
+                electrode->plot->setSelectedUnitAndBox(u[u.size() - 1].getUnitId(), -1);
             }
             else
             {
@@ -252,7 +252,7 @@ void SpikeSorterCanvas::removeUnitOrBox()
             std::vector<BoxUnit> u = electrode->sorter->getBoxUnits();
             if (u.size() > 0)
             {
-                electrode->plot->setSelectedUnitAndBox(u[u.size() - 1].getUnitID(), 0);
+                electrode->plot->setSelectedUnitAndBox(u[u.size() - 1].getUnitId(), 0);
             }
             else
             {
@@ -354,7 +354,7 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
     }
     else if (button == newIDbuttons)
     {
-        electrode->sorter->generateNewIDs();
+        electrode->sorter->generateNewIds();
         electrode->plot->updateUnits();
     }
     else if (button == deleteAllUnits)

@@ -100,6 +100,9 @@ public:
     /** Returns the threshold level for displaying spikes */
     float getDisplayThresholdForChannel(int);
 
+    /** Returns the threshold levels for all channels*/
+    Array<float> getDisplayThresholds();
+
     /** Sets the threshold level for displaying spikes*/
     void setDisplayThresholdForChannel(int channelNum, float thres);
 
@@ -128,6 +131,7 @@ private:
     OwnedArray<UtilityButton> rangeButtons;
     
     Array<float> ranges;
+    Array<float> thresholds;
 
     String name;
     CriticalSection mut;

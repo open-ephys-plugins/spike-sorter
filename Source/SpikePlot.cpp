@@ -71,6 +71,8 @@ SpikePlot::SpikePlot(Electrode* electrode_) :
         rangeButton->setRadius(3.0f);
         rangeButton->addListener(this);
         addAndMakeVisible(rangeButton);
+        
+        thresholds.add(0);
 
         rangeButtons.add(rangeButton);
     }
@@ -160,10 +162,8 @@ void SpikePlot::processSpikeObject(SorterSpikePtr s)
 
         pAxes[0]->updateSpikeData(s);
 
-
     }
 }
-
 
 void SpikePlot::initAxes(std::vector<float> scales)
 {
@@ -173,7 +173,7 @@ void SpikePlot::initAxes(std::vector<float> scales)
 
     for (int i = 0; i < nWaveAx; i++)
     {
-        WaveformAxes* wAx = new WaveformAxes(electrode, i);
+        WaveformAxes* wAx = new WaveformAxes(this, electrode, i);
         wAxes.add(wAx);
         addAndMakeVisible(wAx);
         ranges.add(scales[i]);
@@ -373,19 +373,17 @@ void SpikePlot::clear()
 
 void SpikePlot::setDisplayThresholdForChannel(int i, float f)
 {
-
-    const ScopedLock myScopedLock(mut);
-
-    if (i < wAxes.size())
-        wAxes[i]->setDetectorThreshold(f);
-
+    thresholds.set(i, f);
 }
 
 
 float SpikePlot::getDisplayThresholdForChannel(int i)
 {
+    return thresholds[i];
+}
 
-    const ScopedLock myScopedLock(mut);
 
-    return wAxes[i]->getDisplayThreshold();
+Array<float> SpikePlot::getDisplayThresholds()
+{
+    return thresholds;
 }

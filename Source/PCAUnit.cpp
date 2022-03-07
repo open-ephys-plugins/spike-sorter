@@ -27,10 +27,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "PCAUnit.h"
 
 
-cPolygon::cPolygon()
-{
-};
-
 bool cPolygon::isPointInside(PointD p)
 {
     PointD p1, p2;
@@ -71,11 +67,6 @@ bool cPolygon::isPointInside(PointD p)
     return inside;
 }
 
-PCAUnit::PCAUnit()
-{
-
-}
-
 void PCAUnit::setDefaultColors(uint8_t col[3], int ID)
 {
     int IDmodule = (ID - 1) % 6; // ID can't be zero
@@ -94,27 +85,27 @@ void PCAUnit::setDefaultColors(uint8_t col[3], int ID)
 }
 
 
-PCAUnit::PCAUnit(int ID, int localID_): UnitID(ID),localID(localID_)
+PCAUnit::PCAUnit(int id, int localId_): unitId(id),localId(localId_)
 {
-    setDefaultColors(ColorRGB, localID);
+    setDefaultColors(ColorRGB, localId);
 };
 
 PCAUnit::~PCAUnit()
 {
 }
 
-PCAUnit::PCAUnit(cPolygon B, int ID, int localID_) : UnitID(ID), localID(localID_)
+PCAUnit::PCAUnit(cPolygon B, int id, int localId_) : unitId(id), localId(localId_)
 {
     poly = B;
 }
 
-int PCAUnit::getUnitID()
+int PCAUnit::getUnitId()
 {
-    return UnitID;
+    return unitId;
 }
-int PCAUnit::getLocalID()
+int PCAUnit::getLocalId()
 {
-    return localID;
+    return localId;
 }
 
 bool PCAUnit::isPointInsidePolygon(PointD p)
@@ -127,13 +118,7 @@ bool PCAUnit::isWaveFormInsidePolygon(SorterSpikePtr so)
     return poly.isPointInside(PointD(so->pcProj[0],so->pcProj[1]));
 }
 
-void PCAUnit::resizeWaveform(int newlength)
-{
-
-}
-
-
 void PCAUnit::updateWaveform(SorterSpikePtr so)
 {
-    WaveformStat.update(so);
+    stats.update(so);
 }
