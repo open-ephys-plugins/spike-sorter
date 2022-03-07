@@ -86,13 +86,16 @@ public:
     /** Updates the waveform for this unit */
 	void updateWaveform(SorterSpikePtr so);
 
+    /** Updates the unit's color (when a new ID is assigned) */
+    void updateColor();
+
 public:
     
     int unitId;
     int localId; // used internally, for colors and position.
 
     cPolygon poly;
-    uint8_t ColorRGB[3];
+    uint8_t colorRGB[3];
     static void setDefaultColors(uint8_t col[3], int ID);
     WaveformStats stats;
     bool Active;

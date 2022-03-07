@@ -114,6 +114,9 @@ public:
     /** Returns true if calculation is finished*/
     bool isPCAfinished();
 
+    /** Returns true if calculation is finished*/
+    bool firstJobFinished();
+
     /** Returns a vector of all boxes for a BoxUnit */
     std::vector<Box> getUnitBoxes(int unitId);
 
@@ -130,7 +133,7 @@ public:
     void updatePCAUnits(std::vector<PCAUnit> _units);
 
     /** Generates the next global unit ID (across all Sorters) */
-    int generateUnitId();
+    static int generateUnitId();
 
     /** Generates the next available local unit ID (for this Sorter) */
     int generateLocalId();
@@ -173,7 +176,7 @@ private:
     
     int bufferSize,spikeBufferIndex;
     
-    bool bPCAJobSubmitted,bPCAComputed, bRePCA;
+    bool bPCAJobSubmitted,bPCAComputed, bRePCA, bPCAFirstJobFinished;
     std::atomic<bool> bPCAJobFinished;
 
 };

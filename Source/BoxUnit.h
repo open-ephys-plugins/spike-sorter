@@ -117,11 +117,13 @@ public:
 
     static void setDefaultColors(uint8_t col[3], int ID);
 
+    void updateColor();
+
 public:
     int unitId;
     int localId; // used internally, for colors and position.
     std::vector<Box> lstBoxes;
-    uint8_t ColorRGB[3];
+    uint8_t colorRGB[3];
     WaveformStats stats;
     bool Active;
     juce::int64 Activated_TS_S;

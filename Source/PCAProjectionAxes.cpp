@@ -91,7 +91,7 @@ void PCAProjectionAxes::drawUnit(Graphics& g, PCAUnit unit)
 
     electrode->sorter->getSelectedUnitAndBox(selectedUnitId, selectedBoxId);
 
-    g.setColour(Colour(unit.ColorRGB[0], unit.ColorRGB[1], unit.ColorRGB[2]));
+    g.setColour(Colour(unit.colorRGB[0], unit.colorRGB[1], unit.colorRGB[2]));
     if (unit.poly.pts.size() > 2)
     {
         float thickness;
@@ -155,7 +155,7 @@ void PCAProjectionAxes::paint(Graphics& g)
 
         if (drawnPolygon.size() > 0)
         {
-            g.setColour(Colour(drawnUnit.ColorRGB[0], drawnUnit.ColorRGB[1], drawnUnit.ColorRGB[2]));
+            g.setColour(Colour(drawnUnit.colorRGB[0], drawnUnit.colorRGB[1], drawnUnit.colorRGB[2]));
 
             for (std::list<PointD>::iterator it = drawnPolygon.begin(); it != drawnPolygon.end(); it++)
             {
@@ -434,7 +434,7 @@ void PCAProjectionAxes::mouseDown(const juce::MouseEvent& event)
     }
     if (inPolygonDrawingMode)
     {
-        drawnUnit = PCAUnit(electrode->sorter->generateUnitId(), electrode->sorter->generateLocalId());
+        drawnUnit = PCAUnit(Sorter::generateUnitId(), electrode->sorter->generateLocalId());
         drawnPolygon.push_back(PointD(event.x, event.y));
     }
     else

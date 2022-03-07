@@ -301,8 +301,14 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
 
     if (button == addPolygonUnitButton)
     {
-        inDrawingPolygonMode = true;
-        electrode->plot->setPolygonDrawingMode(true);
+
+        if (electrode->sorter->firstJobFinished())
+        {
+            inDrawingPolygonMode = true;
+            electrode->plot->setPolygonDrawingMode(true);
+        }
+
+        
     }
     else if (button == addUnitButton)
     {

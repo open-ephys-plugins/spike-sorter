@@ -114,28 +114,40 @@ BoxUnit::BoxUnit(int id, int localId_) : unitId(id), localId(localId_)
 {
     Active = false;
     Activated_TS_S = -1;
-    setDefaultColors(ColorRGB, localId);
+    setDefaultColors(colorRGB, unitId);
+
     Box B(50, -20 - localId * 20, 300, 40);
+    
     addBox(B);
 }
 
 
-void BoxUnit::setDefaultColors(uint8_t col[3], int ID)
+void BoxUnit::setDefaultColors(uint8_t col[3], int id)
 {
-    int IDmodule = (ID-1) % 6; // ID can't be zero
-    const int colors[6][3] =
+    int IDmodule = (id - 1) % 8; // ID can't be zero
+    
+    const int colors[8][3] =
     {
-        {0xFF,0xFF,0x00},
-        {0x00,0xFF,0x00},
-        {0x00, 0xFF, 0xFF},
-        {0xFF, 0x00, 0x00},
-        {0x00,0x00,0xFF},
-        {0xFF,0x00,0xFF}
+        {255,224,93},
+        {255,178,99},
+        {255,109,161},
+        {246,102,255},
+        {175,98,255},
+        {90,241,233},
+        {109,175,136},
+        {160,237,181}
     };
+
     col[0] = colors[IDmodule][0];
     col[1] = colors[IDmodule][1];
     col[2] = colors[IDmodule][2];
 }
+
+void BoxUnit::updateColor()
+{
+    setDefaultColors(colorRGB, unitId);
+}
+
 
 bool BoxUnit::isWaveFormInsideAllBoxes(SorterSpikePtr so)
 {

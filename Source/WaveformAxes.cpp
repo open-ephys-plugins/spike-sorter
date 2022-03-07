@@ -557,7 +557,7 @@ void WaveformAxes::drawBoxes(Graphics& g)
     // Typical spike is 40 samples, at 30kHz ~ 1.3 ms or 1300 usecs.
     for (int k = 0; k < units.size(); k++)
     {
-        g.setColour(Colour(units[k].ColorRGB[0], units[k].ColorRGB[1], units[k].ColorRGB[2]));
+        g.setColour(Colour(units[k].colorRGB[0], units[k].colorRGB[1], units[k].colorRGB[2]));
 
         for (int boxiter = 0; boxiter < units[k].lstBoxes.size(); boxiter++)
         {

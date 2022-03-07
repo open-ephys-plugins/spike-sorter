@@ -41,6 +41,7 @@ Sorter::Sorter(Electrode* electrode_, PCAComputingThread* pcaThread_)
       bPCAComputed(false),
       bPCAJobFinished(false),
       bPCAJobSubmitted(false),
+      bPCAFirstJobFinished(false),
       bRePCA(false),
       selectedUnit(-1),
       selectedBox(-1),
@@ -144,9 +145,9 @@ void Sorter::loadCustomParametersFromXml(XmlElement* electrodeNode)
                 {
                     BoxUnit boxUnit;
                     boxUnit.unitId = UnitNode->getIntAttribute("UnitID");
-                    boxUnit.ColorRGB[0] = UnitNode->getIntAttribute("ColorR");
-                    boxUnit.ColorRGB[1] = UnitNode->getIntAttribute("ColorG");
-                    boxUnit.ColorRGB[2] = UnitNode->getIntAttribute("ColorB");
+                    boxUnit.colorRGB[0] = UnitNode->getIntAttribute("ColorR");
+                    boxUnit.colorRGB[1] = UnitNode->getIntAttribute("ColorG");
+                    boxUnit.colorRGB[2] = UnitNode->getIntAttribute("ColorB");
                     int numBoxes = UnitNode->getIntAttribute("NumBoxes");
                     boxUnit.lstBoxes.resize(numBoxes);
                     int boxCounter = 0;
@@ -171,9 +172,9 @@ void Sorter::loadCustomParametersFromXml(XmlElement* electrodeNode)
                     PCAUnit pcaUnit;
 
                     pcaUnit.unitId = UnitNode->getIntAttribute("UnitID");
-                    pcaUnit.ColorRGB[0] = UnitNode->getIntAttribute("ColorR");
-                    pcaUnit.ColorRGB[1] = UnitNode->getIntAttribute("ColorG");
-                    pcaUnit.ColorRGB[2] = UnitNode->getIntAttribute("ColorB");
+                    pcaUnit.colorRGB[0] = UnitNode->getIntAttribute("ColorR");
+                    pcaUnit.colorRGB[1] = UnitNode->getIntAttribute("ColorG");
+                    pcaUnit.colorRGB[2] = UnitNode->getIntAttribute("ColorB");
 
                     int numPolygonPoints = UnitNode->getIntAttribute("PolygonNumPoints");
                     pcaUnit.poly.pts.resize(numPolygonPoints);
@@ -230,9 +231,9 @@ void Sorter::saveCustomParametersToXml(XmlElement* electrodeNode)
         XmlElement* BoxUnitNode = spikesortNode->createNewChildElement("BOXUNIT");
 
         BoxUnitNode->setAttribute("UnitID",boxUnits[boxUnitIter].unitId);
-        BoxUnitNode->setAttribute("ColorR",boxUnits[boxUnitIter].ColorRGB[0]);
-        BoxUnitNode->setAttribute("ColorG",boxUnits[boxUnitIter].ColorRGB[1]);
-        BoxUnitNode->setAttribute("ColorB",boxUnits[boxUnitIter].ColorRGB[2]);
+        BoxUnitNode->setAttribute("ColorR",boxUnits[boxUnitIter].colorRGB[0]);
+        BoxUnitNode->setAttribute("ColorG",boxUnits[boxUnitIter].colorRGB[1]);
+        BoxUnitNode->setAttribute("ColorB",boxUnits[boxUnitIter].colorRGB[2]);
         BoxUnitNode->setAttribute("NumBoxes", (int)boxUnits[boxUnitIter].lstBoxes.size());
         for (int boxIter=0; boxIter<boxUnits[boxUnitIter].lstBoxes.size(); boxIter++)
         {
@@ -250,9 +251,9 @@ void Sorter::saveCustomParametersToXml(XmlElement* electrodeNode)
         XmlElement* PcaUnitNode = spikesortNode->createNewChildElement("PCAUNIT");
 
         PcaUnitNode->setAttribute("UnitID",pcaUnits[pcaUnitIter].unitId);
-        PcaUnitNode->setAttribute("ColorR",pcaUnits[pcaUnitIter].ColorRGB[0]);
-        PcaUnitNode->setAttribute("ColorG",pcaUnits[pcaUnitIter].ColorRGB[1]);
-        PcaUnitNode->setAttribute("ColorB",pcaUnits[pcaUnitIter].ColorRGB[2]);
+        PcaUnitNode->setAttribute("ColorR",pcaUnits[pcaUnitIter].colorRGB[0]);
+        PcaUnitNode->setAttribute("ColorG",pcaUnits[pcaUnitIter].colorRGB[1]);
+        PcaUnitNode->setAttribute("ColorB",pcaUnits[pcaUnitIter].colorRGB[2]);
         PcaUnitNode->setAttribute("PolygonNumPoints",(int)pcaUnits[pcaUnitIter].poly.pts.size());
         PcaUnitNode->setAttribute("PolygonOffsetX",(int)pcaUnits[pcaUnitIter].poly.offset.X);
         PcaUnitNode->setAttribute("PolygonOffsetY",(int)pcaUnits[pcaUnitIter].poly.offset.Y);
@@ -299,6 +300,9 @@ void Sorter::projectOnPrincipalComponents(SorterSpikePtr so)
     if (bPCAJobFinished)
     {
         bPCAComputed = true;
+
+        if (!bPCAFirstJobFinished)
+            bPCAFirstJobFinished = true;
     }
 
     // 3. If job has finished, project spike onto PC axes
@@ -363,6 +367,11 @@ bool Sorter::isPCAfinished()
     return bPCAJobFinished;
 }
 
+bool Sorter::firstJobFinished()
+{
+    return bPCAFirstJobFinished;
+}
+
 void Sorter::RePCA()
 {
     bPCAComputed = false;
@@ -380,7 +389,7 @@ int Sorter::addBoxUnit(int channel)
 {
     const ScopedLock myScopedLock(mut);
 
-    BoxUnit unit(nextUnitId++, generateLocalId());
+    BoxUnit unit(Sorter::generateUnitId(), generateLocalId());
     boxUnits.push_back(unit);
     setSelectedUnitAndBox(nextUnitId, 0);
 
@@ -391,7 +400,7 @@ int Sorter::addBoxUnit(int channel, Box B)
 {
     const ScopedLock myScopedLock(mut);
 
-    BoxUnit unit(B, nextUnitId++, generateLocalId());
+    BoxUnit unit(B, Sorter::generateUnitId(), generateLocalId());
     boxUnits.push_back(unit);
     setSelectedUnitAndBox(nextUnitId, 0);
 
@@ -405,9 +414,9 @@ void Sorter::getUnitColor(int unitId, uint8& R, uint8& G, uint8& B)
     {
         if (boxUnits[k].getUnitId() == unitId)
         {
-            R = boxUnits[k].ColorRGB[0];
-            G = boxUnits[k].ColorRGB[1];
-            B = boxUnits[k].ColorRGB[2];
+            R = boxUnits[k].colorRGB[0];
+            G = boxUnits[k].colorRGB[1];
+            B = boxUnits[k].colorRGB[2];
             break;
         }
     }
@@ -416,9 +425,9 @@ void Sorter::getUnitColor(int unitId, uint8& R, uint8& G, uint8& B)
     {
         if (pcaUnits[k].getUnitId() == unitId)
         {
-            R = pcaUnits[k].ColorRGB[0];
-            G = pcaUnits[k].ColorRGB[1];
-            B = pcaUnits[k].ColorRGB[2];
+            R = pcaUnits[k].colorRGB[0];
+            G = pcaUnits[k].colorRGB[1];
+            B = pcaUnits[k].colorRGB[2];
             break;
         }
     }
@@ -461,7 +470,7 @@ int Sorter::generateLocalId()
 int Sorter::generateUnitId()
 {
 
-    return ++nextUnitId;;
+    return nextUnitId++;
 
 }
 
@@ -472,10 +481,12 @@ void Sorter::generateNewIds()
     for (int k = 0; k < boxUnits.size(); k++)
     {
         boxUnits[k].unitId = generateUnitId();
+        boxUnits[k].updateColor();
     }
     for (int k = 0; k < pcaUnits.size(); k++)
     {
         pcaUnits[k].unitId = generateUnitId();
+        pcaUnits[k].updateColor();
     }
 }
 
@@ -585,9 +596,9 @@ bool Sorter::checkBoxUnits(SorterSpikePtr spike)
         if (boxUnits[k].isWaveFormInsideAllBoxes(spike))
         {
             spike->sortedId = boxUnits[k].getUnitId();
-            spike->color[0] = boxUnits[k].ColorRGB[0];
-            spike->color[1] = boxUnits[k].ColorRGB[1];
-            spike->color[2] = boxUnits[k].ColorRGB[2];
+            spike->color[0] = boxUnits[k].colorRGB[0];
+            spike->color[1] = boxUnits[k].colorRGB[1];
+            spike->color[2] = boxUnits[k].colorRGB[2];
             boxUnits[k].updateWaveform(spike);
             return true;
         }
@@ -601,9 +612,9 @@ bool Sorter::checkPCAUnits(SorterSpikePtr spike)
         if (pcaUnits[k].isWaveFormInsidePolygon(spike))
         {
             spike->sortedId = pcaUnits[k].getUnitId();
-            spike->color[0] = pcaUnits[k].ColorRGB[0];
-            spike->color[1] = pcaUnits[k].ColorRGB[1];
-            spike->color[2] = pcaUnits[k].ColorRGB[2];
+            spike->color[0] = pcaUnits[k].colorRGB[0];
+            spike->color[1] = pcaUnits[k].colorRGB[1];
+            spike->color[2] = pcaUnits[k].colorRGB[2];
             return true;
         }
     }
