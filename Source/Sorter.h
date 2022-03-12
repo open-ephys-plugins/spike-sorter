@@ -135,9 +135,6 @@ public:
     /** Generates the next global unit ID (across all Sorters) */
     static int generateUnitId();
 
-    /** Generates the next available local unit ID (for this Sorter) */
-    int generateLocalId();
-
     /** Re-generates IDs for all units */
     void generateNewIds();
 

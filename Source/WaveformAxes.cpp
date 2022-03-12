@@ -186,8 +186,6 @@ void WaveformAxes::clear()
 void WaveformAxes::mouseMove(const MouseEvent& event)
 {
 
-    // Point<int> pos = event.getPosition();
-
     float y = event.y;
 
     float h = getHeight() * (0.5f - displayThresholdLevel / range);
@@ -197,14 +195,10 @@ void WaveformAxes::mouseMove(const MouseEvent& event)
         h = getHeight() - h;
     }
 
-    // std::cout << y << " " << h << std::endl;
-
     if (y > h - 10.0f && y < h + 10.0f && !isOverThresholdSlider)
     {
         thresholdColour = Colours::yellow;
-        //  std::cout << "Yes." << std::endl;
         isOverThresholdSlider = true;
-        // cursorType = MouseCursor::DraggingHandCursor;
     }
     else if ((y < h - 10.0f || y > h + 10.0f) && isOverThresholdSlider)
     {
@@ -399,7 +393,6 @@ void WaveformAxes::mouseDrag(const MouseEvent& event)
 
         }
 
-        //void WaveformAxes::isOverUnitBox(float x, float y, int &UnitID, int &BoxID, String &where)
     }
     else  if (isOverThresholdSlider)
     {
@@ -483,7 +476,7 @@ void WaveformAxes::isOverUnitBox(float x, float y, int& UnitID, int& BoxID, Stri
 
             if (x >= rectx1 - 10 & y >= recty1 - 10 & x <= rectx2 + 10 & y <= recty2 + 10)
             {
-                //setMouseCursor(MouseCursor::DraggingHandCursor);
+
                 UnitID = units[k].unitId;
                 BoxID = boxiter;
                 if (x >= rectx1 - 10 & x <= rectx1 + 10 && y >= recty1 - 10 & y <= recty1 + 10)
@@ -546,6 +539,7 @@ void WaveformAxes::drawBoxes(Graphics& g)
 
     float h = getHeight();
     float w = getWidth();
+    
     // Map box coordinates to screen coordinates.
     // Assume time span is 40 samples at 30 Khz?
     float microsec_span = 40.0 / 30000.0 * 1e6;
@@ -571,14 +565,11 @@ void WaveformAxes::drawBoxes(Graphics& g)
             else
                 thickness = 1;
 
-
             float rectx1 = B.x / microsec_span * w;
             float recty1 = (h / 2 - (B.y / microvolt_span * h / 2));
 
             float rectx2 = (B.x + B.w) / microsec_span * w;
             float recty2 = (h / 2 - ((B.y - B.h) / microvolt_span * h / 2));
-
-            //std::cout << rectx1 << " " << rectx2 << " " << recty1 << " " << recty2 << std::endl;
 
             float drawRecty1, drawRecty2;
             if (signalFlipped)
@@ -610,28 +601,18 @@ void WaveformAxes::paint(Graphics& g)
     g.setColour(Colours::black);
     g.fillRect(0, 0, getWidth(), getHeight());
 
-    // int chan = 0;
-
     if (drawGrid)
         drawWaveformGrid(g);
-
-    //double noise = processor->getSelectedElectrodeNoise();
-   // String d = "STD: " + String(noise, 2) + "uV";
-    //g.setFont(Font("Small Text", 13, Font::plain));
-   // g.setColour(Colours::white);
-
-   // g.drawText(d, 10, 10, 150, 20, Justification::left, false);
-    // draw the grid lines for the waveforms
 
     // draw the threshold line and labels
     drawThresholdSlider(g);
     drawBoxes(g);
+
     // if no spikes have been received then don't plot anything
     if (!gotFirstSpike)
     {
         return;
     }
-
 
     for (int spikeNum = 0; spikeNum < bufferSize; spikeNum++)
     {

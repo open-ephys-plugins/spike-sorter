@@ -79,8 +79,8 @@ bool Box::isWaveFormInside(SorterSpikePtr so)
     PointD BoxTopRight(x + w, y);
     PointD BoxBottomRight(x + w, (y - h));
 
-    // y,and h are given in micro volts.
-    // x and w and given in micro seconds.
+    // y and h are given in microvolts
+    // x and w and given in microseconds
 
     // no point testing all wave form points. Just ones that are between x and x+w...
     int BinLeft = so->microSecondsToSpikeTimeBin(x);
@@ -105,18 +105,19 @@ bool Box::isWaveFormInside(SorterSpikePtr so)
 }
 
 
-BoxUnit::BoxUnit(Box B, int id, int localId_) : unitId(id), localId(localId_)
+BoxUnit::BoxUnit(Box B, int id) 
+    : unitId(id), isActive(false)
 {
     addBox(B);
 }
 
-BoxUnit::BoxUnit(int id, int localId_) : unitId(id), localId(localId_)
+BoxUnit::BoxUnit(int id) 
+    : unitId(id), isActive(false)
 {
-    Active = false;
-    Activated_TS_S = -1;
+
     setDefaultColors(colorRGB, unitId);
 
-    Box B(50, -20 - localId * 20, 300, 40);
+    Box B(50, -20, 300, 40);
     
     addBox(B);
 }
@@ -151,43 +152,35 @@ void BoxUnit::updateColor()
 
 bool BoxUnit::isWaveFormInsideAllBoxes(SorterSpikePtr so)
 {
-    for (int k=0; k< lstBoxes.size(); k++)
+    
+    for (int k = 0; k < lstBoxes.size(); k++)
     {
         if (!lstBoxes[k].isWaveFormInside(so))
             return false;
     }
+
     return lstBoxes.size() == 0 ? false : true;
 }
 
 bool BoxUnit::isActivated()
 {
-    return Active;
+    return isActive;
 }
 
 void BoxUnit::activateUnit()
 {
-    Active = true;
-    Activated_TS_S = timer.getHighResolutionTicks();
+    isActive = true;
 }
 
 void BoxUnit::deactivateUnit()
 {
-    Active = false;
-    Activated_TS_S = timer.getHighResolutionTicks();
-
+    isActive = false;
 }
 
-double BoxUnit::getNumSecondsActive()
-{
-    if (!Active)
-        return 0;
-    else
-        return (timer.getHighResolutionTicks() - Activated_TS_S) / timer.getHighResolutionTicksPerSecond();
-}
 
 void BoxUnit::toggleActive()
 {
-    if (Active)
+    if (isActive)
         deactivateUnit();
     else
         activateUnit();
@@ -252,7 +245,7 @@ void BoxUnit::setBoxSize(int boxid, double W, double H)
     lstBoxes[boxid].h = H;
 }
 
-void BoxUnit::MoveBox(int boxid, int dx, int dy)
+void BoxUnit::moveBox(int boxid, int dx, int dy)
 {
     lstBoxes[boxid].x += dx;
     lstBoxes[boxid].y += dy;
@@ -266,11 +259,6 @@ std::vector<Box> BoxUnit::getBoxes()
 int BoxUnit::getUnitId()
 {
     return unitId;
-}
-
-int BoxUnit::getLocalId()
-{
-    return localId;
 }
 
 void BoxUnit::updateWaveform(SorterSpikePtr so)

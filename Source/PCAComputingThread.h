@@ -52,8 +52,10 @@ public:
     void addPCAjob(PCAJobPtr job);
 
 private:
+
     PCAJobArray jobs;
 	CriticalSection lock;
+
 };
 
 

@@ -57,6 +57,8 @@ public:
     void reset() { isActive = false; }
 
     String name;
+    String streamName;
+    int sourceNodeId;
     Uuid uniqueId;
 
     int numChannels;
@@ -97,6 +99,9 @@ public:
 
     /** Returns an array of available electrodes*/
     Array<Electrode*> getElectrodesForStream(uint16 streamId);
+
+    /** Finds a matching electrode based on names and IDs */
+    Electrode* findMatchingElectrode(String name, String stream_name, int stream_source);
 
     /** Saves all custom parameters */
     void saveCustomParametersToXml(XmlElement* parentElement) override;

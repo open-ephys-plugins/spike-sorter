@@ -71,19 +71,24 @@ public:
     void mouseDrag(const MouseEvent& event);
     void mouseUp(const MouseEvent& event);
 
+    /** Get/set axes range */
     void setRange(float);
+    float getRange() { return range; }
 
-    float getRange()
-    {
-        return range;
-    }
-
+    /** Get/set display threshold */
     float getDisplayThreshold();
     void setDetectorThreshold(float);
 
-    void updateUnits(std::vector<BoxUnit> _units);
+    /** Updates the box units for this plot*/
+    void updateUnits(std::vector<BoxUnit> units);
 
 private:
+
+    /** Draws tick marks behind waveforms */
+    void drawWaveformGrid(Graphics& g);
+
+    /** Draws threshold slider*/
+    void drawThresholdSlider(Graphics& g);
 
     int electrodeID;
     bool editAll = false;
@@ -97,10 +102,6 @@ private:
 
     float displayThresholdLevel;
     float detectorThresholdLevel;
-
-    void drawWaveformGrid(Graphics& g);
-
-    void drawThresholdSlider(Graphics& g);
 
     int spikesReceivedSinceLastRedraw;
 

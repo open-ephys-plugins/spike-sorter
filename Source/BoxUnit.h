@@ -81,10 +81,10 @@ public:
     BoxUnit() { }
 
     /** Constructor based on unit ID*/
-    BoxUnit(int id, int localId);
+    BoxUnit(int id);
 
     /** Constructor with a Box*/
-    BoxUnit(Box B, int id, int localId);
+    BoxUnit(Box B, int id);
 
     /** Returns true if spike waveform is inside all boxes*/
     bool isWaveFormInsideAllBoxes(SorterSpikePtr so);
@@ -97,37 +97,72 @@ public:
 
     /** Returns true if unit is active */
     bool isActivated();
+
+    /** Sets the unit's status to active */
     void activateUnit();
+
+    /** Sets the unit's status to inactive */
     void deactivateUnit();
-    double getNumSecondsActive();
+ 
+    /** Toggle's the unit's active state */
     void toggleActive();
+
+    /** Adds a box to this unit */
     void addBox(Box b);
+
+    /** Adds a box with default boundaries */
     void addBox();
+
+    /** Returns the total number of boxes for this unit */
     int getNumBoxes();
+
+    /** Changes the boundaries of a box at a particular index */
     void modifyBox(int boxindex, Box b);
+
+    /** Removes a box at a particular index */
     bool deleteBox(int boxindex);
+
+    /** Returns the box at a particular index */
     Box getBox(int box);
+
+    /** Updates the box based on ID*/
     void setBox(int boxid, Box B);
+
+    /** Sets the position of a box by ID*/
     void setBoxPos(int boxid, PointD P);
+
+    /** Sets the size (width and height) of a box by ID */
     void setBoxSize(int boxid, double W, double H);
-    void MoveBox(int boxid, int dx, int dy);
+
+    /** Moves a box by a particular step size*/
+    void moveBox(int boxid, int dx, int dy);
+    
+    /** Returns a vector of boxes for this unit */
     std::vector<Box> getBoxes();
     
+    /** Adds a new waveform to this unit's stats counter */
 	void updateWaveform(SorterSpikePtr so);
 
+    /** Sets the color for this unit */
     static void setDefaultColors(uint8_t col[3], int ID);
 
+    /** Changes the unit color after the ID is updated */
     void updateColor();
 
-public:
+    /** Identifier for this unit (global across the Spike Sorter)*/
     int unitId;
-    int localId; // used internally, for colors and position.
+
+    /** Vector of boxes for this unit */
     std::vector<Box> lstBoxes;
+
+    /** RGB color for this unit */
     uint8_t colorRGB[3];
+    
+    /** Ongoing stats for this unit (not currently used) */
     WaveformStats stats;
-    bool Active;
-    juce::int64 Activated_TS_S;
-    Time timer;
+    
+    /** True if the unit is active */
+    bool isActive;
 
 };
 

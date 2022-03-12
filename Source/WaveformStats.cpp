@@ -93,12 +93,11 @@ void WaveformStats::update(SorterSpikePtr so)
     double ts = so->getTimestamp()/so->getChannel()->getSampleRate();
     if (numSamples == 0)
     {
-        LastSpikeTime = ts;
+        lastSpikeTime = ts;
     }
     else
     {
-        //hist.update(1000.0 * (ts - LastSpikeTime));
-        LastSpikeTime = ts;
+        lastSpikeTime = ts;
     }
 
     newData = true;

@@ -45,10 +45,10 @@ Sorter::Sorter(Electrode* electrode_, PCAComputingThread* pcaThread_)
       bRePCA(false),
       selectedUnit(-1),
       selectedBox(-1),
-      pc1min(-1),
-      pc2min(-1),
-      pc1max(-1),
-      pc2max(-1),
+      pc1min(-5),
+      pc2min(-5),
+      pc1max(5),
+      pc2max(5),
       numChannels(electrode_->numChannels),
       waveformLength(electrode_->numSamples)
      
@@ -93,178 +93,6 @@ void Sorter::resizeWaveform(int numSamples)
 	pc2min = -1;
 	pc1max = 1;
 	pc2max = 1;
-
-}
-
-void Sorter::loadCustomParametersFromXml(XmlElement* electrodeNode)
-{
-
-    forEachXmlChildElement(*electrodeNode, spikesortNode)
-    {
-        if (spikesortNode->hasTagName("SPIKESORTING"))
-        {
-            selectedUnit  = spikesortNode->getIntAttribute("selectedUnit");
-            selectedBox =  spikesortNode->getIntAttribute("selectedBox");
-
-            pcaUnits.clear();
-            boxUnits.clear();
-
-            forEachXmlChildElement(*spikesortNode, UnitNode)
-            {
-                if (UnitNode->hasTagName("PCA"))
-                {
-                    numChannels = UnitNode->getIntAttribute("numChannels");
-                    waveformLength = UnitNode->getIntAttribute("waveformLength");
-
-                    pc1min = UnitNode->getDoubleAttribute("pc1min");
-                    pc2min = UnitNode->getDoubleAttribute("pc2min");
-                    pc1max = UnitNode->getDoubleAttribute("pc1max");
-                    pc2max = UnitNode->getDoubleAttribute("pc2max");
-
-                    bPCAJobFinished = UnitNode->getBoolAttribute("PCAjobFinished");
-                    bPCAComputed = UnitNode->getBoolAttribute("PCAcomputed");
-
-                    delete[] pc1;
-                    delete[] pc2;
-
-                    pc1 = new float[waveformLength*numChannels];
-                    pc2 = new float[waveformLength*numChannels];
-                    int dimcounter = 0;
-                    forEachXmlChildElement(*UnitNode, dimNode)
-                    {
-                        if (dimNode->hasTagName("PCA_DIM"))
-                        {
-                            pc1[dimcounter]=dimNode->getDoubleAttribute("pc1");
-                            pc2[dimcounter]=dimNode->getDoubleAttribute("pc2");
-                            dimcounter++;
-                        }
-                    }
-                }
-
-                if (UnitNode->hasTagName("BOXUNIT"))
-                {
-                    BoxUnit boxUnit;
-                    boxUnit.unitId = UnitNode->getIntAttribute("UnitID");
-                    boxUnit.colorRGB[0] = UnitNode->getIntAttribute("ColorR");
-                    boxUnit.colorRGB[1] = UnitNode->getIntAttribute("ColorG");
-                    boxUnit.colorRGB[2] = UnitNode->getIntAttribute("ColorB");
-                    int numBoxes = UnitNode->getIntAttribute("NumBoxes");
-                    boxUnit.lstBoxes.resize(numBoxes);
-                    int boxCounter = 0;
-                    forEachXmlChildElement(*UnitNode, boxNode)
-                    {
-                        if (boxNode->hasTagName("BOX"))
-                        {
-                            Box box;
-                            box.channel = boxNode->getIntAttribute("ch");
-                            box.x = boxNode->getDoubleAttribute("x");
-                            box.y = boxNode->getDoubleAttribute("y");
-                            box.w = boxNode->getDoubleAttribute("w");
-                            box.h = boxNode->getDoubleAttribute("h");
-                            boxUnit.lstBoxes[boxCounter++] = box;
-                        }
-                    }
-                    // add box unit
-                    boxUnits.push_back(boxUnit);
-                }
-                if (UnitNode->hasTagName("PCAUNIT"))
-                {
-                    PCAUnit pcaUnit;
-
-                    pcaUnit.unitId = UnitNode->getIntAttribute("UnitID");
-                    pcaUnit.colorRGB[0] = UnitNode->getIntAttribute("ColorR");
-                    pcaUnit.colorRGB[1] = UnitNode->getIntAttribute("ColorG");
-                    pcaUnit.colorRGB[2] = UnitNode->getIntAttribute("ColorB");
-
-                    int numPolygonPoints = UnitNode->getIntAttribute("PolygonNumPoints");
-                    pcaUnit.poly.pts.resize(numPolygonPoints);
-                    pcaUnit.poly.offset.X = UnitNode->getDoubleAttribute("PolygonOffsetX");
-                    pcaUnit.poly.offset.Y = UnitNode->getDoubleAttribute("PolygonOffsetY");
-                    // read polygon
-                    int pointCounter = 0;
-                    forEachXmlChildElement(*UnitNode, polygonPoint)
-                    {
-                        if (polygonPoint->hasTagName("POLYGON_POINT"))
-                        {
-                            pcaUnit.poly.pts[pointCounter].X =  polygonPoint->getDoubleAttribute("pointX");
-                            pcaUnit.poly.pts[pointCounter].Y =  polygonPoint->getDoubleAttribute("pointY");
-                            pointCounter++;
-                        }
-                    }
-                    // add polygon unit
-                    pcaUnits.push_back(pcaUnit);
-                }
-            }
-        }
-    }
-}
-
-void Sorter::saveCustomParametersToXml(XmlElement* electrodeNode)
-{
-
-    XmlElement* spikesortNode = electrodeNode->createNewChildElement("SPIKESORTING");
-    spikesortNode->setAttribute("numBoxUnits", (int)boxUnits.size());
-    spikesortNode->setAttribute("numPCAUnits", (int)pcaUnits.size());
-    spikesortNode->setAttribute("selectedUnit",selectedUnit);
-    spikesortNode->setAttribute("selectedBox",selectedBox);
-
-    XmlElement* pcaNode = electrodeNode->createNewChildElement("PCA");
-    pcaNode->setAttribute("numChannels",numChannels);
-    pcaNode->setAttribute("waveformLength",waveformLength);
-    pcaNode->setAttribute("pc1min", pc1min);
-    pcaNode->setAttribute("pc2min", pc2min);
-    pcaNode->setAttribute("pc1max", pc1max);
-    pcaNode->setAttribute("pc2max", pc2max);
-
-    pcaNode->setAttribute("PCAjobFinished", bPCAJobFinished);
-    pcaNode->setAttribute("PCAcomputed", bPCAComputed);
-
-    for (int k=0; k<numChannels*waveformLength; k++)
-    {
-        XmlElement* dimNode = pcaNode->createNewChildElement("PCA_DIM");
-        dimNode->setAttribute("pc1",pc1[k]);
-        dimNode->setAttribute("pc2",pc2[k]);
-    }
-
-    for (int boxUnitIter=0; boxUnitIter<boxUnits.size(); boxUnitIter++)
-    {
-        XmlElement* BoxUnitNode = spikesortNode->createNewChildElement("BOXUNIT");
-
-        BoxUnitNode->setAttribute("UnitID",boxUnits[boxUnitIter].unitId);
-        BoxUnitNode->setAttribute("ColorR",boxUnits[boxUnitIter].colorRGB[0]);
-        BoxUnitNode->setAttribute("ColorG",boxUnits[boxUnitIter].colorRGB[1]);
-        BoxUnitNode->setAttribute("ColorB",boxUnits[boxUnitIter].colorRGB[2]);
-        BoxUnitNode->setAttribute("NumBoxes", (int)boxUnits[boxUnitIter].lstBoxes.size());
-        for (int boxIter=0; boxIter<boxUnits[boxUnitIter].lstBoxes.size(); boxIter++)
-        {
-            XmlElement* BoxNode = BoxUnitNode->createNewChildElement("BOX");
-            BoxNode->setAttribute("ch", (int)boxUnits[boxUnitIter].lstBoxes[boxIter].channel);
-            BoxNode->setAttribute("x", (int)boxUnits[boxUnitIter].lstBoxes[boxIter].x);
-            BoxNode->setAttribute("y", (int)boxUnits[boxUnitIter].lstBoxes[boxIter].y);
-            BoxNode->setAttribute("w", (int)boxUnits[boxUnitIter].lstBoxes[boxIter].w);
-            BoxNode->setAttribute("h", (int)boxUnits[boxUnitIter].lstBoxes[boxIter].h);
-        }
-    }
-
-    for (int pcaUnitIter=0; pcaUnitIter<pcaUnits.size(); pcaUnitIter++)
-    {
-        XmlElement* PcaUnitNode = spikesortNode->createNewChildElement("PCAUNIT");
-
-        PcaUnitNode->setAttribute("UnitID",pcaUnits[pcaUnitIter].unitId);
-        PcaUnitNode->setAttribute("ColorR",pcaUnits[pcaUnitIter].colorRGB[0]);
-        PcaUnitNode->setAttribute("ColorG",pcaUnits[pcaUnitIter].colorRGB[1]);
-        PcaUnitNode->setAttribute("ColorB",pcaUnits[pcaUnitIter].colorRGB[2]);
-        PcaUnitNode->setAttribute("PolygonNumPoints",(int)pcaUnits[pcaUnitIter].poly.pts.size());
-        PcaUnitNode->setAttribute("PolygonOffsetX",(int)pcaUnits[pcaUnitIter].poly.offset.X);
-        PcaUnitNode->setAttribute("PolygonOffsetY",(int)pcaUnits[pcaUnitIter].poly.offset.Y);
-
-        for (int p=0; p<pcaUnits[pcaUnitIter].poly.pts.size(); p++)
-        {
-            XmlElement* PolygonNode = PcaUnitNode->createNewChildElement("POLYGON_POINT");
-            PolygonNode->setAttribute("pointX", pcaUnits[pcaUnitIter].poly.pts[p].X);
-            PolygonNode->setAttribute("pointY", pcaUnits[pcaUnitIter].poly.pts[p].Y);
-        }
-    }
 
 }
 
@@ -389,7 +217,7 @@ int Sorter::addBoxUnit(int channel)
 {
     const ScopedLock myScopedLock(mut);
 
-    BoxUnit unit(Sorter::generateUnitId(), generateLocalId());
+    BoxUnit unit(Sorter::generateUnitId());
     boxUnits.push_back(unit);
     setSelectedUnitAndBox(nextUnitId, 0);
 
@@ -400,7 +228,7 @@ int Sorter::addBoxUnit(int channel, Box B)
 {
     const ScopedLock myScopedLock(mut);
 
-    BoxUnit unit(B, Sorter::generateUnitId(), generateLocalId());
+    BoxUnit unit(B, Sorter::generateUnitId());
     boxUnits.push_back(unit);
     setSelectedUnitAndBox(nextUnitId, 0);
 
@@ -433,39 +261,6 @@ void Sorter::getUnitColor(int unitId, uint8& R, uint8& G, uint8& B)
     }
 }
 
-int Sorter::generateLocalId()
-{
-    // finds the first unused ID and return it
-
-    int ID = 1;
-
-    while (true)
-    {
-        bool used=false;
-        for (int k = 0; k < boxUnits.size(); k++)
-        {
-            if (boxUnits[k].getLocalId() == ID)
-            {
-                used = true;
-                break;
-            }
-        }
-        for (int k = 0; k < pcaUnits.size(); k++)
-        {
-            if (pcaUnits[k].getLocalId() == ID)
-            {
-                used = true;
-                break;
-            }
-        }
-
-        if (used)
-            ID++;
-        else
-            break;
-    }
-    return ID;
-}
 
 int Sorter::generateUnitId()
 {
@@ -698,4 +493,189 @@ int Sorter::getNumBoxes(int unitId)
     }
 
     return -1;
+}
+
+void Sorter::saveCustomParametersToXml(XmlElement* xml)
+{
+
+    xml->setAttribute("name", electrode->name);
+    xml->setAttribute("stream_name", electrode->streamName);
+    xml->setAttribute("source_node_id", electrode->sourceNodeId);
+
+    xml->setAttribute("selectedUnit", selectedUnit);
+    xml->setAttribute("selectedBox", selectedBox);
+
+    XmlElement* pcaNode = xml->createNewChildElement("PCA");
+    pcaNode->setAttribute("numChannels", numChannels);
+    pcaNode->setAttribute("waveformLength", waveformLength);
+    pcaNode->setAttribute("pc1min", pc1min);
+    pcaNode->setAttribute("pc2min", pc2min);
+    pcaNode->setAttribute("pc1max", pc1max);
+    pcaNode->setAttribute("pc2max", pc2max);
+
+    for (int k = 0; k < numChannels * waveformLength; k++)
+    {
+        XmlElement* dimNode = pcaNode->createNewChildElement("PCA_DIM");
+        dimNode->setAttribute("pc1", pc1[k]);
+        dimNode->setAttribute("pc2", pc2[k]);
+    }
+
+    for (int pcaUnitIter = 0; pcaUnitIter < pcaUnits.size(); pcaUnitIter++)
+    {
+        XmlElement* PcaUnitNode = pcaNode->createNewChildElement("UNIT");
+
+        PcaUnitNode->setAttribute("UnitID", pcaUnits[pcaUnitIter].unitId);
+        PcaUnitNode->setAttribute("ColorR", pcaUnits[pcaUnitIter].colorRGB[0]);
+        PcaUnitNode->setAttribute("ColorG", pcaUnits[pcaUnitIter].colorRGB[1]);
+        PcaUnitNode->setAttribute("ColorB", pcaUnits[pcaUnitIter].colorRGB[2]);
+        PcaUnitNode->setAttribute("PolygonNumPoints", (int)pcaUnits[pcaUnitIter].poly.pts.size());
+        PcaUnitNode->setAttribute("PolygonOffsetX", (int)pcaUnits[pcaUnitIter].poly.offset.X);
+        PcaUnitNode->setAttribute("PolygonOffsetY", (int)pcaUnits[pcaUnitIter].poly.offset.Y);
+
+        for (int p = 0; p < pcaUnits[pcaUnitIter].poly.pts.size(); p++)
+        {
+            XmlElement* PolygonNode = PcaUnitNode->createNewChildElement("POLYGON_POINT");
+            PolygonNode->setAttribute("pointX", pcaUnits[pcaUnitIter].poly.pts[p].X);
+            PolygonNode->setAttribute("pointY", pcaUnits[pcaUnitIter].poly.pts[p].Y);
+        }
+    }
+
+    XmlElement* boxNode = xml->createNewChildElement("BOXES");
+
+    for (auto unit : boxUnits)
+    {
+        XmlElement* boxUnitNode = boxNode->createNewChildElement("UNIT");
+
+        boxUnitNode->setAttribute("UnitID", unit.unitId);
+        boxUnitNode->setAttribute("ColorR", unit.colorRGB[0]);
+        boxUnitNode->setAttribute("ColorG", unit.colorRGB[1]);
+        boxUnitNode->setAttribute("ColorB", unit.colorRGB[2]);
+
+        for (auto box : unit.lstBoxes)
+        {
+            XmlElement* boxNode = boxUnitNode->createNewChildElement("BOX");
+            boxNode->setAttribute("ch", (int) box.channel);
+            boxNode->setAttribute("x", (int) box.x);
+            boxNode->setAttribute("y", (int) box.y);
+            boxNode->setAttribute("w", (int) box.w);
+            boxNode->setAttribute("h", (int) box.h);
+        }
+    }
+}
+
+void Sorter::loadCustomParametersFromXml(XmlElement* xml)
+{
+
+    selectedUnit = xml->getIntAttribute("selectedUnit", 0);
+    selectedBox = xml->getIntAttribute("selectedBox", 0);
+
+    forEachXmlChildElement(*xml, sorterNode)
+    {
+        if (sorterNode->hasTagName("PCA"))
+        {
+
+            numChannels = sorterNode->getIntAttribute("numChannels");
+            waveformLength = sorterNode->getIntAttribute("waveformLength");
+
+            pc1min = sorterNode->getDoubleAttribute("pc1min");
+            pc2min = sorterNode->getDoubleAttribute("pc2min");
+            pc1max = sorterNode->getDoubleAttribute("pc1max");
+            pc2max = sorterNode->getDoubleAttribute("pc2max");
+
+            delete[] pc1;
+            delete[] pc2;
+
+            pc1 = new float[waveformLength * numChannels];
+            pc2 = new float[waveformLength * numChannels];
+            int dimcounter = 0;
+
+            forEachXmlChildElement(*sorterNode, dimNode)
+            {
+                if (dimNode->hasTagName("PCA_DIM"))
+                {
+                    pc1[dimcounter] = dimNode->getDoubleAttribute("pc1");
+                    pc2[dimcounter] = dimNode->getDoubleAttribute("pc2");
+                    dimcounter++;
+                }
+            }
+
+            forEachXmlChildElement(*sorterNode, unitNode)
+            {
+                if (unitNode->hasTagName("UNIT"))
+                {
+
+                    std::cout << " Found a PCA unit " << std::endl;
+
+                    PCAUnit pcaUnit;
+
+                    pcaUnit.unitId = unitNode->getIntAttribute("UnitID");
+
+                    nextUnitId = jmax(pcaUnit.unitId + 1, nextUnitId);
+
+                    pcaUnit.colorRGB[0] = unitNode->getIntAttribute("ColorR");
+                    pcaUnit.colorRGB[1] = unitNode->getIntAttribute("ColorG");
+                    pcaUnit.colorRGB[2] = unitNode->getIntAttribute("ColorB");
+
+                    int numPolygonPoints = unitNode->getIntAttribute("PolygonNumPoints");
+                    pcaUnit.poly.pts.resize(numPolygonPoints);
+                    pcaUnit.poly.offset.X = unitNode->getDoubleAttribute("PolygonOffsetX");
+                    pcaUnit.poly.offset.Y = unitNode->getDoubleAttribute("PolygonOffsetY");
+                    
+                    int pointCounter = 0;
+                    forEachXmlChildElement(*unitNode, polygonPoint)
+                    {
+                        if (polygonPoint->hasTagName("POLYGON_POINT"))
+                        {
+                            pcaUnit.poly.pts[pointCounter].X = polygonPoint->getDoubleAttribute("pointX");
+                            pcaUnit.poly.pts[pointCounter].Y = polygonPoint->getDoubleAttribute("pointY");
+                            pointCounter++;
+                        }
+                    }
+
+                    pcaUnits.push_back(pcaUnit);
+                }
+            }
+        }
+        else if (sorterNode->hasTagName("BOXES"))
+        {
+            forEachXmlChildElement(*sorterNode, unitNode)
+            {
+                if (unitNode->hasTagName("UNIT"))
+                {
+
+                    std::cout << " Found a box unit " << std::endl;
+
+                    BoxUnit boxUnit;
+                    boxUnit.unitId = unitNode->getIntAttribute("UnitID");
+
+                    nextUnitId = jmax(boxUnit.unitId + 1, nextUnitId);
+
+                    boxUnit.colorRGB[0] = unitNode->getIntAttribute("ColorR");
+                    boxUnit.colorRGB[1] = unitNode->getIntAttribute("ColorG");
+                    boxUnit.colorRGB[2] = unitNode->getIntAttribute("ColorB");
+
+                    forEachXmlChildElement(*unitNode, boxNode)
+                    {
+                        if (boxNode->hasTagName("BOX"))
+                        {
+                            Box box;
+                            
+                            box.channel = boxNode->getIntAttribute("ch");
+                            box.x = boxNode->getDoubleAttribute("x");
+                            box.y = boxNode->getDoubleAttribute("y");
+                            box.w = boxNode->getDoubleAttribute("w");
+                            box.h = boxNode->getDoubleAttribute("h");
+                            
+                            boxUnit.lstBoxes.push_back(box);
+                        }
+                    }
+
+                    boxUnits.push_back(boxUnit);
+                }
+            }
+        }
+    }
+
+    electrode->plot->updateUnits();
+
 }

@@ -36,8 +36,8 @@ PCAProjectionAxes::PCAProjectionAxes(Electrode* electrode_) :
 {
     projectionImage = Image(Image::RGB, imageDim, imageDim, true);
     bufferSize = 600;
-    pcaMin[0] = pcaMin[1] = 0;
-    pcaMax[0] = pcaMax[1] = 0;
+    pcaMin[0] = pcaMin[1] = -5;
+    pcaMax[0] = pcaMax[1] = 5;
 
     rangeSet = false;
     inPolygonDrawingMode = false;
@@ -92,6 +92,7 @@ void PCAProjectionAxes::drawUnit(Graphics& g, PCAUnit unit)
     electrode->sorter->getSelectedUnitAndBox(selectedUnitId, selectedBoxId);
 
     g.setColour(Colour(unit.colorRGB[0], unit.colorRGB[1], unit.colorRGB[2]));
+    
     if (unit.poly.pts.size() > 2)
     {
         float thickness;
@@ -103,6 +104,7 @@ void PCAProjectionAxes::drawUnit(Graphics& g, PCAUnit unit)
             thickness = 1;
 
         double cx = 0, cy = 0;
+
         for (int k = 0; k < unit.poly.pts.size() - 1; k++)
         {
             // convert projection coordinates to screen coordinates.
@@ -114,10 +116,12 @@ void PCAProjectionAxes::drawUnit(Graphics& g, PCAUnit unit)
             cy += y1;
             g.drawLine(x1, y1, x2, y2, thickness);
         }
+        
         float x1 = (unit.poly.offset.X + unit.poly.pts[0].X - pcaMin[0]) / (pcaMax[0] - pcaMin[0]) * w;
         float y1 = (unit.poly.offset.Y + unit.poly.pts[0].Y - pcaMin[1]) / (pcaMax[1] - pcaMin[1]) * h;
         float x2 = (unit.poly.offset.X + unit.poly.pts[unit.poly.pts.size() - 1].X - pcaMin[0]) / (pcaMax[0] - pcaMin[0]) * w;
         float y2 = (unit.poly.offset.Y + unit.poly.pts[unit.poly.pts.size() - 1].Y - pcaMin[1]) / (pcaMax[1] - pcaMin[1]) * h;
+        
         g.drawLine(x1, y1, x2, y2, thickness);
 
         cx += x2;
@@ -211,9 +215,6 @@ void PCAProjectionAxes::redraw(bool subsample)
 {
     Graphics g(projectionImage);
 
-    // recompute image
-    //int w = getWidth();
-    //int h = getHeight();
     projectionImage.clear(juce::Rectangle<int>(0, 0, projectionImage.getWidth(), projectionImage.getHeight()),
         Colours::black);
 
@@ -434,7 +435,7 @@ void PCAProjectionAxes::mouseDown(const juce::MouseEvent& event)
     }
     if (inPolygonDrawingMode)
     {
-        drawnUnit = PCAUnit(Sorter::generateUnitId(), electrode->sorter->generateLocalId());
+        drawnUnit = PCAUnit(Sorter::generateUnitId());
         drawnPolygon.push_back(PointD(event.x, event.y));
     }
     else

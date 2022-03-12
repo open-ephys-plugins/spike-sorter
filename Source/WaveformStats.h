@@ -33,22 +33,40 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <queue>
 #include <atomic>
 
+/** 
 
+    Online statistics for each unit (not currently used) 
+
+*/
 class WaveformStats
 {
 public:
+
+    /** Construtor */
     WaveformStats();
+
+    /** Destructor */
     ~WaveformStats();
+
+    /** Sets length of waveform */
     void resizeWaveform(int newlength);
+    
+    /** Resets stats to default value */
     void reset();
+
+    /** Returns waveform mean for a given index */
     std::vector<double> getMean(int index);
+
+    /** Returns waveform std for a given index */
     std::vector<double> getStandardDeviation(int index);
     void update(SorterSpikePtr so);
     bool queryNewData();
 
-    double LastSpikeTime;
+    double lastSpikeTime;
     bool newData;
-    std::vector<std::vector<double> > WaveFormMean,WaveFormSk,WaveFormMk;
+    
+    std::vector<std::vector<double>> WaveFormMean, WaveFormSk, WaveFormMk;
+    
     double numSamples;
 };
 

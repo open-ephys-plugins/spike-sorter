@@ -93,7 +93,7 @@ void PCAUnit::updateColor()
     setDefaultColors(colorRGB, unitId);
 }
 
-PCAUnit::PCAUnit(int id, int localId_): unitId(id), localId(localId_)
+PCAUnit::PCAUnit(int id): unitId(id)
 {
     setDefaultColors(colorRGB, unitId);
 };
@@ -102,7 +102,7 @@ PCAUnit::~PCAUnit()
 {
 }
 
-PCAUnit::PCAUnit(cPolygon B, int id, int localId_) : unitId(id), localId(localId_)
+PCAUnit::PCAUnit(cPolygon B, int id) : unitId(id)
 {
     poly = B;
 }
@@ -110,10 +110,6 @@ PCAUnit::PCAUnit(cPolygon B, int id, int localId_) : unitId(id), localId(localId
 int PCAUnit::getUnitId()
 {
     return unitId;
-}
-int PCAUnit::getLocalId()
-{
-    return localId;
 }
 
 bool PCAUnit::isPointInsidePolygon(PointD p)

@@ -37,6 +37,9 @@ Electrode::Electrode(SpikeChannel* channel, PCAComputingThread* computingThread_
 {
 
     name = channel->getName();
+    streamName = channel->getStreamName();
+    sourceNodeId = channel->getSourceNodeId();
+
     streamId = channel->getStreamId();
     uniqueId = channel->getUniqueId();
 
@@ -179,6 +182,26 @@ void SpikeSorter::process(AudioBuffer<float>& buffer)
 
 }
 
+Electrode* SpikeSorter::findMatchingElectrode(String name, String stream_name, int stream_source)
+{
+    std::cout << "Searching for electrode with " << name << " : " << stream_name << " : " << stream_source << std::endl;
+    for (auto electrode : electrodes)
+    {
+        if (electrode->name == name &&
+            electrode->streamName == stream_name &&
+            electrode->sourceNodeId == stream_source)
+        {
+            std::cout << "  Found it! " << std::endl;
+            return electrode;
+        }
+            
+    }
+
+    std::cout << "  No match " << std::endl;
+
+    return nullptr;
+}
+
 void SpikeSorter::saveCustomParametersToXml(XmlElement* parentElement)
 {
     
@@ -196,5 +219,20 @@ void SpikeSorter::saveCustomParametersToXml(XmlElement* parentElement)
 void SpikeSorter::loadCustomParametersFromXml(XmlElement* xml)
 {
 
+    for (auto* paramsXml : xml->getChildIterator())
+    {
 
+        if (paramsXml->hasTagName("ELECTRODE"))
+        {
+            String name = paramsXml->getStringAttribute("name", "");
+            String stream_name = paramsXml->getStringAttribute("stream_name", "");
+            int stream_source = paramsXml->getIntAttribute("source_node_id", 0);
+
+            Electrode* electrode = findMatchingElectrode(name, stream_name, stream_source);
+
+            if (electrode != nullptr)
+                electrode->sorter->loadCustomParametersFromXml(paramsXml);
+
+        }
+    }
 }

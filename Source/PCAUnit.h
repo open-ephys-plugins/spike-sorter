@@ -63,19 +63,16 @@ public:
     PCAUnit() { }
 
     /** Constructor with global and local IDs specified */
-    PCAUnit(int id, int localId);
+    PCAUnit(int id);
 
     /** Constructor with polygon + global and local IDs specified */
-    PCAUnit(cPolygon B, int id, int localId);
+    PCAUnit(cPolygon B, int id);
 
     /** Destructor */
     ~PCAUnit();
 
     /** Returns global ID for this unit */
     int getUnitId();
-
-    /** Returns the local ID for this unit */
-    int getLocalId();
 
     /** Checks whether waveform is inside this unit's polygon */
 	bool isWaveFormInsidePolygon(SorterSpikePtr so);
@@ -86,21 +83,27 @@ public:
     /** Updates the waveform for this unit */
 	void updateWaveform(SorterSpikePtr so);
 
+    /** Sets the color for this unit */
+    static void setDefaultColors(uint8_t col[3], int ID);
+
     /** Updates the unit's color (when a new ID is assigned) */
     void updateColor();
-
-public:
-    
+  
+    /** Identifier for this unit (global across the Spike Sorter) */
     int unitId;
-    int localId; // used internally, for colors and position.
 
+    /** Polygon that defines this unit's boundaries in PCA space*/
     cPolygon poly;
+
+    /** RGB color for this unit */
     uint8_t colorRGB[3];
-    static void setDefaultColors(uint8_t col[3], int ID);
+
+    /** Ongoing stats for this unit (not currently used) */
     WaveformStats stats;
-    bool Active;
-    juce::int64 Activated_TS_S;
-    Time timer;
+
+    /** True if this unit is active */
+    bool isActive;
+
 };
 
 
