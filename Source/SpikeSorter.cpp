@@ -142,7 +142,7 @@ void SpikeSorter::handleSpike(SpikePtr newSpike)
 
     SorterSpikePtr sorterSpike = new SorterSpikeContainer(channelInfo, 
                                                           newSpike->getSortedId(),
-                                                          newSpike->getTimestamp(),
+                                                          newSpike->getSampleNumber(),
                                                           newSpike->getDataPointer());
 
     

@@ -28,7 +28,7 @@
 #include <stdio.h>
 
 SpikeSorterEditor::SpikeSorterEditor(GenericProcessor* parentNode)
-    : VisualizerEditor(parentNode, 205),
+    : VisualizerEditor(parentNode, "Spike Sorter", 205),
       spikeSorterCanvas(nullptr)
 
 {
