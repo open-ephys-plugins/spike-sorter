@@ -28,9 +28,6 @@
 #include <stdio.h>
 
 
-
-
-
 Electrode::Electrode(SpikeChannel* channel, PCAComputingThread* computingThread_)
     : computingThread(computingThread_),
       isActive(true)
@@ -83,6 +80,29 @@ AudioProcessorEditor* SpikeSorter::createEditor()
 
     return editor.get();
 }
+
+bool SpikeSorter::startAcquisition()
+{
+    
+    SpikeSorterEditor* editor = (SpikeSorterEditor*) getEditor();
+    
+    editor->enable();
+    
+    return true;
+}
+
+
+bool SpikeSorter::stopAcquisition()
+{
+    
+    SpikeSorterEditor* editor = (SpikeSorterEditor*) getEditor();
+    
+    editor->disable();
+    
+    return true;
+}
+
+
 
 void SpikeSorter::updateSettings()
 {

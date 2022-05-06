@@ -46,16 +46,19 @@ public:
     ~WaveformAxes() {}
 
     /** Handles an incoming spike*/
-	bool updateSpikeData(SorterSpikePtr s);
+	bool updateSpikeData(SorterSpikePtr s) override;
 
     /** Renders the incoming waveforms */
-    void paint(Graphics& g);
+    void paint(Graphics& g) override;
+    
+    /** Sets whether spikes should be redrawn*/
+    void refresh();
 
     /** Plots an individual spike*/
     void plotSpike(SorterSpikePtr s, Graphics& g);
 
-    /** Renders the box boundaries*/
-    void drawBoxes(Graphics& g);
+    /** Called when axes are resized */
+    void resized() override;
 
     void isOverUnitBox(float x, float y, int& UnitID, int& BoxID, String& where) ;
 
@@ -65,11 +68,11 @@ public:
     int findUnitIndexById(int id);
 
     /** Mouse callbacks*/
-    void mouseMove(const MouseEvent& event);
-    void mouseExit(const MouseEvent& event);
-    void mouseDown(const MouseEvent& event);
-    void mouseDrag(const MouseEvent& event);
-    void mouseUp(const MouseEvent& event);
+    void mouseMove(const MouseEvent& event) override;
+    void mouseExit(const MouseEvent& event) override;
+    void mouseDown(const MouseEvent& event) override;
+    void mouseDrag(const MouseEvent& event) override;
+    void mouseUp(const MouseEvent& event) override;
 
     /** Get/set axes range */
     void setRange(float);
@@ -84,41 +87,75 @@ public:
 
 private:
 
+    /**
+        Class used to draw annotations, so waveforms can be
+     redrawn independently
+     */
+    class AnnotationComponent : public Component
+    {
+    public:
+        
+        /** Constructor */
+        AnnotationComponent(Electrode* electrode, std::vector<BoxUnit>* units);
+        
+        /** Render the component */
+        void paint(Graphics& g) override;
+        
+        Colour thresholdColour = Colours::red;
+        bool signalFlipped = false;
+        bool isOverThresholdSlider = false;
+        float displayThresholdLevel = 0.0f;
+        float range;
+        
+        int isOverUnit = -1;
+        int isOverBox = -1;
+        
+        std::vector<BoxUnit>* units;
+    private:
+
+        /** Renders the box boundaries*/
+        void drawBoxes(Graphics& g);
+
+        /** Draws threshold slider*/
+        void drawThresholdSlider(Graphics& g);
+        
+        Electrode* electrode;
+        
+    };
+    
+    std::unique_ptr<AnnotationComponent> annotationComponent;
+    
     /** Draws tick marks behind waveforms */
     void drawWaveformGrid(Graphics& g);
 
-    /** Draws threshold slider*/
-    void drawThresholdSlider(Graphics& g);
-
-    int electrodeID;
     bool editAll = false;
     bool signalFlipped = false;
-    bool bDragging ;
+    bool bDragging = false;
     Colour waveColour;
-    Colour thresholdColour;
     Colour gridColour;
     int channel;
-    bool drawGrid;
+    bool drawGrid = true;
+    bool redrawSpikes = true;
 
-    float displayThresholdLevel;
+    float displayThresholdLevel = 0.0f;
     float detectorThresholdLevel;
 
-    int spikesReceivedSinceLastRedraw;
+    int spikesReceivedSinceLastRedraw = 0;
 
-    Font font;
     float mouseDownX, mouseDownY;
     float mouseOffsetX, mouseOffsetY;
 
     SorterSpikeArray spikeBuffer;
 
-    int spikeIndex;
-    int bufferSize;
+    int spikeIndex = 0;
+    int bufferSize = 5;
 
-    float range;
+    float range = 250.0f;
 
-    bool isOverThresholdSlider;
-    bool isDraggingThresholdSlider;
-    int isOverUnit,isOverBox;
+    bool isOverThresholdSlider = false;
+    bool isDraggingThresholdSlider = false;
+    int isOverUnit = -1;
+    int isOverBox = -1;
     String strOverWhere;
 
     std::vector<BoxUnit> units;

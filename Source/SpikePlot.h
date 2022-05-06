@@ -60,6 +60,9 @@ public:
 
     /** Sets bounds of sub-plots*/
     void resized();
+    
+    /** Called on each animation */
+    void refresh();
 
     /** Gets the currently available units from the electrode*/
     void updateUnits();

@@ -93,6 +93,12 @@ public:
 
     /** Called whenever the signal chain is altered. */
     void updateSettings() override;
+    
+    /** Used to enable animation */
+    bool startAcquisition() override;
+    
+    /** Used to disable animation */
+    bool stopAcquisition() override;
 
     /** Creates the SpikeSorterEditor. */
     AudioProcessorEditor* createEditor() override;

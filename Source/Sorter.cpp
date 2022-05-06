@@ -1,4 +1,4 @@
-﻿/*
+/*
 ------------------------------------------------------------------
 
 This file is part of the Open Ephys GUI
@@ -295,8 +295,10 @@ void Sorter::removeAllUnits()
 bool Sorter::removeUnit(int unitID)
 {
     const ScopedLock myScopedLock(mut);
+    
+    std::cout << "Sorter::removeUnit() " << unitID << std::endl;
 
-    for (int k=0; k<boxUnits.size(); k++)
+    for (int k = 0; k < boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitId() == unitID)
         {
@@ -305,7 +307,7 @@ bool Sorter::removeUnit(int unitID)
         }
     }
 
-    for (int k=0; k<pcaUnits.size(); k++)
+    for (int k = 0; k < pcaUnits.size(); k++)
     {
         if (pcaUnits[k].getUnitId() == unitID)
         {
@@ -444,7 +446,7 @@ bool Sorter::removeBoxFromUnit(int unitId, int boxIndex)
 {
     const ScopedLock myScopedLock(mut);
 
-    for (int k=0; k<boxUnits.size(); k++)
+    for (int k = 0; k < boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitId() == unitId)
         {
@@ -463,7 +465,7 @@ std::vector<Box> Sorter::getUnitBoxes(int unitId)
     std::vector<Box> boxes;
     const ScopedLock myScopedLock(mut);
 
-    for (int k=0; k< boxUnits.size(); k++)
+    for (int k = 0; k < boxUnits.size(); k++)
     {
         if (boxUnits[k].getUnitId() == unitId)
         {

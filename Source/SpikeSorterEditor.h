@@ -53,7 +53,7 @@ public:
     Visualizer* createNewCanvas();
 
     /** ComboBox::Listener callback*/
-    void comboBoxChanged(ComboBox* comboBox);
+    void comboBoxChanged(ComboBox* comboBox) override;
 
     /** Selects the next available electrode */
     void nextElectrode();
@@ -62,7 +62,7 @@ public:
     void previousElectrode();
 
     /** Called when selected stream is updated*/
-    void SpikeSorterEditor::selectedStreamHasChanged() override;
+    void selectedStreamHasChanged() override;
 
 private:
 

@@ -63,12 +63,6 @@ public:
     /** Called instead of "repaint" to avoid redrawing underlying components.*/
     void refresh();
 
-    /** Starts animation callbacks*/
-    void beginAnimation();
-
-    /** Stops animation callbacks*/
-    void endAnimation();
-
     /** Called when the component's tab becomes visible again*/
     void refreshState();
 
@@ -77,9 +71,6 @@ public:
 
     /** Updates size of spike display*/
     void resized();
-
-    /** Responds to C (clear), escape, and delete*/
-    bool keyPressed(const KeyPress& key);
 
     /** Responds to button clicks*/
     void buttonClicked(Button* button);
@@ -136,9 +127,9 @@ public:
 
     /** Sets the spike plot to display */
     void setSpikePlot(SpikePlot* plot);
-
-    /** Fills the background */
-    void paint(Graphics& g);
+    
+    /** Called on each animation cycle*/
+    void refresh();
 
     /** Resizes spike plot location*/
     void resized();

@@ -31,29 +31,13 @@ WaveformAxes::WaveformAxes(SpikePlot* plot_, Electrode* electrode_, int channelI
     GenericDrawAxes(GenericDrawAxes::AxesType(channelIndex)),
     channel(channelIndex),
     plot(plot_),
-    electrode(electrode_),
-    drawGrid(true),
-    displayThresholdLevel(0.0f),
-    spikesReceivedSinceLastRedraw(0),
-    spikeIndex(0),
-    bufferSize(5),
-    range(250.0f),
-    isOverThresholdSlider(false),
-    isDraggingThresholdSlider(false)
+    electrode(electrode_)
 
 {
-    bDragging = false;
-
-    isOverUnit = -1;
-    isOverBox = -1;
-
     addMouseListener(this, true);
 
-    thresholdColour = Colours::red;
-
-    font = Font("Small Text", 10, Font::plain);
-    
-    int numSamples = 40;
+    annotationComponent = std::make_unique<AnnotationComponent>(electrode, &units);
+    addAndMakeVisible(annotationComponent.get());
 
     for (int n = 0; n < bufferSize; n++)
     {
@@ -61,9 +45,16 @@ WaveformAxes::WaveformAxes(SpikePlot* plot_, Electrode* electrode_, int channelI
     }
 }
 
+void WaveformAxes::resized()
+{
+    annotationComponent->setBounds(0, 0, getWidth(), getHeight());
+}
+
 void WaveformAxes::setRange(float r)
 {
     range = r;
+    
+    annotationComponent->range = range;
 
     repaint();
 }
@@ -106,7 +97,14 @@ void WaveformAxes::plotSpike(SorterSpikePtr s, Graphics& g)
 
 }
 
-void WaveformAxes::drawThresholdSlider(Graphics& g)
+WaveformAxes::AnnotationComponent::AnnotationComponent(Electrode* electrode_,
+                                                       std::vector<BoxUnit>* units_)
+    : electrode(electrode_), units(units_)
+{
+
+}
+
+void WaveformAxes::AnnotationComponent::drawThresholdSlider(Graphics& g)
 {
 
     g.setColour(thresholdColour);
@@ -126,6 +124,11 @@ void WaveformAxes::drawThresholdSlider(Graphics& g)
 
 }
 
+void WaveformAxes::AnnotationComponent::paint(Graphics& g)
+{
+    drawThresholdSlider(g);
+    drawBoxes(g);
+}
 
 void WaveformAxes::drawWaveformGrid(Graphics& g)
 {
@@ -174,7 +177,7 @@ void WaveformAxes::clear()
 {
     spikeBuffer.clear();
     spikeIndex = 0;
-    int numSamples = 40;
+
     for (int n = 0; n < bufferSize; n++)
     {
         spikeBuffer.add(nullptr);
@@ -197,24 +200,29 @@ void WaveformAxes::mouseMove(const MouseEvent& event)
 
     if (y > h - 10.0f && y < h + 10.0f && !isOverThresholdSlider)
     {
-        thresholdColour = Colours::yellow;
         isOverThresholdSlider = true;
+        annotationComponent->thresholdColour = Colours::yellow;
+        annotationComponent->isOverThresholdSlider = true;
     }
     else if ((y < h - 10.0f || y > h + 10.0f) && isOverThresholdSlider)
     {
-        thresholdColour = Colours::red;
         isOverThresholdSlider = false;
+        annotationComponent->thresholdColour = Colours::red;
+        annotationComponent->isOverThresholdSlider = false;
     }
     else
     {
         // are we inside a box ?
         isOverUnit = 0;
         isOverBox = -1;
+        annotationComponent->isOverBox = -1;
+        annotationComponent->isOverUnit = 0;
         strOverWhere = "";
         isOverUnitBox(event.x, event.y, isOverUnit, isOverBox, strOverWhere);
 
     }
-    repaint();
+    
+    annotationComponent->repaint();
 
 }
 
@@ -228,11 +236,6 @@ int WaveformAxes::findUnitIndexById(int id)
 
 void WaveformAxes::mouseDown(const juce::MouseEvent& event)
 {
-
-    if (event.mods.isRightButtonDown())
-    {
-        clear();
-    }
 
     float h = getHeight();
     float w = getWidth();
@@ -257,8 +260,9 @@ void WaveformAxes::mouseDown(const juce::MouseEvent& event)
     else
     {
         electrode->sorter->setSelectedUnitAndBox(-1, -1);
-
     }
+    
+    annotationComponent->repaint();
 }
 
 
@@ -394,10 +398,11 @@ void WaveformAxes::mouseDrag(const MouseEvent& event)
         }
 
     }
-    else  if (isOverThresholdSlider)
+    else if (isOverThresholdSlider)
     {
 
         float thresholdSliderPosition;
+        
         if (signalFlipped)
             thresholdSliderPosition = (getHeight() - float(event.y)) / float(getHeight());
         else
@@ -410,12 +415,13 @@ void WaveformAxes::mouseDrag(const MouseEvent& event)
 
 
         displayThresholdLevel = (0.5f - thresholdSliderPosition) * range;
+        annotationComponent->displayThresholdLevel = displayThresholdLevel;
 
         plot->setDisplayThresholdForChannel(channel, displayThresholdLevel);
 
     }
 
-    repaint();
+    annotationComponent->repaint();
 
 }
 
@@ -425,8 +431,9 @@ void WaveformAxes::mouseExit(const MouseEvent& event)
     if (isOverThresholdSlider)
     {
         isOverThresholdSlider = false;
-        thresholdColour = Colours::red;
-        repaint();
+        annotationComponent->isOverThresholdSlider = false;
+        annotationComponent->thresholdColour = Colours::red;
+        annotationComponent->repaint();
     }
 }
 
@@ -438,6 +445,8 @@ float WaveformAxes::getDisplayThreshold()
 void WaveformAxes::setDetectorThreshold(float t)
 {
     displayThresholdLevel = t;
+    annotationComponent->displayThresholdLevel = t;
+    annotationComponent->repaint();
 }
 
 
@@ -532,7 +541,7 @@ void WaveformAxes::isOverUnitBox(float x, float y, int& UnitID, int& BoxID, Stri
     setMouseCursor(MouseCursor::NormalCursor); // not inside any boxes
 }
 
-void WaveformAxes::drawBoxes(Graphics& g)
+void WaveformAxes::AnnotationComponent::drawBoxes(Graphics& g)
 {
     // y and h are given in micro volts.
     // x and w and given in micro seconds.
@@ -549,18 +558,18 @@ void WaveformAxes::drawBoxes(Graphics& g)
     electrode->sorter->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
 
     // Typical spike is 40 samples, at 30kHz ~ 1.3 ms or 1300 usecs.
-    for (int k = 0; k < units.size(); k++)
+    for (int k = 0; k < units->size(); k++)
     {
-        g.setColour(Colour(units[k].colorRGB[0], units[k].colorRGB[1], units[k].colorRGB[2]));
+        g.setColour(Colour(units->at(k).colorRGB[0], units->at(k).colorRGB[1], units->at(k).colorRGB[2]));
 
-        for (int boxiter = 0; boxiter < units[k].lstBoxes.size(); boxiter++)
+        for (int boxiter = 0; boxiter < units->at(k).lstBoxes.size(); boxiter++)
         {
-            Box B = units[k].lstBoxes[boxiter];
+            Box B = units->at(k).lstBoxes[boxiter];
 
             float thickness = 2;
-            if (units[k].getUnitId() == selectedUnitID && boxiter == selectedBoxID)
+            if (units->at(k).getUnitId() == selectedUnitID && boxiter == selectedBoxID)
                 thickness = 3;
-            else if (units[k].getUnitId() == isOverUnit && boxiter == isOverBox)
+            else if (units->at(k).getUnitId() == isOverUnit && boxiter == isOverBox)
                 thickness = 2;
             else
                 thickness = 1;
@@ -583,17 +592,28 @@ void WaveformAxes::drawBoxes(Graphics& g)
                 drawRecty2 = recty2;
             }
             g.drawRect(rectx1, drawRecty1, rectx2 - rectx1, drawRecty2 - drawRecty1, thickness);
-            g.drawText(String(units[k].unitId), rectx1, drawRecty1 - 15, rectx2 - rectx1, 15, juce::Justification::centred, false);
+            g.drawText(String(units->at(k).unitId), rectx1, drawRecty1 - 15, rectx2 - rectx1, 15, juce::Justification::centred, false);
 
         }
     }
 }
 
 
+void WaveformAxes::refresh()
+{
+    spikesReceivedSinceLastRedraw = 0;
+    
+    repaint();
+}
+
 
 void WaveformAxes::updateUnits(std::vector<BoxUnit> _units)
 {
     units = _units;
+    
+    std::cout << "WaveformAxes::updateUnits()" << std::endl;
+    
+    annotationComponent->units = &units;
 }
 
 void WaveformAxes::paint(Graphics& g)
@@ -603,10 +623,6 @@ void WaveformAxes::paint(Graphics& g)
 
     if (drawGrid)
         drawWaveformGrid(g);
-
-    // draw the threshold line and labels
-    drawThresholdSlider(g);
-    drawBoxes(g);
 
     // if no spikes have been received then don't plot anything
     if (!gotFirstSpike)
@@ -626,9 +642,11 @@ void WaveformAxes::paint(Graphics& g)
     }
 
     g.setColour(Colours::white);
+    
     if (spikeBuffer[spikeIndex] != nullptr)
         plotSpike(spikeBuffer[spikeIndex], g);
 
-    spikesReceivedSinceLastRedraw = 0;
+    annotationComponent->repaint();
+    
 
 }

@@ -42,17 +42,17 @@ SpikeSorterCanvas::SpikeSorterCanvas(SpikeSorter* n) :
     inDrawingPolygonMode = false;
     scrollBarThickness = viewport->getScrollBarThickness();
 
-    addUnitButton = new UtilityButton("New box unit", Font("Small Text", 13, Font::plain));
+    addUnitButton = new UtilityButton("New Box Unit", Font("Small Text", 13, Font::plain));
     addUnitButton->setRadius(3.0f);
     addUnitButton->addListener(this);
     addAndMakeVisible(addUnitButton);
 
-    addPolygonUnitButton = new UtilityButton("New polygon", Font("Small Text", 13, Font::plain));
+    addPolygonUnitButton = new UtilityButton("New Polygon Unit", Font("Small Text", 13, Font::plain));
     addPolygonUnitButton->setRadius(3.0f);
     addPolygonUnitButton->addListener(this);
     addAndMakeVisible(addPolygonUnitButton);
 
-    addBoxButton = new UtilityButton("Add box", Font("Small Text", 13, Font::plain));
+    addBoxButton = new UtilityButton("Add Box", Font("Small Text", 13, Font::plain));
     addBoxButton->setRadius(3.0f);
     addBoxButton->addListener(this);
     addAndMakeVisible(addBoxButton);
@@ -91,24 +91,12 @@ SpikeSorterCanvas::SpikeSorterCanvas(SpikeSorter* n) :
 
     setWantsKeyboardFocus(true);
 
-    refreshRate = 5;
+    refreshRate = 10; // Hz
 
-}
-
-void SpikeSorterCanvas::beginAnimation()
-{
-    startCallbacks();
-}
-
-void SpikeSorterCanvas::endAnimation()
-{
-    stopCallbacks();
 }
 
 void SpikeSorterCanvas::update()
 {
-
-    std::cout << "Updating SpikeSorterCanvas" << std::endl;
 
 }
 
@@ -124,18 +112,20 @@ void SpikeSorterCanvas::resized()
 
     spikeDisplay->setBounds(0, 0, getWidth() - 140, spikeDisplay->getTotalHeight());
 
-    nextElectrode->setBounds(0, 20, 120, 30);
-    prevElectrode->setBounds(0, 60, 120, 30);
+    nextElectrode->setBounds(8, 20, 115, 30);
+    prevElectrode->setBounds(8, 60, 115, 30);
 
-    addUnitButton->setBounds(0, 120, 120, 20);
-    addPolygonUnitButton->setBounds(0, 150, 120, 20);
-    addBoxButton->setBounds(0, 180, 120, 20);
-    delUnitButton->setBounds(0, 210, 120, 20);
+    addUnitButton->setBounds(8, 120, 115, 20);
+    addBoxButton->setBounds(8, 150, 115, 20);
+    
+    addPolygonUnitButton->setBounds(8, 190, 115, 20);
+    
+    delUnitButton->setBounds(8, 230, 115, 20);
 
-    rePCAButton->setBounds(0, 240, 120, 20);
+    rePCAButton->setBounds(5, 270, 115, 20);
 
-    newIDbuttons->setBounds(0, 270, 120, 20);
-    deleteAllUnits->setBounds(0, 300, 120, 20);
+    newIDbuttons->setBounds(5, 300, 115, 20);
+    deleteAllUnits->setBounds(5, 350, 115, 20);
 
 }
 
@@ -148,7 +138,7 @@ void SpikeSorterCanvas::paint(Graphics& g)
 
 void SpikeSorterCanvas::refresh()
 {
-    spikeDisplay->repaint();
+    spikeDisplay->refresh();
 }
 
 
@@ -171,6 +161,7 @@ void SpikeSorterCanvas::removeUnitOrBox()
 {
     int unitID, boxID;
     electrode->plot->getSelectedUnitAndBox(unitID, boxID);
+    
     bool selectNewBoxUnit = false;
     bool selectNewPCAUnit = false;
 
@@ -180,6 +171,8 @@ void SpikeSorterCanvas::removeUnitOrBox()
         {
             // box unit
             int numBoxes = electrode->sorter->getNumBoxes(unitID);
+            
+            std::cout << "Removing box unit" << std::endl;
 
             if (numBoxes > 1)
             {
@@ -263,35 +256,6 @@ void SpikeSorterCanvas::removeUnitOrBox()
 
 }
 
-bool SpikeSorterCanvas::keyPressed(const KeyPress& key)
-{
-
-    KeyPress c = KeyPress::createFromDescription("c");
-    KeyPress e = KeyPress::createFromDescription("escape");
-    KeyPress d = KeyPress::createFromDescription("delete");
-
-    if (key.isKeyCode(c.getKeyCode())) // C
-    {
-        spikeDisplay->clear();
-
-        std::cout << "Clearing display" << std::endl;
-        return true;
-    }
-    else  if (key.isKeyCode(e.getKeyCode()))   // ESC
-    {
-        spikeDisplay->setPolygonMode(false);
-        return true;
-    }
-    else  if (key.isKeyCode(d.getKeyCode()))   // Delete
-    {
-        removeUnitOrBox();
-        return true;
-    }
-
-    return false;
-
-}
-
 void SpikeSorterCanvas::buttonClicked(Button* button)
 {
     int channel = 0;
@@ -326,6 +290,7 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
     }
     else if (button == delUnitButton)
     {
+        //std::cout << "Delete button pressed" << std::endl;
         removeUnitOrBox();
 
     }
@@ -336,7 +301,7 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
 
         if (unitID > 0)
         {
-            std::cout << "Adding box to channel " << channel << " with unitID " << unitID << std::endl;
+            //std::cout << "Adding box to channel " << channel << " with unitID " << unitID << std::endl;
             electrode->sorter->addBoxToUnit(channel, unitID);
             electrode->plot->updateUnits();
         }
@@ -365,12 +330,13 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
     }
     else if (button == deleteAllUnits)
     {
-        // delete unit
+        // delete all units
         electrode->sorter->removeAllUnits();
+        electrode->plot->updateUnits();
+        electrode->plot->setSelectedUnitAndBox(-1, -1);
     }
 
-
-    repaint();
+    refresh();
 }
 
 
@@ -397,7 +363,7 @@ void SpikeDisplay::setSpikePlot(SpikePlot* plot)
         removeChildComponent(activePlot);
     }
 
-    std::cout << "Spike display updating active plot" << std::endl;
+    //std::cout << "Spike display updating active plot" << std::endl;
     
     activePlot = plot;
 
@@ -409,12 +375,10 @@ void SpikeDisplay::setSpikePlot(SpikePlot* plot)
     resized();
 }
 
-void SpikeDisplay::paint(Graphics& g)
+void SpikeDisplay::refresh()
 {
-
     if (activePlot != nullptr)
-        activePlot->repaint();
-
+        activePlot->refresh();
 }
 
 void SpikeDisplay::setPolygonMode(bool on)
