@@ -134,8 +134,6 @@ private:
     Colour waveColour;
     Colour gridColour;
     int channel;
-    bool drawGrid = true;
-    bool redrawSpikes = true;
 
     float displayThresholdLevel = 0.0f;
     float detectorThresholdLevel;

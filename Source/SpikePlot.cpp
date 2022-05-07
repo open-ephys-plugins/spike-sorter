@@ -109,13 +109,15 @@ void SpikePlot::setName(const String& name_)
 
 void SpikePlot::paint(Graphics& g)
 {
-
-    g.setColour(Colours::white);
-    g.drawRect(0, 0, getWidth(), getHeight());
-
-    g.setFont(font);
-
+    
+    g.setColour(Colours::whitesmoke);
+    g.setFont(20);
     g.drawText(name, 10, 0, 200, 20, Justification::left, false);
+    
+    g.setColour(Colours::grey);
+    g.fillRoundedRectangle(0, 30, getWidth(), getHeight()-30, 12.0f);
+    g.setColour(Colours::black);
+    g.fillRoundedRectangle(10, 40, getWidth()-20, getHeight()-50, 8.0f);
 
 }
 
@@ -208,7 +210,7 @@ void SpikePlot::resized()
     const ScopedLock myScopedLock(mut);
 
     float width = (float)getWidth() - 10;
-    float height = (float)getHeight() - 25;
+    float height = (float)getHeight() - 50;
 
     float axesWidth = 0;
     float axesHeight = 0;
@@ -243,12 +245,13 @@ void SpikePlot::resized()
 
     for (int i = 0; i < nWaveAx; i++)
     {
-        wAxes[i]->setBounds(5 + (i % nWaveCols) * axesWidth / nWaveCols, 20 + (i / nWaveCols) * axesHeight, axesWidth / nWaveCols, axesHeight);
-        rangeButtons[i]->setBounds(8 + (i % nWaveCols) * axesWidth / nWaveCols,
-            20 + (i / nWaveCols) * axesHeight + axesHeight - 18,
-            35, 15);
+        wAxes[i]->setBounds(10 + (i % nWaveCols) * axesWidth / nWaveCols, 40 + (i / nWaveCols) * axesHeight, axesWidth / nWaveCols, axesHeight);
+        rangeButtons[i]->setBounds(15 + (i % nWaveCols) * axesWidth / nWaveCols,
+            25 + (i / nWaveCols) * axesHeight + axesHeight - 10,
+            40, 20);
     }
-    pAxes[0]->setBounds(5 + axesWidth, 20 + 0, width / 2, height);
+    
+    pAxes[0]->setBounds(15 + axesWidth, 40, width / 2 - 20, height-50);
 
 
 }

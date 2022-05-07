@@ -77,12 +77,12 @@ SpikeSorterCanvas::SpikeSorterCanvas(SpikeSorter* n) :
     deleteAllUnits->addListener(this);
     addAndMakeVisible(deleteAllUnits);
 
-    nextElectrode = new UtilityButton("Next Electrode", Font("Small Text", 13, Font::plain));
+    nextElectrode = new UtilityButton(">>", Font("Small Text", 13, Font::plain));
     nextElectrode->setRadius(3.0f);
     nextElectrode->addListener(this);
     addAndMakeVisible(nextElectrode);
 
-    prevElectrode = new UtilityButton("Prev Electrode", Font("Small Text", 13, Font::plain));
+    prevElectrode = new UtilityButton("<<", Font("Small Text", 13, Font::plain));
     prevElectrode->setRadius(3.0f);
     prevElectrode->addListener(this);
     addAndMakeVisible(prevElectrode);
@@ -108,12 +108,12 @@ void SpikeSorterCanvas::refreshState()
 
 void SpikeSorterCanvas::resized()
 {
-    viewport->setBounds(130, 0, getWidth() - 140, getHeight());
+    viewport->setBounds(130, 10, getWidth() - 140, getHeight()-20);
 
     spikeDisplay->setBounds(0, 0, getWidth() - 140, spikeDisplay->getTotalHeight());
 
-    nextElectrode->setBounds(8, 20, 115, 30);
-    prevElectrode->setBounds(8, 60, 115, 30);
+    nextElectrode->setBounds(90, 10, 40, 20);
+    prevElectrode->setBounds(45, 10, 40, 20);
 
     addUnitButton->setBounds(8, 120, 115, 20);
     addBoxButton->setBounds(8, 150, 115, 20);
@@ -133,7 +133,6 @@ void SpikeSorterCanvas::paint(Graphics& g)
 {
 
     g.fillAll(Colours::darkgrey);
-
 }
 
 void SpikeSorterCanvas::refresh()

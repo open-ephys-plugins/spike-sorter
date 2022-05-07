@@ -113,13 +113,13 @@ void WaveformAxes::AnnotationComponent::drawThresholdSlider(Graphics& g)
     {
         float h = getHeight() - (getHeight() * (0.5f - displayThresholdLevel / range));
         g.drawLine(0, h, getWidth(), h);
-        g.drawText(String(roundFloatToInt(displayThresholdLevel)), 2, h, 35, 10, Justification::left, false);
+        g.drawText(String(roundFloatToInt(displayThresholdLevel)), 5, h+3, 35, 10, Justification::left, false);
     }
     else
     {
         float h = getHeight() * (0.5f - displayThresholdLevel / range);
         g.drawLine(0, h, getWidth(), h);
-        g.drawText(String(roundFloatToInt(displayThresholdLevel)), 2, h, 35, 10, Justification::left, false);
+        g.drawText(String(roundFloatToInt(displayThresholdLevel)), 5, h+3, 35, 10, Justification::left, false);
     }
 
 }
@@ -610,19 +610,14 @@ void WaveformAxes::refresh()
 void WaveformAxes::updateUnits(std::vector<BoxUnit> _units)
 {
     units = _units;
-    
-    std::cout << "WaveformAxes::updateUnits()" << std::endl;
-    
+
     annotationComponent->units = &units;
 }
 
 void WaveformAxes::paint(Graphics& g)
 {
-    g.setColour(Colours::black);
-    g.fillRect(0, 0, getWidth(), getHeight());
-
-    if (drawGrid)
-        drawWaveformGrid(g);
+    
+    drawWaveformGrid(g);
 
     // if no spikes have been received then don't plot anything
     if (!gotFirstSpike)
