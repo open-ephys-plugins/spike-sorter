@@ -46,7 +46,10 @@ class Electrode;
   @see SpikeDisplayNode, SpikeDisplayEditor, Visualizer
 
 */
-class SpikeSorterCanvas : public Visualizer, public Button::Listener
+class SpikeSorterCanvas :
+    public Visualizer,
+    public Button::Listener,
+    public KeyListener
 
 {
 public:
@@ -67,7 +70,7 @@ public:
     void refreshState();
 
     /** Creates spike displays for incoming spike channels*/
-    void update();
+    void update() { }
 
     /** Updates size of spike display*/
     void resized();
@@ -77,6 +80,9 @@ public:
 
     /** Updates the current electrode */
     void setActiveElectrode(Electrode* electrode);
+    
+    /** Responds to keypress*/
+    bool keyPressed(const KeyPress& key, Component*);
 
     SpikeSorter* processor;
 
@@ -93,6 +99,8 @@ public:
         deleteAllUnits;
 
 private:
+    
+    /** Deletes currently selected unit or box */
     void removeUnitOrBox();
 
     ScopedPointer<SpikeDisplay> spikeDisplay;
@@ -137,6 +145,7 @@ public:
     /** Sets polygon drawing mode in the active plot*/
     void setPolygonMode(bool on);
 
+    /** Returns the total height of the display */
     int getTotalHeight()
     {
         return totalHeight;

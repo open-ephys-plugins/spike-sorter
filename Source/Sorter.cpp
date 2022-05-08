@@ -202,9 +202,12 @@ bool Sorter::firstJobFinished()
 
 void Sorter::RePCA()
 {
-    bPCAComputed = false;
-    bPCAJobSubmitted = false;
-    bRePCA = true;
+    if (bPCAComputed)
+    {
+        bPCAComputed = false;
+        bPCAJobSubmitted = false;
+        bRePCA = true;
+    }
 }
 
 void Sorter::addPCAunit(PCAUnit unit)

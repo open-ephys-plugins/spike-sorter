@@ -140,11 +140,12 @@ void SpikePlot::setPolygonDrawingMode(bool on)
 
 void SpikePlot::updateUnits()
 {
+    
+    LOGD("SpikePlot::updateUnits()");
+    
     const ScopedLock myScopedLock(mut);
     boxUnits = electrode->sorter->getBoxUnits();
     pcaUnits = electrode->sorter->getPCAUnits();
-    
-    std::cout << "SpikePlot::updateUnits()" << std::endl;
     
     if (nWaveAx > 0)
     {
@@ -377,7 +378,6 @@ void SpikePlot::clear()
 {
 
     const ScopedLock myScopedLock(mut);
-    std::cout << "SpikePlot::clear()" << std::endl;
 
     for (int i = 0; i < nWaveAx; i++)
         wAxes[i]->clear();

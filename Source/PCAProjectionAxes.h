@@ -66,7 +66,7 @@ public:
     void mouseDrag(const juce::MouseEvent& event);
     void mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel);
 
-    bool keyPressed(const KeyPress& key);
+    //bool keyPressed(const KeyPress& key);
     
     void redraw(bool subsample);
 

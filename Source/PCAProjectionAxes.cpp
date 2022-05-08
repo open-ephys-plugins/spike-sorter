@@ -448,7 +448,7 @@ void PCAProjectionAxes::mouseDown(const juce::MouseEvent& event)
 }
 
 
-bool PCAProjectionAxes::keyPressed(const KeyPress& key)
+/*bool PCAProjectionAxes::keyPressed(const KeyPress& key)
 {
     KeyPress e = KeyPress::createFromDescription("escape");
 
@@ -459,7 +459,7 @@ bool PCAProjectionAxes::keyPressed(const KeyPress& key)
         return true;
     }
     return false;
-}
+}*/
 
 void PCAProjectionAxes::rangeDown()
 {

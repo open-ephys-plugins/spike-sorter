@@ -88,18 +88,12 @@ SpikeSorterCanvas::SpikeSorterCanvas(SpikeSorter* n) :
     addAndMakeVisible(prevElectrode);
 
     addAndMakeVisible(viewport);
-
-    setWantsKeyboardFocus(true);
+    
+    addKeyListener(this);
 
     refreshRate = 10; // Hz
 
 }
-
-void SpikeSorterCanvas::update()
-{
-
-}
-
 
 void SpikeSorterCanvas::refreshState()
 {
@@ -253,6 +247,18 @@ void SpikeSorterCanvas::removeUnitOrBox()
         }
     }
 
+}
+
+bool SpikeSorterCanvas::keyPressed(const KeyPress& key, Component* c)
+{
+    if (key.getKeyCode() == KeyPress::deleteKey ||
+        key.getKeyCode() == KeyPress::backspaceKey)
+    {
+        removeUnitOrBox();
+        return false;
+    }
+    
+    return true;
 }
 
 void SpikeSorterCanvas::buttonClicked(Button* button)
