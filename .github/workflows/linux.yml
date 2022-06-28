@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-18.04]
 
     steps:
     - uses: actions/checkout@v1
@@ -33,8 +33,7 @@ jobs:
       env:
         artifactoryApiKey: ${{ secrets.artifactoryApiKey }}
         build_dir: "Build"
-        repo: ${{ github.event.repository.name }}
-        package: ${{ github.event.repository.name }}-linux
+        package: SpikeSorter-linux
       run: |
         plugin_api=$(grep -rnw ../../plugin-GUI/Source -e '#define PLUGIN_API_VER' | grep -Eo "[0-9]*" | tail -1)
         tag=$(git describe --tags $(git rev-list --tags --max-count=1))
