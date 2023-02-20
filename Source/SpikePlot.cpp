@@ -27,7 +27,10 @@
 #include "PCAProjectionAxes.h"
 #include "WaveformAxes.h"
 
-SpikePlot::SpikePlot(Electrode* electrode_) :
+SpikePlot::SpikePlot(
+    SpikeSorter* sorter_,
+    Electrode* electrode_) :
+    sorter(sorter_),
     electrode(electrode_),
     limitsChanged(true),
     name(electrode_->name)
@@ -83,9 +86,47 @@ SpikePlot::~SpikePlot()
 {
     pAxes.clear();
     wAxes.clear();
+}
+
+void SpikePlot::saveCustomParametersToXml(XmlElement* xml)
+{
+    XmlElement* mainNode = xml->createNewChildElement("PLOT");
+
+    mainNode->setAttribute("name", electrode->getKey());
+
+    for (int i = 0; i < electrode->numChannels; i++)
+    {
+        XmlElement* rangeNode = mainNode->createNewChildElement("AXIS");
+        rangeNode->setAttribute("thresh", thresholds[i]);
+        rangeNode->setAttribute("range", ranges[i]);
+    }
 
 }
 
+void SpikePlot::loadCustomParametersFromXml(XmlElement* xml)
+{
+
+    forEachXmlChildElement(*xml, mainNode)
+    {
+        if (mainNode->hasTagName("PLOT"))
+        {
+
+            std::string key = mainNode->getStringAttribute("name").toStdString();
+
+            int i = 0;
+            forEachXmlChildElement(*mainNode, axisNode)
+            {
+                if (axisNode->hasTagName("AXIS"))
+                {
+                    sorter->cache->setThreshold(key, i, axisNode->getIntAttribute("thresh"));
+                    sorter->cache->setRange(key, i, axisNode->getIntAttribute("range"));
+                    i++;
+                }
+            }
+        }
+    }
+
+}
 
 void SpikePlot::setSelectedUnitAndBox(int unitID, int boxID)
 {
@@ -105,7 +146,6 @@ void SpikePlot::setName(const String& name_)
 
     repaint();
 }
-
 
 void SpikePlot::paint(Graphics& g)
 {
@@ -257,8 +297,6 @@ void SpikePlot::resized()
 
 }
 
-
-
 void SpikePlot::modifyRange(std::vector<float> values)
 {
 
@@ -285,7 +323,6 @@ void SpikePlot::modifyRange(std::vector<float> values)
 
     setLimitsOnAxes();
 }
-
 
 void SpikePlot::modifyRange(int index, bool up)
 {
@@ -386,20 +423,34 @@ void SpikePlot::clear()
 
 }
 
-
 void SpikePlot::setDisplayThresholdForChannel(int i, float f)
 {
     thresholds.set(i, f);
+    wAxes[i]->setDetectorThreshold(f);
 }
-
 
 float SpikePlot::getDisplayThresholdForChannel(int i)
 {
     return thresholds[i];
 }
 
-
 Array<float> SpikePlot::getDisplayThresholds()
 {
     return thresholds;
+}
+
+float SpikePlot::getDisplayRangeForChannel(int i)
+{
+    return ranges[i];
+}
+
+void SpikePlot::setDisplayRangeForChannel(int i, float f)
+{
+    while (getDisplayRangeForChannel(i) != f)
+    {
+        modifyRange(i, true);
+        LOGC("Got range: ", getDisplayRangeForChannel(i));
+        LOGC("Requested range: ", f);
+    }
+    ranges.set(i,f);
 }

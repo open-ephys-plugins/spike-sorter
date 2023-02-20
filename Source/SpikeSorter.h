@@ -36,13 +36,69 @@
 #include <stdio.h>
 #include <math.h>
 
+class SpikeDisplayCache
+{
+public:
+    SpikeDisplayCache () {}
+    virtual ~SpikeDisplayCache() {}
+
+    void setMonitor(std::string key, bool isMonitored) {
+        monitors[key] = isMonitored;
+    };
+
+    bool isMonitored(std::string key) {
+        return monitors[key];
+    };
+
+    void setRange(std::string key, int channelIdx, double range) {
+        ranges[key][channelIdx] = range;
+    };
+
+    double getRange(std::string key, int channelIdx) {
+        return ranges[key][channelIdx];
+    };
+
+    void setThreshold(std::string key,int channelIdx, double thresh) {
+        thresholds[key][channelIdx] = thresh;
+    };
+
+    double getThreshold(std::string key, int channelIdx) {
+        return thresholds[key][channelIdx];
+    };
+
+    bool hasCachedDisplaySettings(std::string cacheKey)
+    {
+        /*
+        LOGDD("SpikeDisplayCache keys:");
+        std::vector<std::string> keys = extract_keys(ranges);
+        std::vector<std::map<int,double>> vals = extract_values(ranges);
+        for (int i = 0; i < keys.size(); i++)
+        {
+            std::vector<int> channels = extract_keys(vals[i]);
+            std::vector<double> ranges = extract_values(vals[i]);
+            for (int j = 0; j < channels.size(); j++)
+                LOGDD("Key: ", keys[i], " Channel: ", channels[j], " Range: ", ranges[j]);
+        }
+        */
+        return thresholds.count(cacheKey) > 0;
+    };
+
+private:
+
+    std::map<std::string, std::map<int, double>> ranges;
+    std::map<std::string, std::map<int, double>> thresholds;
+    std::map<std::string, bool> monitors;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpikeDisplayCache);
+};
+
 
 class Electrode
 {
 public:
 
     /** Constructor */
-    Electrode(SpikeChannel* channel, PCAComputingThread* computingThread);
+    Electrode(SpikeSorter* sorter, SpikeChannel* channel, PCAComputingThread* computingThread);
 
     /** Destructor */
     ~Electrode() { }
@@ -70,7 +126,15 @@ public:
     std::unique_ptr<SpikePlot> plot;
     std::unique_ptr<Sorter> sorter;
 
+    SpikeSorter* processor;
     PCAComputingThread* computingThread;
+
+    std::string getKey() { return key; }
+    
+
+private:
+
+    std::string key; // used for caching
 
 };
 
@@ -114,6 +178,9 @@ public:
 
     /** Loads all custom parameters*/
     void loadCustomParametersFromXml(XmlElement* xml) override;
+
+    /** Manages connections from SpikeChannels to SpikePlots */
+    std::unique_ptr<SpikeDisplayCache> cache;
    
 private:
 

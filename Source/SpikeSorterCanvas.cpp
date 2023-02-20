@@ -134,7 +134,6 @@ void SpikeSorterCanvas::refresh()
     spikeDisplay->refresh();
 }
 
-
 void SpikeSorterCanvas::setActiveElectrode(Electrode* electrode_)
 {
     electrode = electrode_;

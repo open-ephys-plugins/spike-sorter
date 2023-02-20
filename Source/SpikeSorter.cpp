@@ -28,8 +28,9 @@
 #include <stdio.h>
 
 
-Electrode::Electrode(SpikeChannel* channel, PCAComputingThread* computingThread_)
-    : computingThread(computingThread_),
+Electrode::Electrode(SpikeSorter* processor_, SpikeChannel* channel, PCAComputingThread* computingThread_)
+    : processor(processor_),
+      computingThread(computingThread_),
       isActive(true)
 {
 
@@ -45,7 +46,7 @@ Electrode::Electrode(SpikeChannel* channel, PCAComputingThread* computingThread_
     
     sorter = std::make_unique<Sorter>(this, computingThread);
 
-    plot = std::make_unique<SpikePlot>(this);
+    plot = std::make_unique<SpikePlot>(processor, this);
 
 }
 
@@ -66,11 +67,27 @@ void Electrode::updateSettings(SpikeChannel* channel)
 {
     name = channel->getName();
 
+    key = channel->getIdentifier().toStdString();
+
+    if (processor->cache->hasCachedDisplaySettings(key))
+    {
+
+        for (int i = 0; i < channel->getNumChannels(); i++)
+        {
+            plot->setDisplayThresholdForChannel(i, processor->cache->getThreshold(key, i));
+            plot->setDisplayRangeForChannel(i, processor->cache->getRange(key, i));
+        }
+
+    }
+
     plot->setName(name);
+    plot->refresh();
 }
 
 SpikeSorter::SpikeSorter() : GenericProcessor("Spike Sorter")
 {
+
+    cache = std::make_unique<SpikeDisplayCache>();
 
 }
 
@@ -107,6 +124,8 @@ bool SpikeSorter::stopAcquisition()
 void SpikeSorter::updateSettings()
 {
 
+    LOGC("SpikeSorter::updateSettings()");
+
     for (auto electrode : electrodes)
     {
         electrode->reset();
@@ -132,7 +151,8 @@ void SpikeSorter::updateSettings()
 
             if (!foundMatch)
             {
-                Electrode* e = new Electrode(spikeChannel, &computingThread);
+
+                Electrode* e = new Electrode(this, spikeChannel, &computingThread);
                 electrodes.add(e);
                 electrodeMap[spikeChannel] = e;
             }
@@ -230,6 +250,7 @@ void SpikeSorter::saveCustomParametersToXml(XmlElement* parentElement)
         
         XmlElement* electrodeNode = parentElement->createNewChildElement("ELECTRODE");
 
+        electrode->plot->saveCustomParametersToXml(electrodeNode);
         electrode->sorter->saveCustomParametersToXml(electrodeNode);
 
     }
@@ -251,8 +272,10 @@ void SpikeSorter::loadCustomParametersFromXml(XmlElement* xml)
             Electrode* electrode = findMatchingElectrode(name, stream_name, stream_source);
 
             if (electrode != nullptr)
+            {
                 electrode->sorter->loadCustomParametersFromXml(paramsXml);
-
+                electrode->plot->loadCustomParametersFromXml(paramsXml);
+            }
         }
     }
 }

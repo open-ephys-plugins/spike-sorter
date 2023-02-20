@@ -84,6 +84,7 @@ public:
     /** Responds to keypress*/
     bool keyPressed(const KeyPress& key, Component*);
 
+    /** Pointer to the underlying processor */
     SpikeSorter* processor;
 
     ScopedPointer<UtilityButton> 

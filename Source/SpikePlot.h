@@ -47,7 +47,7 @@ class SpikePlot : public Component,
 public:
 
     /** Constructor */
-    SpikePlot(Electrode*);
+    SpikePlot(SpikeSorter*, Electrode*);
 
     /** Destructor */
     virtual ~SpikePlot();
@@ -109,6 +109,19 @@ public:
     /** Sets the threshold level for displaying spikes*/
     void setDisplayThresholdForChannel(int channelNum, float thres);
 
+    /** Gets the display range level for the input channel */
+    float getDisplayRangeForChannel(int channelNum);
+
+    /** Sets the display range level for the input channel */
+    void setDisplayRangeForChannel(int channelNum, float range);
+
+    /** Saves plotting parameters for one electrode */
+    void saveCustomParametersToXml(XmlElement* electrodeNode);
+
+    /** Loads plotting parameters for one electrode*/
+    void loadCustomParametersFromXml(XmlElement* electrodeNode);
+
+    SpikeSorter* sorter; 
     Electrode* electrode;
 
     float minWidth;
