@@ -319,6 +319,8 @@ void SpikePlot::modifyRange(std::vector<float> values)
         ranges.set(index, range_array[newIndex]);
         String label = String(range_array[newIndex], 0);
         rangeButtons[index]->setLabel(label);
+
+        sorter->cache->setRange(electrode->getKey(), index, range_array[newIndex]);
     }
 
     setLimitsOnAxes();
@@ -348,6 +350,8 @@ void SpikePlot::modifyRange(int index, bool up)
             String label = String(range_array[newIndex], 0);
             rangeButtons[index]->setLabel(label);
             setLimitsOnAxes();
+
+            sorter->cache->setRange(electrode->getKey(), index, range_array[newIndex]);
 
             return;
         }
@@ -427,6 +431,7 @@ void SpikePlot::setDisplayThresholdForChannel(int i, float f)
 {
     thresholds.set(i, f);
     wAxes[i]->setDetectorThreshold(f);
+    sorter->cache->setThreshold(electrode->getKey(), i, f);
 }
 
 float SpikePlot::getDisplayThresholdForChannel(int i)
@@ -449,8 +454,5 @@ void SpikePlot::setDisplayRangeForChannel(int i, float f)
     while (getDisplayRangeForChannel(i) != f)
     {
         modifyRange(i, true);
-        LOGC("Got range: ", getDisplayRangeForChannel(i));
-        LOGC("Requested range: ", f);
     }
-    ranges.set(i,f);
 }
