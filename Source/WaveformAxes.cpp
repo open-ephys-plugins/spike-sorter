@@ -418,9 +418,9 @@ void WaveformAxes::mouseDrag(const MouseEvent& event)
 
         plot->setDisplayThresholdForChannel(channel, displayThresholdLevel);
 
-        repaint();
-
     }
+
+    repaint();
 
 }
 
