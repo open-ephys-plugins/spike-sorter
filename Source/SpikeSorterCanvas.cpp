@@ -164,7 +164,7 @@ void SpikeSorterCanvas::removeUnitOrBox()
             // box unit
             int numBoxes = electrode->sorter->getNumBoxes(unitID);
             
-            std::cout << "Removing box unit" << std::endl;
+            LOGD("Removing box unit");
 
             if (numBoxes > 1)
             {
@@ -457,7 +457,7 @@ void GenericDrawAxes::setType(GenericDrawAxes::AxesType t)
 {
     if (t < GenericDrawAxes::WAVE1 || t > GenericDrawAxes::PCA)
     {
-        std::cout << "Invalid Axes type specified";
+        LOGD("Invalid Axes type specified");
         return;
     }
 

@@ -124,8 +124,6 @@ bool SpikeSorter::stopAcquisition()
 void SpikeSorter::updateSettings()
 {
 
-    LOGC("SpikeSorter::updateSettings()");
-
     for (auto electrode : electrodes)
     {
         electrode->reset();
@@ -224,20 +222,20 @@ void SpikeSorter::process(AudioBuffer<float>& buffer)
 
 Electrode* SpikeSorter::findMatchingElectrode(String name, String stream_name, int stream_source)
 {
-    std::cout << "Searching for electrode with " << name << " : " << stream_name << " : " << stream_source << std::endl;
+    LOGD("Searching for electrode with ", name, " : ", stream_name, " : ", stream_source);
     for (auto electrode : electrodes)
     {
         if (electrode->name == name &&
             electrode->streamName == stream_name &&
             electrode->sourceNodeId == stream_source)
         {
-            std::cout << "  Found it! " << std::endl;
+            LOGD("  Found matching electrode!");
             return electrode;
         }
             
     }
 
-    std::cout << "  No match " << std::endl;
+    LOGD("  No match ");
 
     return nullptr;
 }

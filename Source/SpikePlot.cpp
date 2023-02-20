@@ -60,7 +60,7 @@ SpikePlot::SpikePlot(
         aspectRatio = 0.5f;
         break;
     default: // unsupported number of axes provided
-        std::cout << "SpikePlot as UNKNOWN, defaulting to SINGLE_PLOT" << std::endl;
+        LOGD("SpikePlot as UNKNOWN, defaulting to SINGLE_PLOT");
         nWaveAx = 1;
         nProjAx = 0;
     }

@@ -299,7 +299,7 @@ bool Sorter::removeUnit(int unitID)
 {
     const ScopedLock myScopedLock(mut);
     
-    std::cout << "Sorter::removeUnit() " << unitID << std::endl;
+    LOGD("Sorter::removeUnit() ", unitID);
 
     for (int k = 0; k < boxUnits.size(); k++)
     {
@@ -609,7 +609,7 @@ void Sorter::loadCustomParametersFromXml(XmlElement* xml)
                 if (unitNode->hasTagName("UNIT"))
                 {
 
-                    std::cout << " Found a PCA unit " << std::endl;
+                    LOGD(" Found a PCA unit ");
 
                     PCAUnit pcaUnit;
 
@@ -648,7 +648,7 @@ void Sorter::loadCustomParametersFromXml(XmlElement* xml)
                 if (unitNode->hasTagName("UNIT"))
                 {
 
-                    std::cout << " Found a box unit " << std::endl;
+                    LOGD(" Found a box unit ");
 
                     BoxUnit boxUnit;
                     boxUnit.unitId = unitNode->getIntAttribute("UnitID");
