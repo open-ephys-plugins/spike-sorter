@@ -48,6 +48,8 @@ Electrode::Electrode(SpikeSorter* processor_, SpikeChannel* channel, PCAComputin
 
     plot = std::make_unique<SpikePlot>(processor, this);
 
+    key = channel->getIdentifier().toStdString();
+
 }
 
 bool Electrode::matchesChannel(SpikeChannel* channel)
