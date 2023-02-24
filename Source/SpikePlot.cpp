@@ -76,8 +76,10 @@ SpikePlot::SpikePlot(
         addAndMakeVisible(rangeButton);
         
         thresholds.add(0);
-
         rangeButtons.add(rangeButton);
+
+        sorter->cache->setThreshold(electrode->getKey(), i, 0.0);
+        sorter->cache->setRange(electrode->getKey(), i, double(scales[i]));
     }
 
 }

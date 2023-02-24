@@ -39,22 +39,23 @@ Electrode::Electrode(SpikeSorter* processor_, SpikeChannel* channel, PCAComputin
     sourceNodeId = channel->getSourceNodeId();
 
     streamId = channel->getStreamId();
-    uniqueId = channel->getUniqueId();
+    uniqueId = channel->getIdentifier();
 
     numChannels = channel->getNumChannels();
     numSamples = channel->getPrePeakSamples() + channel->getPostPeakSamples();
     
+    key = channel->getIdentifier().toStdString();
+
     sorter = std::make_unique<Sorter>(this, computingThread);
 
     plot = std::make_unique<SpikePlot>(processor, this);
-
-    key = channel->getIdentifier().toStdString();
 
 }
 
 bool Electrode::matchesChannel(SpikeChannel* channel)
 {
-    if (channel->getUniqueId() == uniqueId)
+
+    if (channel->getIdentifier() == uniqueId)
     {
         isActive = true;
         return true;
@@ -65,20 +66,44 @@ bool Electrode::matchesChannel(SpikeChannel* channel)
 
 }
 
+void Electrode::applyCachedDisplaySettings(SpikeChannel* channel, std::string key)
+{
+    for (int i = 0; i < channel->getNumChannels(); i++)
+    {
+        plot->setDisplayThresholdForChannel(i, processor->cache->getThreshold(key, i));
+        plot->setDisplayRangeForChannel(i, processor->cache->getRange(key, i));
+    }
+}
+
 void Electrode::updateSettings(SpikeChannel* channel)
 {
     name = channel->getName();
+    streamId = channel->getStreamId();
 
-    key = channel->getIdentifier().toStdString();
+    std::string cacheKey = channel->getIdentifier().toStdString();
 
-    if (processor->cache->hasCachedDisplaySettings(key))
+    int streamIdx = 0;
+    for (auto& stream : processor->getDataStreams())
     {
+        if (stream->getStreamId() == channel->getStreamId())
+            break;
+        streamIdx++;
+    }
 
-        for (int i = 0; i < channel->getNumChannels(); i++)
-        {
-            plot->setDisplayThresholdForChannel(i, processor->cache->getThreshold(key, i));
-            plot->setDisplayRangeForChannel(i, processor->cache->getRange(key, i));
-        }
+    if (processor->cache->hasCachedDisplaySettings(cacheKey))
+    {
+        applyCachedDisplaySettings(channel, cacheKey);
+    }
+    else if (processor->cache->findSimilarKey(cacheKey, streamIdx).size() > 0)
+    {
+        applyCachedDisplaySettings(channel, processor->cache->findSimilarKey(cacheKey, streamIdx));
+        
+        // Update electrode stream and source IDs
+        streamName = channel->getStreamName();
+        sourceNodeId = channel->getSourceNodeId();
+
+        streamId = channel->getStreamId();
+        uniqueId = channel->getIdentifier();
 
     }
 
