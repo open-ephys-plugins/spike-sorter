@@ -69,16 +69,17 @@ public:
     bool hasCachedDisplaySettings(std::string cacheKey)
     {
         /*
-        LOGDD("SpikeDisplayCache keys:");
+        LOGD("*********AVAILABLE SETTINGS*********");
         std::vector<std::string> keys = extract_keys(ranges);
-        std::vector<std::map<int,double>> vals = extract_values(ranges);
+        std::vector<std::map<int,double>> vals = extract_values(thresholds);
         for (int i = 0; i < keys.size(); i++)
         {
             std::vector<int> channels = extract_keys(vals[i]);
-            std::vector<double> ranges = extract_values(vals[i]);
+            std::vector<double> thresholds = extract_values(vals[i]);
             for (int j = 0; j < channels.size(); j++)
-                LOGDD("Key: ", keys[i], " Channel: ", channels[j], " Range: ", ranges[j]);
+                LOGC("Key: ", keys[i], " Channel: ", channels[j], " Thresh: ", thresholds[j]);
         }
+        LOGD("*************************************");
         */
         return thresholds.count(cacheKey) > 0;
     };
@@ -157,6 +158,7 @@ public:
     String streamName;
     int sourceNodeId;
     String uniqueId;
+    int streamSourceId;
 
     int numChannels;
     int numSamples;

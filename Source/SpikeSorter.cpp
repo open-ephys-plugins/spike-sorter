@@ -41,6 +41,8 @@ Electrode::Electrode(SpikeSorter* processor_, SpikeChannel* channel, PCAComputin
     streamId = channel->getStreamId();
     uniqueId = channel->getIdentifier();
 
+    streamSourceId = processor->getDataStream(streamId)->getSourceNodeId();
+
     numChannels = channel->getNumChannels();
     numSamples = channel->getPrePeakSamples() + channel->getPostPeakSamples();
     
@@ -77,8 +79,14 @@ void Electrode::applyCachedDisplaySettings(SpikeChannel* channel, std::string ke
 
 void Electrode::updateSettings(SpikeChannel* channel)
 {
-    name = channel->getName();
+
+    streamName = channel->getStreamName();
+    sourceNodeId = channel->getSourceNodeId();
+
     streamId = channel->getStreamId();
+    uniqueId = channel->getIdentifier();
+
+    streamSourceId = processor->getDataStream(streamId)->getSourceNodeId();
 
     std::string cacheKey = channel->getIdentifier().toStdString();
 
@@ -98,12 +106,6 @@ void Electrode::updateSettings(SpikeChannel* channel)
     {
         applyCachedDisplaySettings(channel, processor->cache->findSimilarKey(cacheKey, streamIdx));
         
-        // Update electrode stream and source IDs
-        streamName = channel->getStreamName();
-        sourceNodeId = channel->getSourceNodeId();
-
-        streamId = channel->getStreamId();
-        uniqueId = channel->getIdentifier();
 
     }
 

@@ -94,7 +94,10 @@ void SpikePlot::saveCustomParametersToXml(XmlElement* xml)
 {
     XmlElement* mainNode = xml->createNewChildElement("PLOT");
 
-    mainNode->setAttribute("name", electrode->getKey());
+    mainNode->setAttribute("stream_source", electrode->streamSourceId); // Continuous source node ID
+    mainNode->setAttribute("stream_name", electrode->streamName);
+    mainNode->setAttribute("spike_source", electrode->sourceNodeId); // Spike node ID
+    mainNode->setAttribute("name", electrode->name);
 
     for (int i = 0; i < electrode->numChannels; i++)
     {
@@ -113,7 +116,12 @@ void SpikePlot::loadCustomParametersFromXml(XmlElement* xml)
         if (mainNode->hasTagName("PLOT"))
         {
 
-            std::string key = mainNode->getStringAttribute("name").toStdString();
+            std::string stream_source = mainNode->getStringAttribute("stream_source").toStdString();
+            std::string stream_name = mainNode->getStringAttribute("stream_name").toStdString();
+            std::string source = mainNode->getStringAttribute("spike_source").toStdString();
+            std::string electrode_name = mainNode->getStringAttribute("name").toStdString();
+
+            std::string key = stream_source + "|" + stream_name + "|" + source + "|" + electrode_name;
 
             int i = 0;
             forEachXmlChildElement(*mainNode, axisNode)
