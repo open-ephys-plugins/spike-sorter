@@ -42,6 +42,7 @@ SpikeSorterEditor::SpikeSorterEditor(GenericProcessor* parentNode)
     electrodeSelectionLabel = new Label("Label", "Active Electrode:");
     electrodeSelectionLabel->setBounds(17, 40, 180, 20);
     addAndMakeVisible(electrodeSelectionLabel);
+
 }
 
 Visualizer* SpikeSorterEditor::createNewCanvas()
@@ -82,7 +83,9 @@ void SpikeSorterEditor::selectedStreamHasChanged()
             
     }
 
-    electrodeList->setSelectedId(viewedPlot, true);
+    int electrodeIndex = processor->getDataStream(selectedStream)->getParameter("electrode_index")->getValue();
+
+    electrodeList->setSelectedId(electrodeIndex+1, true);
 }
 
 void SpikeSorterEditor::comboBoxChanged(ComboBox* comboBox)
@@ -101,8 +104,14 @@ void SpikeSorterEditor::comboBoxChanged(ComboBox* comboBox)
             }
 
             spikeSorterCanvas->setActiveElectrode(currentElectrodes[index]);
+
+            for (auto& stream : getProcessor()->getDataStreams())
+                if (stream->getName() == currentElectrodes[index]->streamName
+                    && stream->getSourceNodeId() == currentElectrodes[index]->streamSourceId)
+                stream->getParameter("electrode_index")->setNextValue(index);
+
         }
-            
+
     }
    
 }

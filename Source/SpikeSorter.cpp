@@ -105,8 +105,6 @@ void Electrode::updateSettings(SpikeChannel* channel)
     else if (processor->cache->findSimilarKey(cacheKey, streamIdx).size() > 0)
     {
         applyCachedDisplaySettings(channel, processor->cache->findSimilarKey(cacheKey, streamIdx));
-        
-
     }
 
     plot->setName(name);
@@ -117,6 +115,8 @@ SpikeSorter::SpikeSorter() : GenericProcessor("Spike Sorter")
 {
 
     cache = std::make_unique<SpikeDisplayCache>();
+
+    addIntParameter(Parameter::STREAM_SCOPE, "electrode_index", "The current electrode index being viewed", 0, 0, 1000);
 
 }
 
