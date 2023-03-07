@@ -55,6 +55,9 @@ public:
     /** ComboBox::Listener callback*/
     void comboBoxChanged(ComboBox* comboBox) override;
 
+    /** Called when settings are updated */
+    void updateSettings() override;
+
     /** Selects the next available electrode */
     void nextElectrode();
 

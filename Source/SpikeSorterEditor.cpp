@@ -116,6 +116,11 @@ void SpikeSorterEditor::comboBoxChanged(ComboBox* comboBox)
    
 }
 
+void SpikeSorterEditor::updateSettings()
+{
+    selectedStreamHasChanged();
+}
+
 void SpikeSorterEditor::nextElectrode()
 {
     int numAvailable = electrodeList->getNumItems();
