@@ -9,6 +9,8 @@ Sorts spikes based on manually drawn boxes in waveform space, or boundaries in P
 
 This plugin can be added via the Open Ephys GUI Plugin Installer. To access the Plugin Installer, press **ctrl-P** or **⌘P** from inside the GUI. Once the installer is loaded, browse to the "Spike Sorter" plugin and click "Install."
 
+**Important:** Version 0.2.0 requires GUI v0.6.4 or higher.
+
 ## Usage
 
 Instructions for using the Spike Sorter plugin are available [here](https://open-ephys.github.io/gui-docs/User-Manual/Plugins/Spike-Sorter.html).
