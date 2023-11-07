@@ -116,7 +116,7 @@ SpikeSorter::SpikeSorter() : GenericProcessor("Spike Sorter")
 
     cache = std::make_unique<SpikeDisplayCache>();
 
-    addIntParameter(Parameter::STREAM_SCOPE, "electrode_index", "The current electrode index being viewed", 0, 0, 1000);
+    addIntParameter(Parameter::STREAM_SCOPE, "electrode_index", "Electrode Index", "The current electrode index being viewed", 0, 0, 1000);
 
 }
 
