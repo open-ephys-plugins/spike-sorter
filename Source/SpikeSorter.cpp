@@ -90,6 +90,12 @@ void Electrode::updateSettings(SpikeChannel* channel)
 
     std::string cacheKey = channel->getIdentifier().toStdString();
 
+    // Check for changes in the channel name from upstream spike channel creators
+    if (name != channel->getName())
+    {
+        name = channel->getName();
+    }
+
     int streamIdx = 0;
     for (auto& stream : processor->getDataStreams())
     {
@@ -162,6 +168,8 @@ void SpikeSorter::updateSettings()
     {
         if (spikeChannel->isValid())
         {
+
+            LOGD("Found spike channel: ", spikeChannel->getName());
 
             bool foundMatch = false;
 
