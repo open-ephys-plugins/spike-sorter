@@ -70,7 +70,7 @@ SpikePlot::SpikePlot(
 
     for (int i = 0; i < electrode->numChannels; i++)
     {
-        UtilityButton* rangeButton = new UtilityButton(String(scales[i], 0), Font("Small Text", 10, Font::plain));
+        UtilityButton* rangeButton = new UtilityButton(String(scales[i]));
         rangeButton->setRadius(3.0f);
         rangeButton->addListener(this);
         addAndMakeVisible(rangeButton);

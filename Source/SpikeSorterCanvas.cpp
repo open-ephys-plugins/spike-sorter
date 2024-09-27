@@ -42,47 +42,47 @@ SpikeSorterCanvas::SpikeSorterCanvas(SpikeSorter* n) :
     inDrawingPolygonMode = false;
     scrollBarThickness = viewport->getScrollBarThickness();
 
-    addUnitButton = new UtilityButton("New Box Unit", Font("Small Text", 13, Font::plain));
+    addUnitButton = new UtilityButton("New Box Unit");
     addUnitButton->setRadius(3.0f);
     addUnitButton->addListener(this);
     addAndMakeVisible(addUnitButton);
 
-    addPolygonUnitButton = new UtilityButton("New Polygon Unit", Font("Small Text", 13, Font::plain));
+    addPolygonUnitButton = new UtilityButton("New Polygon Unit");
     addPolygonUnitButton->setRadius(3.0f);
     addPolygonUnitButton->addListener(this);
     addAndMakeVisible(addPolygonUnitButton);
 
-    addBoxButton = new UtilityButton("Add Box", Font("Small Text", 13, Font::plain));
+    addBoxButton = new UtilityButton("Add Box");
     addBoxButton->setRadius(3.0f);
     addBoxButton->addListener(this);
     addAndMakeVisible(addBoxButton);
 
-    delUnitButton = new UtilityButton("Delete", Font("Small Text", 13, Font::plain));
+    delUnitButton = new UtilityButton("Delete");
     delUnitButton->setRadius(3.0f);
     delUnitButton->addListener(this);
     addAndMakeVisible(delUnitButton);
 
-    rePCAButton = new UtilityButton("Re-PCA", Font("Small Text", 13, Font::plain));
+    rePCAButton = new UtilityButton("Re-PCA");
     rePCAButton->setRadius(3.0f);
     rePCAButton->addListener(this);
     addAndMakeVisible(rePCAButton);
 
-    newIDbuttons = new UtilityButton("New IDs", Font("Small Text", 13, Font::plain));
+    newIDbuttons = new UtilityButton("New IDs");
     newIDbuttons->setRadius(3.0f);
     newIDbuttons->addListener(this);
     addAndMakeVisible(newIDbuttons);
 
-    deleteAllUnits = new UtilityButton("Delete All", Font("Small Text", 13, Font::plain));
+    deleteAllUnits = new UtilityButton("Delete All");
     deleteAllUnits->setRadius(3.0f);
     deleteAllUnits->addListener(this);
     addAndMakeVisible(deleteAllUnits);
 
-    nextElectrode = new UtilityButton(">>", Font("Small Text", 13, Font::plain));
+    nextElectrode = new UtilityButton(">>");
     nextElectrode->setRadius(3.0f);
     nextElectrode->addListener(this);
     addAndMakeVisible(nextElectrode);
 
-    prevElectrode = new UtilityButton("<<", Font("Small Text", 13, Font::plain));
+    prevElectrode = new UtilityButton("<<");
     prevElectrode->setRadius(3.0f);
     prevElectrode->addListener(this);
     addAndMakeVisible(prevElectrode);

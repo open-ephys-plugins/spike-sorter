@@ -45,13 +45,13 @@ PCAProjectionAxes::PCAProjectionAxes(Electrode* electrode_) :
     updateProcessor = false;
     isOverUnit = -1;
 
-    rangeUpButton = new UtilityButton("+", Font("Small Text", 10, Font::plain));
+    rangeUpButton = new UtilityButton("+");
     rangeUpButton->setRadius(3.0f);
     rangeUpButton->addListener(this);
     rangeUpButton->setBounds(35, 10, 20, 15);
     addAndMakeVisible(rangeUpButton);
 
-    rangeDownButton = new UtilityButton("-", Font("Small Text", 10, Font::plain));
+    rangeDownButton = new UtilityButton("-");
     rangeDownButton->setRadius(3.0f);
     rangeDownButton->addListener(this);
     rangeDownButton->setBounds(10, 10, 20, 15);
