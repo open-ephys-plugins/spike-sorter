@@ -40,20 +40,20 @@ class SpikeSorterCanvas;
 */
 
 class SpikeSorterEditor : public VisualizerEditor,
-    public ComboBox::Listener
+                          public ComboBox::Listener
 {
 public:
     /** Constructor*/
-    SpikeSorterEditor(GenericProcessor* parentNode);
+    SpikeSorterEditor (GenericProcessor* parentNode);
 
     /** Destructor*/
-    virtual ~SpikeSorterEditor() { }
+    virtual ~SpikeSorterEditor() {}
 
     /** Creates the SpikeSorterCanvas */
     Visualizer* createNewCanvas();
 
     /** ComboBox::Listener callback*/
-    void comboBoxChanged(ComboBox* comboBox) override;
+    void comboBoxChanged (ComboBox* comboBox) override;
 
     /** Called when settings are updated */
     void updateSettings() override;
@@ -68,19 +68,14 @@ public:
     void selectedStreamHasChanged() override;
 
 private:
-
     ScopedPointer<Label> electrodeSelectionLabel;
-	ScopedPointer<ComboBox> electrodeList;
+    ScopedPointer<ComboBox> electrodeList;
 
     Array<Electrode*> currentElectrodes;
 
     SpikeSorterCanvas* spikeSorterCanvas;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeSorterEditor);
-
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpikeSorterEditor);
 };
 
-
-
-
-#endif  // __SPIKESORTEREDITOR_H_F0BD2DD9__
+#endif // __SPIKESORTEREDITOR_H_F0BD2DD9__

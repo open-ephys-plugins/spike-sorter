@@ -38,55 +38,53 @@ class SpikePlot;
 class WaveformAxes : public GenericDrawAxes
 {
 public:
-
     /** Constructor */
-    WaveformAxes(SpikePlot*, Electrode*, int channelIndex);
+    WaveformAxes (SpikePlot*, Electrode*, int channelIndex);
 
     /** Destructor*/
     ~WaveformAxes() {}
 
     /** Handles an incoming spike*/
-	bool updateSpikeData(SorterSpikePtr s) override;
+    bool updateSpikeData (SorterSpikePtr s) override;
 
     /** Renders the incoming waveforms */
-    void paint(Graphics& g) override;
-    
+    void paint (Graphics& g) override;
+
     /** Sets whether spikes should be redrawn*/
     void refresh();
 
     /** Plots an individual spike*/
-    void plotSpike(SorterSpikePtr s, Graphics& g);
+    void plotSpike (SorterSpikePtr s, Graphics& g);
 
     /** Called when axes are resized */
     void resized() override;
 
-    void isOverUnitBox(float x, float y, int& UnitID, int& BoxID, String& where) ;
+    void isOverUnitBox (float x, float y, int& UnitID, int& BoxID, String& where);
 
     /** Clears internal spike buffer */
     void clear();
 
-    int findUnitIndexById(int id);
+    int findUnitIndexById (int id);
 
     /** Mouse callbacks*/
-    void mouseMove(const MouseEvent& event) override;
-    void mouseExit(const MouseEvent& event) override;
-    void mouseDown(const MouseEvent& event) override;
-    void mouseDrag(const MouseEvent& event) override;
-    void mouseUp(const MouseEvent& event) override;
+    void mouseMove (const MouseEvent& event) override;
+    void mouseExit (const MouseEvent& event) override;
+    void mouseDown (const MouseEvent& event) override;
+    void mouseDrag (const MouseEvent& event) override;
+    void mouseUp (const MouseEvent& event) override;
 
     /** Get/set axes range */
-    void setRange(float);
+    void setRange (float);
     float getRange() { return range; }
 
     /** Get/set display threshold */
     float getDisplayThreshold();
-    void setDetectorThreshold(float);
+    void setDetectorThreshold (float);
 
     /** Updates the box units for this plot*/
-    void updateUnits(std::vector<BoxUnit> units);
+    void updateUnits (std::vector<BoxUnit> units);
 
 private:
-
     /**
         Class used to draw annotations, so waveforms can be
      redrawn independently
@@ -94,39 +92,37 @@ private:
     class AnnotationComponent : public Component
     {
     public:
-        
         /** Constructor */
-        AnnotationComponent(Electrode* electrode, std::vector<BoxUnit>* units);
-        
+        AnnotationComponent (Electrode* electrode, std::vector<BoxUnit>* units);
+
         /** Render the component */
-        void paint(Graphics& g) override;
-        
+        void paint (Graphics& g) override;
+
         Colour thresholdColour = Colours::red;
         bool signalFlipped = false;
         bool isOverThresholdSlider = false;
         float displayThresholdLevel = 0.0f;
         float range;
-        
+
         int isOverUnit = -1;
         int isOverBox = -1;
-        
-        std::vector<BoxUnit>* units;
-    private:
 
+        std::vector<BoxUnit>* units;
+
+    private:
         /** Renders the box boundaries*/
-        void drawBoxes(Graphics& g);
+        void drawBoxes (Graphics& g);
 
         /** Draws threshold slider*/
-        void drawThresholdSlider(Graphics& g);
-        
+        void drawThresholdSlider (Graphics& g);
+
         Electrode* electrode;
-        
     };
-    
+
     std::unique_ptr<AnnotationComponent> annotationComponent;
-    
+
     /** Draws tick marks behind waveforms */
-    void drawWaveformGrid(Graphics& g);
+    void drawWaveformGrid (Graphics& g);
 
     bool editAll = false;
     bool signalFlipped = false;
@@ -162,8 +158,6 @@ private:
     SpikePlot* plot;
 
     MouseCursor::StandardCursorType cursorType;
-
 };
 
-
-#endif 
+#endif

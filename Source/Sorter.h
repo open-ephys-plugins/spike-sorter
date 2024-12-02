@@ -28,10 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Containers.h"
 
-#include <algorithm>    // std::sort
+#include <algorithm> // std::sort
+#include <atomic>
 #include <list>
 #include <queue>
-#include <atomic>
 
 class PCAUnit;
 class PCAComputingThread;
@@ -47,66 +47,65 @@ class Electrode;
 class Sorter
 {
 public:
-
     /** Constructor */
-    Sorter(Electrode* electrode, PCAComputingThread* pcaThread);
+    Sorter (Electrode* electrode, PCAComputingThread* pcaThread);
 
     /** Destructor */
     ~Sorter();
 
     /** Sets the size of the waveform (in samples) and re-set PCA calculation */
-    void resizeWaveform(int numSamples);
+    void resizeWaveform (int numSamples);
 
     /** Tests whether a candidate spike belongs to one of the defined units*/
-    bool sortSpike(SorterSpikePtr so, bool PCAfirst);
+    bool sortSpike (SorterSpikePtr so, bool PCAfirst);
 
     /** Tests whether a candidate spike belongs to one of the available BoxUnits*/
-    bool checkBoxUnits(SorterSpikePtr so);
+    bool checkBoxUnits (SorterSpikePtr so);
 
     /** Tests whether a candidate spike belongs to one of the available PCAUnits*/
-    bool checkPCAUnits(SorterSpikePtr so);
+    bool checkPCAUnits (SorterSpikePtr so);
 
     /** Projects a spike waveform into PC space */
-	void projectOnPrincipalComponents(SorterSpikePtr so);
+    void projectOnPrincipalComponents (SorterSpikePtr so);
 
     /** Gets the RGB color values for a unit */
-    void getUnitColor(int unitId, uint8& R, uint8& G, uint8& B);
-	
+    void getUnitColor (int unitId, uint8& R, uint8& G, uint8& B);
+
     /** Triggers re-calculation of PCs */
     void RePCA();
 
     /** Adds a new PCA unit*/
-    void addPCAunit(PCAUnit unit);
+    void addPCAunit (PCAUnit unit);
 
     /** Adds a new unit with a single box at some default location */
-    int addBoxUnit(int channel);
+    int addBoxUnit (int channel);
 
     /** Adds a new unit with a custom box */
-    int addBoxUnit(int channel, Box B);
+    int addBoxUnit (int channel, Box B);
 
     /** Adds a new box to a unit at a default location */
-    bool addBoxToUnit(int channel, int unitId);
+    bool addBoxToUnit (int channel, int unitId);
 
     /** Adds a new custom box to a unit */
-    bool addBoxToUnit(int channel, int unitId, Box B);
+    bool addBoxToUnit (int channel, int unitId, Box B);
 
     /** Removes a box from a unit based on index */
-    bool removeBoxFromUnit(int unitId, int boxIndex);
+    bool removeBoxFromUnit (int unitId, int boxIndex);
 
     /** Returns the number of boxes for a given unit*/
-    int getNumBoxes(int unitId);
+    int getNumBoxes (int unitId);
 
     /** Removes a unit by ID */
-    bool removeUnit(int unitId);
+    bool removeUnit (int unitId);
 
     /** Removes all units from this sorter */
     void removeAllUnits();
 
     /** Copies the range values for the PC axes */
-    void getPCArange(float& p1min, float& p2min, float& p1max, float& p2max);
+    void getPCArange (float& p1min, float& p2min, float& p1max, float& p2max);
 
     /** Sets the range values for the PC axes */
-    void setPCArange(float p1min, float p2min, float p1max, float p2max);
+    void setPCArange (float p1min, float p2min, float p1max, float p2max);
 
     /** Sets bPCAJobFinished to false */
     void resetJobStatus();
@@ -118,7 +117,7 @@ public:
     bool firstJobFinished();
 
     /** Returns a vector of all boxes for a BoxUnit */
-    std::vector<Box> getUnitBoxes(int unitId);
+    std::vector<Box> getUnitBoxes (int unitId);
 
     /** Returns a vector of all BoxUnits */
     std::vector<BoxUnit> getBoxUnits();
@@ -127,10 +126,10 @@ public:
     std::vector<PCAUnit> getPCAUnits();
 
     /** Sets the BoxUnits for this Sorter */
-    void updateBoxUnits(std::vector<BoxUnit> _units);
+    void updateBoxUnits (std::vector<BoxUnit> _units);
 
     /** Sets the PCAUnits for this Sorter */
-    void updatePCAUnits(std::vector<PCAUnit> _units);
+    void updatePCAUnits (std::vector<PCAUnit> _units);
 
     /** Generates the next global unit ID (across all Sorters) */
     static int generateUnitId();
@@ -139,19 +138,18 @@ public:
     void generateNewIds();
 
     /** Selects a box for a particular unit */
-    void setSelectedUnitAndBox(int unitId, int boxId);
+    void setSelectedUnitAndBox (int unitId, int boxId);
 
     /** Returns the selected unit and box*/
-    void getSelectedUnitAndBox(int& unitId, int& boxId);
+    void getSelectedUnitAndBox (int& unitId, int& boxId);
 
     /** Saves sorting parameters for one electrode */
-    void saveCustomParametersToXml(XmlElement* electrodeNode);
+    void saveCustomParametersToXml (XmlElement* electrodeNode);
 
     /** Loads sorting parameters for one electrode*/
-    void loadCustomParametersFromXml(XmlElement* electrodeNode);
+    void loadCustomParametersFromXml (XmlElement* electrodeNode);
 
 private:
-
     CriticalSection mut;
 
     Electrode* electrode;
@@ -167,16 +165,14 @@ private:
 
     int numChannels, waveformLength;
     int selectedUnit, selectedBox;
-    
-    float* pc1, *pc2;
+
+    float *pc1, *pc2;
     std::atomic<float> pc1min, pc2min, pc1max, pc2max;
-    
-    int bufferSize,spikeBufferIndex;
-    
-    bool bPCAJobSubmitted,bPCAComputed, bRePCA, bPCAFirstJobFinished;
+
+    int bufferSize, spikeBufferIndex;
+
+    bool bPCAJobSubmitted, bPCAComputed, bRePCA, bPCAFirstJobFinished;
     std::atomic<bool> bPCAJobFinished;
-
 };
-
 
 #endif // __SPIKESORTBOXES_H

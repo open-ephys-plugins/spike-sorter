@@ -21,19 +21,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <stdio.h>
 #include <algorithm>
+#include <stdio.h>
 
 #include "PCAComputingThread.h"
 
-void PCAComputingThread::addPCAjob(PCAJobPtr job)
+void PCAComputingThread::addPCAjob (PCAJobPtr job)
 {
-	{
-		ScopedLock critical(lock);
-		jobs.add(job);
-	}
-	
-    if (!isThreadRunning())
+    {
+        ScopedLock critical (lock);
+        jobs.add (job);
+    }
+
+    if (! isThreadRunning())
     {
         startThread();
     }
@@ -43,10 +43,11 @@ void PCAComputingThread::run()
 {
     while (jobs.size() > 0)
     {
-		lock.enter();
-        PCAJobPtr J = jobs.removeAndReturn(0);
-	if (J == nullptr) continue;
-		lock.exit();
+        lock.enter();
+        PCAJobPtr J = jobs.removeAndReturn (0);
+        if (J == nullptr)
+            continue;
+        lock.exit();
         // compute PCA
         // 1. Compute Covariance matrix
         // 2. Apply SVD on covariance matrix
@@ -60,8 +61,6 @@ void PCAComputingThread::run()
     }
 }
 
-
-PCAComputingThread::PCAComputingThread() : Thread("PCA")
+PCAComputingThread::PCAComputingThread() : Thread ("PCA")
 {
-
 }

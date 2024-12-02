@@ -29,10 +29,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Containers.h"
 #include "WaveformStats.h"
 
-#include <algorithm>    // std::sort
+#include <algorithm> // std::sort
+#include <atomic>
 #include <list>
 #include <queue>
-#include <atomic>
 
 /** 
     Represents a polygon in 2D PCA space
@@ -40,12 +40,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class cPolygon
 {
 public:
-
     /** Constructor */
-    cPolygon() { }
+    cPolygon() {}
 
     /** Returns true if 2D point is inside polygon */
-    bool isPointInside(PointD p);
+    bool isPointInside (PointD p);
 
     std::vector<PointD> pts;
 
@@ -58,15 +57,14 @@ public:
 class PCAUnit
 {
 public:
-
     /** Default constructor */
-    PCAUnit() { }
+    PCAUnit() {}
 
     /** Constructor with global and local IDs specified */
-    PCAUnit(int id);
+    PCAUnit (int id);
 
     /** Constructor with polygon + global and local IDs specified */
-    PCAUnit(cPolygon B, int id);
+    PCAUnit (cPolygon B, int id);
 
     /** Destructor */
     ~PCAUnit();
@@ -75,20 +73,20 @@ public:
     int getUnitId();
 
     /** Checks whether waveform is inside this unit's polygon */
-	bool isWaveFormInsidePolygon(SorterSpikePtr so);
+    bool isWaveFormInsidePolygon (SorterSpikePtr so);
 
     /** Checks whether a point is inside this unit's polygone */
-    bool isPointInsidePolygon(PointD p);
+    bool isPointInsidePolygon (PointD p);
 
     /** Updates the waveform for this unit */
-	void updateWaveform(SorterSpikePtr so);
+    void updateWaveform (SorterSpikePtr so);
 
     /** Sets the color for this unit */
-    static void setDefaultColors(uint8_t col[3], int ID);
+    static void setDefaultColors (uint8_t col[3], int ID);
 
     /** Updates the unit's color (when a new ID is assigned) */
     void updateColor();
-  
+
     /** Identifier for this unit (global across the Spike Sorter) */
     int unitId;
 
@@ -103,8 +101,6 @@ public:
 
     /** True if this unit is active */
     bool isActive;
-
 };
-
 
 #endif // __PCA_UNIT_H

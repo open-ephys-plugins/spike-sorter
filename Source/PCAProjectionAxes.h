@@ -27,54 +27,53 @@
 #include <VisualizerWindowHeaders.h>
 
 #include "Containers.h"
-#include "SpikeSorterCanvas.h"
 #include "PCAUnit.h"
+#include "SpikeSorterCanvas.h"
 
 class Electrode;
 class SpikeSorterCanvas;
 
-class PCAProjectionAxes : public GenericDrawAxes,  
+class PCAProjectionAxes : public GenericDrawAxes,
                           public Button::Listener
 {
 public:
-
     /** Constructor */
-    PCAProjectionAxes(Electrode* );
+    PCAProjectionAxes (Electrode*);
 
     /** Destructor */
     ~PCAProjectionAxes() {}
 
     /** Sets range for PCA*/
-    void setPCARange(float p1min, float p2min, float p1max, float p2max);
+    void setPCARange (float p1min, float p2min, float p1max, float p2max);
 
     /** Adds a new spike object*/
-	bool updateSpikeData(SorterSpikePtr s);
+    bool updateSpikeData (SorterSpikePtr s);
 
     /** Renders the PCA projections */
-    void paint(Graphics& g);
+    void paint (Graphics& g);
 
     /** Turns polygon drawing mode on or off*/
-    void setPolygonDrawingMode(bool on);
+    void setPolygonDrawingMode (bool on);
 
     /** Clears the axes*/
     void clear();
 
     /** Mouse callbacks*/
-    void mouseDown(const juce::MouseEvent& event);
-    void mouseUp(const juce::MouseEvent& event);
-    void mouseMove(const juce::MouseEvent& event);
-    void mouseDrag(const juce::MouseEvent& event);
-    void mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel);
+    void mouseDown (const juce::MouseEvent& event);
+    void mouseUp (const juce::MouseEvent& event);
+    void mouseMove (const juce::MouseEvent& event);
+    void mouseDrag (const juce::MouseEvent& event);
+    void mouseWheelMove (const MouseEvent& event, const MouseWheelDetails& wheel);
 
     //bool keyPressed(const KeyPress& key);
-    
-    void redraw(bool subsample);
 
-    void updateUnits(std::vector<PCAUnit> _units);
+    void redraw (bool subsample);
 
-    void buttonClicked(Button* button);
+    void updateUnits (std::vector<PCAUnit> _units);
 
-    void drawUnit(Graphics& g, PCAUnit unit);
+    void buttonClicked (Button* button);
+
+    void drawUnit (Graphics& g, PCAUnit unit);
     void rangeDown();
     void rangeUp();
 
@@ -82,21 +81,21 @@ public:
     Electrode* electrode;
 
 private:
-    float prevx,prevy;
+    float prevx, prevy;
     bool inPolygonDrawingMode;
-	void drawProjectedSpike(SorterSpikePtr s);
+    void drawProjectedSpike (SorterSpikePtr s);
 
     bool rangeSet;
-    
-    void updateProjectionImage(uint16_t, uint16_t, uint16_t, const uint8_t* col);
-	void updateRange(SorterSpikePtr s);
+
+    void updateProjectionImage (uint16_t, uint16_t, uint16_t, const uint8_t* col);
+    void updateRange (SorterSpikePtr s);
     ScopedPointer<UtilityButton> rangeDownButton, rangeUpButton;
 
     SorterSpikeArray spikeBuffer;
     int bufferSize;
     int spikeIndex;
     bool updateProcessor;
-	void calcWaveformPeakIdx(SorterSpikePtr, int, int, int*, int*);
+    void calcWaveformPeakIdx (SorterSpikePtr, int, int, int*, int*);
 
     Image projectionImage;
 
@@ -110,7 +109,7 @@ private:
 
     int spikesReceivedSinceLastRedraw;
 
-    float pcaMin[2],pcaMax[2];
+    float pcaMin[2], pcaMax[2];
     std::list<PointD> drawnPolygon;
 
     std::vector<PCAUnit> units;
@@ -120,4 +119,4 @@ private:
     bool redrawSpikes;
 };
 
-#endif  // PCAPROJECTIONAXES_H_
+#endif // PCAPROJECTIONAXES_H_

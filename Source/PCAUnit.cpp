@@ -21,13 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <stdio.h>
 #include <algorithm>
+#include <stdio.h>
 
 #include "PCAUnit.h"
 
-
-bool cPolygon::isPointInside(PointD p)
+bool cPolygon::isPointInside (PointD p)
 {
     PointD p1, p2;
 
@@ -38,11 +37,11 @@ bool cPolygon::isPointInside(PointD p)
         return inside;
     }
 
-    PointD oldPoint(pts[pts.size()- 1].X + offset.X, pts[pts.size()- 1].Y + offset.Y);
+    PointD oldPoint (pts[pts.size() - 1].X + offset.X, pts[pts.size() - 1].Y + offset.Y);
 
     for (int i = 0; i < pts.size(); i++)
     {
-        PointD newPoint(pts[i].X + offset.X, pts[i].Y + offset.Y);
+        PointD newPoint (pts[i].X + offset.X, pts[i].Y + offset.Y);
 
         if (newPoint.X > oldPoint.X)
         {
@@ -56,9 +55,9 @@ bool cPolygon::isPointInside(PointD p)
         }
 
         if ((newPoint.X < p.X) == (p.X <= oldPoint.X)
-            && ((p.Y - p1.Y) * (p2.X - p1.X)	< (p2.Y - p1.Y) * (p.X - p1.X)))
+            && ((p.Y - p1.Y) * (p2.X - p1.X) < (p2.Y - p1.Y) * (p.X - p1.X)))
         {
-            inside = !inside;
+            inside = ! inside;
         }
 
         oldPoint = newPoint;
@@ -67,20 +66,19 @@ bool cPolygon::isPointInside(PointD p)
     return inside;
 }
 
-void PCAUnit::setDefaultColors(uint8_t col[3], int id)
+void PCAUnit::setDefaultColors (uint8_t col[3], int id)
 {
     int IDmodule = (id - 1) % 8; // ID can't be zero
-    
-    const int colors[8][3] =
-    {
-        {255,224,93},
-        {255,178,99},
-        {255,109,161},
-        {246,102,255},
-        {175,98,255},
-        {90,241,233},
-        {109,175,136},
-        {160,237,181}
+
+    const int colors[8][3] = {
+        { 255, 224, 93 },
+        { 255, 178, 99 },
+        { 255, 109, 161 },
+        { 246, 102, 255 },
+        { 175, 98, 255 },
+        { 90, 241, 233 },
+        { 109, 175, 136 },
+        { 160, 237, 181 }
     };
 
     col[0] = colors[IDmodule][0];
@@ -90,19 +88,19 @@ void PCAUnit::setDefaultColors(uint8_t col[3], int id)
 
 void PCAUnit::updateColor()
 {
-    setDefaultColors(colorRGB, unitId);
+    setDefaultColors (colorRGB, unitId);
 }
 
-PCAUnit::PCAUnit(int id): unitId(id)
+PCAUnit::PCAUnit (int id) : unitId (id)
 {
-    setDefaultColors(colorRGB, unitId);
+    setDefaultColors (colorRGB, unitId);
 };
 
 PCAUnit::~PCAUnit()
 {
 }
 
-PCAUnit::PCAUnit(cPolygon B, int id) : unitId(id)
+PCAUnit::PCAUnit (cPolygon B, int id) : unitId (id)
 {
     poly = B;
 }
@@ -112,17 +110,17 @@ int PCAUnit::getUnitId()
     return unitId;
 }
 
-bool PCAUnit::isPointInsidePolygon(PointD p)
+bool PCAUnit::isPointInsidePolygon (PointD p)
 {
-    return poly.isPointInside(p);
+    return poly.isPointInside (p);
 }
 
-bool PCAUnit::isWaveFormInsidePolygon(SorterSpikePtr so)
+bool PCAUnit::isWaveFormInsidePolygon (SorterSpikePtr so)
 {
-    return poly.isPointInside(PointD(so->pcProj[0],so->pcProj[1]));
+    return poly.isPointInside (PointD (so->pcProj[0], so->pcProj[1]));
 }
 
-void PCAUnit::updateWaveform(SorterSpikePtr so)
+void PCAUnit::updateWaveform (SorterSpikePtr so)
 {
-    stats.update(so);
+    stats.update (so);
 }

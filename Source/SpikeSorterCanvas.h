@@ -38,7 +38,6 @@ class WaveAxes;
 class SpikeSorter;
 class Electrode;
 
-
 /**
 
   Displays spike waveforms and projections for Spike Sorter
@@ -46,22 +45,20 @@ class Electrode;
   @see SpikeDisplayNode, SpikeDisplayEditor, Visualizer
 
 */
-class SpikeSorterCanvas :
-    public Visualizer,
-    public Button::Listener,
-    public KeyListener
+class SpikeSorterCanvas : public Visualizer,
+                          public Button::Listener,
+                          public KeyListener
 
 {
 public:
-
     /** Constructor */
-    SpikeSorterCanvas(SpikeSorter* n);
+    SpikeSorterCanvas (SpikeSorter* n);
 
     /** Destructor */
-    ~SpikeSorterCanvas() { }
+    ~SpikeSorterCanvas() {}
 
     /** Fills background*/
-    void paint(Graphics& g);
+    void paint (Graphics& g);
 
     /** Called instead of "repaint" to avoid redrawing underlying components.*/
     void refresh();
@@ -70,24 +67,24 @@ public:
     void refreshState();
 
     /** Creates spike displays for incoming spike channels*/
-    void update() { }
+    void update() {}
 
     /** Updates size of spike display*/
     void resized();
 
     /** Responds to button clicks*/
-    void buttonClicked(Button* button);
+    void buttonClicked (Button* button);
 
     /** Updates the current electrode */
-    void setActiveElectrode(Electrode* electrode);
-    
+    void setActiveElectrode (Electrode* electrode);
+
     /** Responds to keypress*/
-    bool keyPressed(const KeyPress& key, Component*);
+    bool keyPressed (const KeyPress& key, Component*);
 
     /** Pointer to the underlying processor */
     SpikeSorter* processor;
 
-    ScopedPointer<UtilityButton> 
+    ScopedPointer<UtilityButton>
         addPolygonUnitButton,
         addUnitButton,
         delUnitButton,
@@ -100,7 +97,6 @@ public:
         deleteAllUnits;
 
 private:
-    
     /** Deletes currently selected unit or box */
     void removeUnitOrBox();
 
@@ -112,9 +108,8 @@ private:
 
     Electrode* electrode;
     int scrollBarThickness;
-    
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeSorterCanvas);
 
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpikeSorterCanvas);
 };
 
 /** 
@@ -124,19 +119,18 @@ private:
 class SpikeDisplay : public Component
 {
 public:
-
     /** Constructor */
     SpikeDisplay();
 
     /** Destructor */
-    ~SpikeDisplay() { }
+    ~SpikeDisplay() {}
 
     /** Clears the current plot*/
     void clear();
 
     /** Sets the spike plot to display */
-    void setSpikePlot(SpikePlot* plot);
-    
+    void setSpikePlot (SpikePlot* plot);
+
     /** Called on each animation cycle*/
     void refresh();
 
@@ -144,7 +138,7 @@ public:
     void resized();
 
     /** Sets polygon drawing mode in the active plot*/
-    void setPolygonMode(bool on);
+    void setPolygonMode (bool on);
 
     /** Returns the total height of the display */
     int getTotalHeight()
@@ -153,11 +147,9 @@ public:
     }
 
 private:
-
     int totalHeight;
-    
-    SpikePlot* activePlot;
 
+    SpikePlot* activePlot;
 };
 
 /** 
@@ -168,8 +160,8 @@ private:
 class GenericDrawAxes : public Component
 {
 public:
-
-    enum AxesType {
+    enum AxesType
+    {
         WAVE1 = 0,
         WAVE2,
         WAVE3,
@@ -178,26 +170,26 @@ public:
     };
 
     /** Constructor */
-    GenericDrawAxes(AxesType t);
+    GenericDrawAxes (AxesType t);
 
     /** Destructor */
     virtual ~GenericDrawAxes();
 
     /** Add new spike to the plot */
-    virtual bool updateSpikeData(SorterSpikePtr s);
+    virtual bool updateSpikeData (SorterSpikePtr s);
 
-    void setXLims(double xmin, double xmax);
-    void getXLims(double* xmin, double* xmax);
-    void setYLims(double ymin, double ymax);
-    void getYLims(double* ymin, double* ymax);
+    void setXLims (double xmin, double xmax);
+    void getXLims (double* xmin, double* xmax);
+    void setYLims (double ymin, double ymax);
+    void getYLims (double* ymin, double* ymax);
 
-    void setType(AxesType type);
+    void setType (AxesType type);
     AxesType getType();
 
-    virtual void paint(Graphics& g) = 0;
+    virtual void paint (Graphics& g) = 0;
 
-    int roundUp(int, int);
-    void makeLabel(int val, int gain, bool convert, char* s);
+    int roundUp (int, int);
+    void makeLabel (int val, int gain, bool convert, char* s);
 
 protected:
     double xlims[2];
@@ -211,9 +203,7 @@ protected:
 
     Font font;
 
-    double ad16ToUv(int x, int gain);
-
+    double ad16ToUv (int x, int gain);
 };
 
-
-#endif  //
+#endif //

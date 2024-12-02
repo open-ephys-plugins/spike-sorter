@@ -23,76 +23,74 @@
 
 #include "SpikeSorterCanvas.h"
 
-#include "SpikeSorterEditor.h"
-#include "SpikeSorter.h"
-#include "SpikePlot.h"
-#include "PCAUnit.h"
 #include "BoxUnit.h"
+#include "PCAUnit.h"
+#include "SpikePlot.h"
+#include "SpikeSorter.h"
+#include "SpikeSorterEditor.h"
 
-SpikeSorterCanvas::SpikeSorterCanvas(SpikeSorter* n) :
-    processor(n), newSpike(false)
+SpikeSorterCanvas::SpikeSorterCanvas (SpikeSorter* n) : processor (n), newSpike (false)
 {
     electrode = nullptr;
     viewport = new Viewport();
     spikeDisplay = new SpikeDisplay();
 
-    viewport->setViewedComponent(spikeDisplay, false);
-    viewport->setScrollBarsShown(true, true);
+    viewport->setViewedComponent (spikeDisplay, false);
+    viewport->setScrollBarsShown (true, true);
 
     inDrawingPolygonMode = false;
     scrollBarThickness = viewport->getScrollBarThickness();
 
-    addUnitButton = new UtilityButton("New Box Unit");
-    addUnitButton->setRadius(3.0f);
-    addUnitButton->addListener(this);
-    addAndMakeVisible(addUnitButton);
+    addUnitButton = new UtilityButton ("New Box Unit");
+    addUnitButton->setRadius (3.0f);
+    addUnitButton->addListener (this);
+    addAndMakeVisible (addUnitButton);
 
-    addPolygonUnitButton = new UtilityButton("New Polygon Unit");
-    addPolygonUnitButton->setRadius(3.0f);
-    addPolygonUnitButton->addListener(this);
-    addAndMakeVisible(addPolygonUnitButton);
+    addPolygonUnitButton = new UtilityButton ("New Polygon Unit");
+    addPolygonUnitButton->setRadius (3.0f);
+    addPolygonUnitButton->addListener (this);
+    addAndMakeVisible (addPolygonUnitButton);
 
-    addBoxButton = new UtilityButton("Add Box");
-    addBoxButton->setRadius(3.0f);
-    addBoxButton->addListener(this);
-    addAndMakeVisible(addBoxButton);
+    addBoxButton = new UtilityButton ("Add Box");
+    addBoxButton->setRadius (3.0f);
+    addBoxButton->addListener (this);
+    addAndMakeVisible (addBoxButton);
 
-    delUnitButton = new UtilityButton("Delete");
-    delUnitButton->setRadius(3.0f);
-    delUnitButton->addListener(this);
-    addAndMakeVisible(delUnitButton);
+    delUnitButton = new UtilityButton ("Delete");
+    delUnitButton->setRadius (3.0f);
+    delUnitButton->addListener (this);
+    addAndMakeVisible (delUnitButton);
 
-    rePCAButton = new UtilityButton("Re-PCA");
-    rePCAButton->setRadius(3.0f);
-    rePCAButton->addListener(this);
-    addAndMakeVisible(rePCAButton);
+    rePCAButton = new UtilityButton ("Re-PCA");
+    rePCAButton->setRadius (3.0f);
+    rePCAButton->addListener (this);
+    addAndMakeVisible (rePCAButton);
 
-    newIDbuttons = new UtilityButton("New IDs");
-    newIDbuttons->setRadius(3.0f);
-    newIDbuttons->addListener(this);
-    addAndMakeVisible(newIDbuttons);
+    newIDbuttons = new UtilityButton ("New IDs");
+    newIDbuttons->setRadius (3.0f);
+    newIDbuttons->addListener (this);
+    addAndMakeVisible (newIDbuttons);
 
-    deleteAllUnits = new UtilityButton("Delete All");
-    deleteAllUnits->setRadius(3.0f);
-    deleteAllUnits->addListener(this);
-    addAndMakeVisible(deleteAllUnits);
+    deleteAllUnits = new UtilityButton ("Delete All");
+    deleteAllUnits->setRadius (3.0f);
+    deleteAllUnits->addListener (this);
+    addAndMakeVisible (deleteAllUnits);
 
-    nextElectrode = new UtilityButton(">>");
-    nextElectrode->setRadius(3.0f);
-    nextElectrode->addListener(this);
-    addAndMakeVisible(nextElectrode);
+    nextElectrode = new UtilityButton (">>");
+    nextElectrode->setRadius (3.0f);
+    nextElectrode->addListener (this);
+    addAndMakeVisible (nextElectrode);
 
-    prevElectrode = new UtilityButton("<<");
-    prevElectrode->setRadius(3.0f);
-    prevElectrode->addListener(this);
-    addAndMakeVisible(prevElectrode);
+    prevElectrode = new UtilityButton ("<<");
+    prevElectrode->setRadius (3.0f);
+    prevElectrode->addListener (this);
+    addAndMakeVisible (prevElectrode);
 
-    addAndMakeVisible(viewport);
-    
-    addKeyListener(this);
+    addAndMakeVisible (viewport);
+
+    addKeyListener (this);
 
     refreshRate = 10; // Hz
-
 }
 
 void SpikeSorterCanvas::refreshState()
@@ -102,31 +100,29 @@ void SpikeSorterCanvas::refreshState()
 
 void SpikeSorterCanvas::resized()
 {
-    viewport->setBounds(130, 10, getWidth() - 140, getHeight()-20);
+    viewport->setBounds (130, 10, getWidth() - 140, getHeight() - 20);
 
-    spikeDisplay->setBounds(0, 0, getWidth() - 140, spikeDisplay->getTotalHeight());
+    spikeDisplay->setBounds (0, 0, getWidth() - 140, spikeDisplay->getTotalHeight());
 
-    nextElectrode->setBounds(90, 10, 40, 20);
-    prevElectrode->setBounds(45, 10, 40, 20);
+    nextElectrode->setBounds (90, 10, 40, 20);
+    prevElectrode->setBounds (45, 10, 40, 20);
 
-    addUnitButton->setBounds(8, 120, 115, 20);
-    addBoxButton->setBounds(8, 150, 115, 20);
-    
-    addPolygonUnitButton->setBounds(8, 190, 115, 20);
-    
-    delUnitButton->setBounds(8, 230, 115, 20);
+    addUnitButton->setBounds (8, 120, 115, 20);
+    addBoxButton->setBounds (8, 150, 115, 20);
 
-    rePCAButton->setBounds(5, 270, 115, 20);
+    addPolygonUnitButton->setBounds (8, 190, 115, 20);
 
-    newIDbuttons->setBounds(5, 300, 115, 20);
-    deleteAllUnits->setBounds(5, 350, 115, 20);
+    delUnitButton->setBounds (8, 230, 115, 20);
 
+    rePCAButton->setBounds (5, 270, 115, 20);
+
+    newIDbuttons->setBounds (5, 300, 115, 20);
+    deleteAllUnits->setBounds (5, 350, 115, 20);
 }
 
-void SpikeSorterCanvas::paint(Graphics& g)
+void SpikeSorterCanvas::paint (Graphics& g)
 {
-
-    g.fillAll(Colours::darkgrey);
+    g.fillAll (Colours::darkgrey);
 }
 
 void SpikeSorterCanvas::refresh()
@@ -134,26 +130,25 @@ void SpikeSorterCanvas::refresh()
     spikeDisplay->refresh();
 }
 
-void SpikeSorterCanvas::setActiveElectrode(Electrode* electrode_)
+void SpikeSorterCanvas::setActiveElectrode (Electrode* electrode_)
 {
     electrode = electrode_;
 
     if (electrode != nullptr)
     {
-        spikeDisplay->setSpikePlot(electrode->plot.get());
+        spikeDisplay->setSpikePlot (electrode->plot.get());
     }
-    else {
-        spikeDisplay->setSpikePlot(nullptr);
+    else
+    {
+        spikeDisplay->setSpikePlot (nullptr);
     }
-
-    
 }
 
 void SpikeSorterCanvas::removeUnitOrBox()
 {
     int unitID, boxID;
-    electrode->plot->getSelectedUnitAndBox(unitID, boxID);
-    
+    electrode->plot->getSelectedUnitAndBox (unitID, boxID);
+
     bool selectNewBoxUnit = false;
     bool selectNewPCAUnit = false;
 
@@ -162,21 +157,21 @@ void SpikeSorterCanvas::removeUnitOrBox()
         if (boxID >= 0)
         {
             // box unit
-            int numBoxes = electrode->sorter->getNumBoxes(unitID);
-            
-            LOGD("Removing box unit");
+            int numBoxes = electrode->sorter->getNumBoxes (unitID);
+
+            LOGD ("Removing box unit");
 
             if (numBoxes > 1)
             {
                 // delete box, but keep unit
-                electrode->sorter->removeBoxFromUnit(unitID, boxID);
+                electrode->sorter->removeBoxFromUnit (unitID, boxID);
                 electrode->plot->updateUnits();
-                electrode->plot->setSelectedUnitAndBox(unitID, 0);
+                electrode->plot->setSelectedUnitAndBox (unitID, 0);
             }
             else
             {
                 // delete unit
-                electrode->sorter->removeUnit(unitID);
+                electrode->sorter->removeUnit (unitID);
                 electrode->plot->updateUnits();
 
                 std::vector<BoxUnit> boxunits = electrode->sorter->getBoxUnits();
@@ -191,14 +186,14 @@ void SpikeSorterCanvas::removeUnitOrBox()
                 }
                 else
                 {
-                    electrode->plot->setSelectedUnitAndBox(-1, -1);
+                    electrode->plot->setSelectedUnitAndBox (-1, -1);
                 }
             }
         }
         else
         {
             // pca unit
-            electrode->sorter->removeUnit(unitID);
+            electrode->sorter->removeUnit (unitID);
             electrode->plot->updateUnits();
 
             std::vector<BoxUnit> boxunits = electrode->sorter->getBoxUnits();
@@ -213,10 +208,8 @@ void SpikeSorterCanvas::removeUnitOrBox()
             }
             else
             {
-                electrode->plot->setSelectedUnitAndBox(-1, -1);
+                electrode->plot->setSelectedUnitAndBox (-1, -1);
             }
-
-
         }
         if (selectNewPCAUnit)
         {
@@ -224,11 +217,11 @@ void SpikeSorterCanvas::removeUnitOrBox()
             std::vector<PCAUnit> u = electrode->sorter->getPCAUnits();
             if (u.size() > 0)
             {
-                electrode->plot->setSelectedUnitAndBox(u[u.size() - 1].getUnitId(), -1);
+                electrode->plot->setSelectedUnitAndBox (u[u.size() - 1].getUnitId(), -1);
             }
             else
             {
-                electrode->plot->setSelectedUnitAndBox(-1, -1);
+                electrode->plot->setSelectedUnitAndBox (-1, -1);
             }
         }
         if (selectNewBoxUnit)
@@ -237,30 +230,28 @@ void SpikeSorterCanvas::removeUnitOrBox()
             std::vector<BoxUnit> u = electrode->sorter->getBoxUnits();
             if (u.size() > 0)
             {
-                electrode->plot->setSelectedUnitAndBox(u[u.size() - 1].getUnitId(), 0);
+                electrode->plot->setSelectedUnitAndBox (u[u.size() - 1].getUnitId(), 0);
             }
             else
             {
-                electrode->plot->setSelectedUnitAndBox(-1, -1);
+                electrode->plot->setSelectedUnitAndBox (-1, -1);
             }
         }
     }
-
 }
 
-bool SpikeSorterCanvas::keyPressed(const KeyPress& key, Component* c)
+bool SpikeSorterCanvas::keyPressed (const KeyPress& key, Component* c)
 {
-    if (key.getKeyCode() == KeyPress::deleteKey ||
-        key.getKeyCode() == KeyPress::backspaceKey)
+    if (key.getKeyCode() == KeyPress::deleteKey || key.getKeyCode() == KeyPress::backspaceKey)
     {
         removeUnitOrBox();
         return false;
     }
-    
+
     return true;
 }
 
-void SpikeSorterCanvas::buttonClicked(Button* button)
+void SpikeSorterCanvas::buttonClicked (Button* button)
 {
     int channel = 0;
     int unitID = -1;
@@ -269,44 +260,37 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
 
     if (button == addPolygonUnitButton)
     {
-
         if (electrode->sorter->firstJobFinished())
         {
             inDrawingPolygonMode = true;
-            electrode->plot->setPolygonDrawingMode(true);
+            electrode->plot->setPolygonDrawingMode (true);
         }
-
-        
     }
     else if (button == addUnitButton)
     {
-
         if (electrode != nullptr)
         {
-            int newUnitID = electrode->sorter->addBoxUnit(0);
+            int newUnitID = electrode->sorter->addBoxUnit (0);
 
             uint8 r, g, b;
-            electrode->sorter->getUnitColor(newUnitID, r, g, b);
+            electrode->sorter->getUnitColor (newUnitID, r, g, b);
             electrode->plot->updateUnits();
-            electrode->plot->setSelectedUnitAndBox(newUnitID, 0);
+            electrode->plot->setSelectedUnitAndBox (newUnitID, 0);
         }
-
     }
     else if (button == delUnitButton)
     {
         //std::cout << "Delete button pressed" << std::endl;
         removeUnitOrBox();
-
     }
     else if (button == addBoxButton)
     {
-
-        electrode->plot->getSelectedUnitAndBox(unitID, boxID);
+        electrode->plot->getSelectedUnitAndBox (unitID, boxID);
 
         if (unitID > 0)
         {
             //std::cout << "Adding box to channel " << channel << " with unitID " << unitID << std::endl;
-            electrode->sorter->addBoxToUnit(channel, unitID);
+            electrode->sorter->addBoxToUnit (channel, unitID);
             electrode->plot->updateUnits();
         }
     }
@@ -316,16 +300,14 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
     }
     else if (button == nextElectrode)
     {
-        SpikeSorterEditor* ed = (SpikeSorterEditor*)processor->getEditor();
+        SpikeSorterEditor* ed = (SpikeSorterEditor*) processor->getEditor();
         ed->nextElectrode();
     }
     else if (button == prevElectrode)
     {
-
-        SpikeSorterEditor* ed = (SpikeSorterEditor*)processor->getEditor();
+        SpikeSorterEditor* ed = (SpikeSorterEditor*) processor->getEditor();
 
         ed->previousElectrode();
-
     }
     else if (button == newIDbuttons)
     {
@@ -337,18 +319,15 @@ void SpikeSorterCanvas::buttonClicked(Button* button)
         // delete all units
         electrode->sorter->removeAllUnits();
         electrode->plot->updateUnits();
-        electrode->plot->setSelectedUnitAndBox(-1, -1);
+        electrode->plot->setSelectedUnitAndBox (-1, -1);
     }
 
     refresh();
 }
 
-
-SpikeDisplay::SpikeDisplay() : 
-    activePlot(nullptr),
-    totalHeight(430)
+SpikeDisplay::SpikeDisplay() : activePlot (nullptr),
+                               totalHeight (430)
 {
-
 }
 
 void SpikeDisplay::clear()
@@ -357,25 +336,23 @@ void SpikeDisplay::clear()
         activePlot->clear();
 }
 
-
-void SpikeDisplay::setSpikePlot(SpikePlot* plot)
+void SpikeDisplay::setSpikePlot (SpikePlot* plot)
 {
-
     if (activePlot != nullptr)
     {
-        activePlot->setVisible(false);
-        removeChildComponent(activePlot);
+        activePlot->setVisible (false);
+        removeChildComponent (activePlot);
     }
 
     //std::cout << "Spike display updating active plot" << std::endl;
-    
+
     activePlot = plot;
 
     if (activePlot != nullptr)
     {
-        addAndMakeVisible(activePlot);
+        addAndMakeVisible (activePlot);
     }
-    
+
     resized();
 }
 
@@ -385,23 +362,20 @@ void SpikeDisplay::refresh()
         activePlot->refresh();
 }
 
-void SpikeDisplay::setPolygonMode(bool on)
+void SpikeDisplay::setPolygonMode (bool on)
 {
     if (activePlot != nullptr)
-        activePlot->setPolygonDrawingMode(on);
+        activePlot->setPolygonDrawingMode (on);
 }
 
 void SpikeDisplay::resized()
 {
-
     if (activePlot != nullptr)
-        activePlot->setBounds(0, 0, getWidth(), totalHeight);
-
+        activePlot->setBounds (0, 0, getWidth(), totalHeight);
 }
 
-
-GenericDrawAxes::GenericDrawAxes(GenericDrawAxes::AxesType t)
-    : gotFirstSpike(false), type(t)
+GenericDrawAxes::GenericDrawAxes (GenericDrawAxes::AxesType t)
+    : gotFirstSpike (false), type (t)
 {
     ylims[0] = 0;
     ylims[1] = 1;
@@ -409,18 +383,16 @@ GenericDrawAxes::GenericDrawAxes(GenericDrawAxes::AxesType t)
     xlims[0] = 0;
     xlims[1] = 1;
 
-    font = Font("Default", 12, Font::plain);
-
+    font = Font ("Default", 12, Font::plain);
 }
 
 GenericDrawAxes::~GenericDrawAxes()
 {
-
 }
 
-bool GenericDrawAxes::updateSpikeData(SorterSpikePtr newSpike)
+bool GenericDrawAxes::updateSpikeData (SorterSpikePtr newSpike)
 {
-    if (!gotFirstSpike)
+    if (! gotFirstSpike)
     {
         gotFirstSpike = true;
     }
@@ -429,35 +401,33 @@ bool GenericDrawAxes::updateSpikeData(SorterSpikePtr newSpike)
     return true;
 }
 
-void GenericDrawAxes::setYLims(double ymin, double ymax)
+void GenericDrawAxes::setYLims (double ymin, double ymax)
 {
-
     //std::cout << "setting y limits to " << ymin << " " << ymax << std::endl;
     ylims[0] = ymin;
     ylims[1] = ymax;
 }
-void GenericDrawAxes::getYLims(double* min, double* max)
+void GenericDrawAxes::getYLims (double* min, double* max)
 {
     *min = ylims[0];
     *max = ylims[1];
 }
-void GenericDrawAxes::setXLims(double xmin, double xmax)
+void GenericDrawAxes::setXLims (double xmin, double xmax)
 {
     xlims[0] = xmin;
     xlims[1] = xmax;
 }
-void GenericDrawAxes::getXLims(double* min, double* max)
+void GenericDrawAxes::getXLims (double* min, double* max)
 {
     *min = xlims[0];
     *max = xlims[1];
 }
 
-
-void GenericDrawAxes::setType(GenericDrawAxes::AxesType t)
+void GenericDrawAxes::setType (GenericDrawAxes::AxesType t)
 {
     if (t < GenericDrawAxes::WAVE1 || t > GenericDrawAxes::PCA)
     {
-        LOGD("Invalid Axes type specified");
+        LOGD ("Invalid Axes type specified");
         return;
     }
 
@@ -469,7 +439,7 @@ GenericDrawAxes::AxesType GenericDrawAxes::getType()
     return type;
 }
 
-int GenericDrawAxes::roundUp(int numToRound, int multiple)
+int GenericDrawAxes::roundUp (int numToRound, int multiple)
 {
     if (multiple == 0)
     {
@@ -482,33 +452,32 @@ int GenericDrawAxes::roundUp(int numToRound, int multiple)
     return numToRound + multiple - remainder;
 }
 
-
-void GenericDrawAxes::makeLabel(int val, int gain, bool convert, char* s)
+void GenericDrawAxes::makeLabel (int val, int gain, bool convert, char* s)
 {
     if (convert)
     {
-        double volt = ad16ToUv(val, gain) / 1000.;
-        if (abs(val) > 1e6)
+        double volt = ad16ToUv (val, gain) / 1000.;
+        if (abs (val) > 1e6)
         {
             //val = val/(1e6);
-            sprintf(s, "%.2fV", volt);
+            sprintf (s, "%.2fV", volt);
         }
-        else if (abs(val) > 1e3)
+        else if (abs (val) > 1e3)
         {
             //val = val/(1e3);
-            sprintf(s, "%.2fmV", volt);
+            sprintf (s, "%.2fmV", volt);
         }
         else
-            sprintf(s, "%.2fuV", volt);
+            sprintf (s, "%.2fuV", volt);
     }
     else
     {
-        sprintf(s, "%d", (int)val);
+        sprintf (s, "%d", (int) val);
     }
 }
 
-double GenericDrawAxes::ad16ToUv(int x, int gain)
+double GenericDrawAxes::ad16ToUv (int x, int gain)
 {
-    int result = (double)(x * 20e6) / (double)(gain * pow(2.0, 16));
+    int result = (double) (x * 20e6) / (double) (gain * pow (2.0, 16));
     return result;
 }

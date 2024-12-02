@@ -28,10 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "PCAJob.h"
 
-#include <algorithm>    // std::sort
+#include <algorithm> // std::sort
+#include <atomic>
 #include <list>
 #include <queue>
-#include <atomic>
 
 /** 
 
@@ -41,7 +41,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class PCAComputingThread : public Thread
 {
 public:
-
     /** Constructor */
     PCAComputingThread();
 
@@ -49,14 +48,11 @@ public:
     void run();
 
     /** Adds a job to the queue*/
-    void addPCAjob(PCAJobPtr job);
+    void addPCAjob (PCAJobPtr job);
 
 private:
-
     PCAJobArray jobs;
-	CriticalSection lock;
-
+    CriticalSection lock;
 };
-
 
 #endif // __PCACOMPUTINGTHREAD_H

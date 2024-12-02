@@ -21,8 +21,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include <stdio.h>
 #include <algorithm>
+#include <stdio.h>
 
 #include "WaveformStats.h"
 
@@ -43,8 +43,7 @@ void WaveformStats::reset()
     numSamples = 0;
 }
 
-
-std::vector<double> WaveformStats::getMean(int index)
+std::vector<double> WaveformStats::getMean (int index)
 {
     std::vector<double> m;
 
@@ -54,14 +53,14 @@ std::vector<double> WaveformStats::getMean(int index)
     }
 
     int numSamplesInWaveForm = (int) WaveFormMean[0].size();
-    m.resize(numSamplesInWaveForm);
+    m.resize (numSamplesInWaveForm);
 
     for (int k = 0; k < numSamplesInWaveForm; k++)
         m[k] = WaveFormMean[index][k];
     return m;
 }
 
-std::vector<double> WaveformStats::getStandardDeviation(int index)
+std::vector<double> WaveformStats::getStandardDeviation (int index)
 {
     std::vector<double> WaveFormVar;
 
@@ -70,27 +69,26 @@ std::vector<double> WaveformStats::getStandardDeviation(int index)
         return WaveFormVar;
     }
     int numSamplesInWaveForm = (int) WaveFormMean[0].size();
-    WaveFormVar.resize(numSamplesInWaveForm);
+    WaveFormVar.resize (numSamplesInWaveForm);
 
     for (int j = 0; j < numSamplesInWaveForm; j++)
     {
         if (numSamples - 1 == 0)
             WaveFormVar[j] = 0;
         else
-            WaveFormVar[j] = sqrt(WaveFormSk[index][j] / (numSamples - 1));
+            WaveFormVar[j] = sqrt (WaveFormSk[index][j] / (numSamples - 1));
     }
     return WaveFormVar;
 }
 
-
-void WaveformStats::resizeWaveform(int newlength)
+void WaveformStats::resizeWaveform (int newlength)
 {
     numSamples = 0; // this should ensure that update reallocates upon the next update.
 }
 
-void WaveformStats::update(SorterSpikePtr so)
+void WaveformStats::update (SorterSpikePtr so)
 {
-    double ts = so->getTimestamp()/so->getChannel()->getSampleRate();
+    double ts = so->getTimestamp() / so->getChannel()->getSampleRate();
     if (numSamples == 0)
     {
         lastSpikeTime = ts;
@@ -101,28 +99,28 @@ void WaveformStats::update(SorterSpikePtr so)
     }
 
     newData = true;
-	int nChannels = so->getChannel()->getNumChannels();
-	int nSamples = so->getChannel()->getTotalSamples();
+    int nChannels = so->getChannel()->getNumChannels();
+    int nSamples = so->getChannel()->getTotalSamples();
     if (numSamples == 0)
     {
         // allocate
-        WaveFormMean.resize(nChannels);
-        WaveFormSk.resize(nChannels);
-        WaveFormMk.resize(nChannels);
-        for (int k=0; k<nChannels; k++)
+        WaveFormMean.resize (nChannels);
+        WaveFormSk.resize (nChannels);
+        WaveFormMk.resize (nChannels);
+        for (int k = 0; k < nChannels; k++)
         {
-            WaveFormMean[k].resize(nSamples);
-            WaveFormSk[k].resize(nSamples);
-            WaveFormMk[k].resize(nSamples);
+            WaveFormMean[k].resize (nSamples);
+            WaveFormSk[k].resize (nSamples);
+            WaveFormMk[k].resize (nSamples);
         }
 
         for (int i = 0; i < nChannels; i++)
         {
             for (int j = 0; j < nSamples; j++)
             {
-				WaveFormMean[i][j] = so->getData()[j + i*nSamples];
+                WaveFormMean[i][j] = so->getData()[j + i * nSamples];
                 WaveFormSk[i][j] = 0;
-				WaveFormMk[i][j] = so->getData()[j + i*nSamples];
+                WaveFormMk[i][j] = so->getData()[j + i * nSamples];
             }
         }
         numSamples += 1.0F;
@@ -133,14 +131,13 @@ void WaveformStats::update(SorterSpikePtr so)
     {
         for (int j = 0; j < nSamples; j++)
         {
-			WaveFormMean[i][j] = (numSamples * WaveFormMean[i][j] + so->getData()[j + i*nSamples]) / (numSamples + 1);
-			WaveFormMk[i][j] += (so->getData()[j + i*nSamples] - WaveFormMk[i][j]) / numSamples;
-			WaveFormSk[i][j] += (so->getData()[j + i*nSamples] - WaveFormMk[i][j]) * (so->getData()[j + i*nSamples] - WaveFormMk[i][j]);
+            WaveFormMean[i][j] = (numSamples * WaveFormMean[i][j] + so->getData()[j + i * nSamples]) / (numSamples + 1);
+            WaveFormMk[i][j] += (so->getData()[j + i * nSamples] - WaveFormMk[i][j]) / numSamples;
+            WaveFormSk[i][j] += (so->getData()[j + i * nSamples] - WaveFormMk[i][j]) * (so->getData()[j + i * nSamples] - WaveFormMk[i][j]);
         }
     }
     numSamples += 1.0F;
 }
-
 
 bool WaveformStats::queryNewData()
 {

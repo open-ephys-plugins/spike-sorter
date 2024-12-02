@@ -28,10 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "Containers.h"
 
-#include <algorithm>    // std::sort
+#include <algorithm> // std::sort
+#include <atomic>
 #include <list>
 #include <queue>
-#include <atomic>
 
 /** 
 
@@ -41,7 +41,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class WaveformStats
 {
 public:
-
     /** Construtor */
     WaveformStats();
 
@@ -49,26 +48,25 @@ public:
     ~WaveformStats();
 
     /** Sets length of waveform */
-    void resizeWaveform(int newlength);
-    
+    void resizeWaveform (int newlength);
+
     /** Resets stats to default value */
     void reset();
 
     /** Returns waveform mean for a given index */
-    std::vector<double> getMean(int index);
+    std::vector<double> getMean (int index);
 
     /** Returns waveform std for a given index */
-    std::vector<double> getStandardDeviation(int index);
-    void update(SorterSpikePtr so);
+    std::vector<double> getStandardDeviation (int index);
+    void update (SorterSpikePtr so);
     bool queryNewData();
 
     double lastSpikeTime;
     bool newData;
-    
+
     std::vector<std::vector<double>> WaveFormMean, WaveFormSk, WaveFormMk;
-    
+
     double numSamples;
 };
-
 
 #endif // __WAVEFORMSTATS_H

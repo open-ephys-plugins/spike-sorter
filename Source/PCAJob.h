@@ -29,9 +29,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Containers.h"
 
 #include <algorithm>
+#include <atomic>
 #include <list>
 #include <queue>
-#include <atomic>
 
 /** 
     
@@ -41,10 +41,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class PCAjob : public ReferenceCountedObject
 {
 public:
-
     /** Constructor */
-    PCAjob(SorterSpikeArray& _spikes, float* _pc1, float* _pc2,
-           std::atomic<float>&,  std::atomic<float>&,  std::atomic<float>&,  std::atomic<float>&, std::atomic<bool>& _reportDone);
+    PCAjob (SorterSpikeArray& _spikes, float* _pc1, float* _pc2, std::atomic<float>&, std::atomic<float>&, std::atomic<float>&, std::atomic<float>&, std::atomic<bool>& _reportDone);
 
     /** Destructor */
     ~PCAjob();
@@ -57,14 +55,13 @@ public:
 
     float** cov;
     SorterSpikeArray spikes;
-    float* pc1, *pc2;
-    std::atomic<float>& pc1min, &pc2min, &pc1max, &pc2max;
+    float *pc1, *pc2;
+    std::atomic<float>&pc1min, &pc2min, &pc1max, &pc2max;
     std::atomic<bool>& reportDone;
 
 private:
-    
-    int svdcmp(float** a, int nRows, int nCols, float* w, float** v);
-    float pythag(float a, float b);
+    int svdcmp (float** a, int nRows, int nCols, float* w, float** v);
+    float pythag (float a, float b);
     int dim;
 };
 

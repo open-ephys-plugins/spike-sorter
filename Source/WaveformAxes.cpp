@@ -23,51 +23,51 @@
 
 #include "WaveformAxes.h"
 
-#include "SpikeSorter.h"
-#include "SpikePlot.h"
 #include "BoxUnit.h"
+#include "SpikePlot.h"
+#include "SpikeSorter.h"
 
-WaveformAxes::WaveformAxes(SpikePlot* plot_, Electrode* electrode_, int channelIndex) : 
-    GenericDrawAxes(GenericDrawAxes::AxesType(channelIndex)),
-    channel(channelIndex),
-    plot(plot_),
-    electrode(electrode_)
+WaveformAxes::WaveformAxes (SpikePlot* plot_, Electrode* electrode_, int channelIndex) : GenericDrawAxes (GenericDrawAxes::AxesType (channelIndex)),
+                                                                                         channel (channelIndex),
+                                                                                         plot (plot_),
+                                                                                         electrode (electrode_)
 
 {
-    addMouseListener(this, true);
+    addMouseListener (this, true);
 
-    annotationComponent = std::make_unique<AnnotationComponent>(electrode, &units);
-    addAndMakeVisible(annotationComponent.get());
+    annotationComponent = std::make_unique<AnnotationComponent> (electrode, &units);
+    addAndMakeVisible (annotationComponent.get());
 
     for (int n = 0; n < bufferSize; n++)
     {
-        spikeBuffer.add(nullptr);
+        spikeBuffer.add (nullptr);
     }
 }
 
 void WaveformAxes::resized()
 {
-    annotationComponent->setBounds(0, 0, getWidth(), getHeight());
+    annotationComponent->setBounds (0, 0, getWidth(), getHeight());
 }
 
-void WaveformAxes::setRange(float r)
+void WaveformAxes::setRange (float r)
 {
     range = r;
-    
+
     annotationComponent->range = range;
 
     repaint();
 }
 
-void WaveformAxes::plotSpike(SorterSpikePtr s, Graphics& g)
+void WaveformAxes::plotSpike (SorterSpikePtr s, Graphics& g)
 {
-    if (s.get() == nullptr) return;
+    if (s.get() == nullptr)
+        return;
     float h = getHeight();
 
-    g.setColour(Colour(s->color[0], s->color[1], s->color[2]));
+    g.setColour (Colour (s->color[0], s->color[1], s->color[2]));
 
     //compute the spatial width for each waveform sample
-    float dx = getWidth() / float(s->getChannel()->getTotalSamples());
+    float dx = getWidth() / float (s->getChannel()->getTotalSamples());
 
     int spikeSamples = s->getChannel()->getTotalSamples();
 
@@ -79,99 +79,88 @@ void WaveformAxes::plotSpike(SorterSpikePtr s, Graphics& g)
 
     for (int i = 0; i < spikeSamples - 1; i++)
     {
-        float s1 = h - (h / 2 + s->getData()[offset + i] / (range)*h);
-        float s2 = h - (h / 2 + s->getData()[offset + i + 1] / (range)*h);
+        float s1 = h - (h / 2 + s->getData()[offset + i] / (range) *h);
+        float s2 = h - (h / 2 + s->getData()[offset + i + 1] / (range) *h);
 
         if (signalFlipped)
         {
             s1 = h - s1;
             s2 = h - s2;
         }
-        g.drawLine(x,
-            s1,
-            x + dx,
-            s2);
+        g.drawLine (x,
+                    s1,
+                    x + dx,
+                    s2);
 
         x += dx;
     }
-
 }
 
-WaveformAxes::AnnotationComponent::AnnotationComponent(Electrode* electrode_,
-                                                       std::vector<BoxUnit>* units_)
-    : electrode(electrode_), units(units_)
+WaveformAxes::AnnotationComponent::AnnotationComponent (Electrode* electrode_,
+                                                        std::vector<BoxUnit>* units_)
+    : electrode (electrode_), units (units_)
 {
-
 }
 
-void WaveformAxes::AnnotationComponent::drawThresholdSlider(Graphics& g)
+void WaveformAxes::AnnotationComponent::drawThresholdSlider (Graphics& g)
 {
-
-     g.setColour(thresholdColour);
+    g.setColour (thresholdColour);
 
     if (signalFlipped)
     {
         float h = getHeight() - (getHeight() * (0.5f - displayThresholdLevel / range));
-        g.drawLine(0, h, getWidth(), h);
-        g.drawText(String(roundFloatToInt(displayThresholdLevel)), 5, h+3, 35, 10, Justification::left, false);
+        g.drawLine (0, h, getWidth(), h);
+        g.drawText (String (roundFloatToInt (displayThresholdLevel)), 5, h + 3, 35, 10, Justification::left, false);
     }
     else
     {
         float h = getHeight() * (0.5f - displayThresholdLevel / range);
-        g.drawLine(0, h, getWidth(), h);
-        g.drawText(String(roundFloatToInt(displayThresholdLevel)), 5, h+3, 35, 10, Justification::left, false);
+        g.drawLine (0, h, getWidth(), h);
+        g.drawText (String (roundFloatToInt (displayThresholdLevel)), 5, h + 3, 35, 10, Justification::left, false);
     }
-
 }
 
-void WaveformAxes::AnnotationComponent::paint(Graphics& g)
+void WaveformAxes::AnnotationComponent::paint (Graphics& g)
 {
-    drawThresholdSlider(g);
-    drawBoxes(g);
+    drawThresholdSlider (g);
+    drawBoxes (g);
 }
 
-void WaveformAxes::drawWaveformGrid(Graphics& g)
+void WaveformAxes::drawWaveformGrid (Graphics& g)
 {
-
     float h = getHeight();
     float w = getWidth();
 
-    g.setColour(Colours::darkgrey);
+    g.setColour (Colours::darkgrey);
 
     for (float y = -range / 2; y < range / 2; y += 25.0f)
     {
         if (y == 0)
-            g.drawLine(0, h / 2 + y / range * h, w, h / 2 + y / range * h, 2.0f);
+            g.drawLine (0, h / 2 + y / range * h, w, h / 2 + y / range * h, 2.0f);
         else
-            g.drawLine(0, h / 2 + y / range * h, w, h / 2 + y / range * h);
+            g.drawLine (0, h / 2 + y / range * h, w, h / 2 + y / range * h);
     }
-
 }
 
-
-bool WaveformAxes::updateSpikeData(SorterSpikePtr s)
+bool WaveformAxes::updateSpikeData (SorterSpikePtr s)
 {
-    if (!gotFirstSpike)
+    if (! gotFirstSpike)
     {
         gotFirstSpike = true;
     }
 
     if (spikesReceivedSinceLastRedraw < bufferSize)
     {
-
         spikeIndex++;
         spikeIndex %= bufferSize;
 
-        spikeBuffer.set(spikeIndex, s);
+        spikeBuffer.set (spikeIndex, s);
 
         spikesReceivedSinceLastRedraw++;
-
     }
 
     return true;
-
 }
-
 
 void WaveformAxes::clear()
 {
@@ -180,15 +169,14 @@ void WaveformAxes::clear()
 
     for (int n = 0; n < bufferSize; n++)
     {
-        spikeBuffer.add(nullptr);
+        spikeBuffer.add (nullptr);
     }
 
     repaint();
 }
 
-void WaveformAxes::mouseMove(const MouseEvent& event)
+void WaveformAxes::mouseMove (const MouseEvent& event)
 {
-
     float y = event.y;
 
     float h = getHeight() * (0.5f - displayThresholdLevel / range);
@@ -198,7 +186,7 @@ void WaveformAxes::mouseMove(const MouseEvent& event)
         h = getHeight() - h;
     }
 
-    if (y > h - 10.0f && y < h + 10.0f && !isOverThresholdSlider)
+    if (y > h - 10.0f && y < h + 10.0f && ! isOverThresholdSlider)
     {
         isOverThresholdSlider = true;
         annotationComponent->thresholdColour = Colours::yellow;
@@ -218,13 +206,11 @@ void WaveformAxes::mouseMove(const MouseEvent& event)
         annotationComponent->isOverBox = -1;
         annotationComponent->isOverUnit = 0;
         strOverWhere = "";
-        isOverUnitBox(event.x, event.y, isOverUnit, isOverBox, strOverWhere);
-
+        isOverUnitBox (event.x, event.y, isOverUnit, isOverBox, strOverWhere);
     }
-
 }
 
-int WaveformAxes::findUnitIndexById(int id)
+int WaveformAxes::findUnitIndexById (int id)
 {
     for (int k = 0; k < units.size(); k++)
         if (units[k].unitId == id)
@@ -232,16 +218,15 @@ int WaveformAxes::findUnitIndexById(int id)
     return -1;
 }
 
-void WaveformAxes::mouseDown(const juce::MouseEvent& event)
+void WaveformAxes::mouseDown (const juce::MouseEvent& event)
 {
-
     float h = getHeight();
     float w = getWidth();
     float microsec_span = 40.0 / 30000.0 * 1e6;
     float microvolt_span = range / 2;
-    
+
     mouseDownX = event.x / w * microsec_span;
-    
+
     if (signalFlipped)
         mouseDownY = (h / 2 - (h - event.y)) / (h / 2) * microvolt_span;
     else
@@ -249,33 +234,29 @@ void WaveformAxes::mouseDown(const juce::MouseEvent& event)
 
     if (isOverUnit > 0)
     {
-        electrode->sorter->setSelectedUnitAndBox(isOverUnit, isOverBox);
-        int indx = findUnitIndexById(isOverUnit);
-        jassert(indx >= 0);
+        electrode->sorter->setSelectedUnitAndBox (isOverUnit, isOverBox);
+        int indx = findUnitIndexById (isOverUnit);
+        jassert (indx >= 0);
         mouseOffsetX = mouseDownX - units[indx].lstBoxes[isOverBox].x;
         mouseOffsetY = mouseDownY - units[indx].lstBoxes[isOverBox].y;
     }
     else
     {
-        electrode->sorter->setSelectedUnitAndBox(-1, -1);
+        electrode->sorter->setSelectedUnitAndBox (-1, -1);
     }
-
 }
 
-
-void WaveformAxes::mouseUp(const MouseEvent& event)
+void WaveformAxes::mouseUp (const MouseEvent& event)
 {
-
     if (bDragging)
     {
         bDragging = false;
-        electrode->sorter->updateBoxUnits(units);
+        electrode->sorter->updateBoxUnits (units);
     }
 }
 
-void WaveformAxes::mouseDrag(const MouseEvent& event)
+void WaveformAxes::mouseDrag (const MouseEvent& event)
 {
-
     bDragging = true;
 
     if (isOverUnit > 0)
@@ -315,41 +296,38 @@ void WaveformAxes::mouseDrag(const MouseEvent& event)
                     units[k].lstBoxes[isOverBox].w += -dx;
                     units[k].lstBoxes[isOverBox].x = x;
                 }
-                else if ((!signalFlipped && strOverWhere == "top") || (signalFlipped && strOverWhere == "bottom"))
+                else if ((! signalFlipped && strOverWhere == "top") || (signalFlipped && strOverWhere == "bottom"))
                 {
                     units[k].lstBoxes[isOverBox].y += dy;
                     units[k].lstBoxes[isOverBox].h += dy;
                 }
-                else if ((!signalFlipped && strOverWhere == "bottom") || (signalFlipped && strOverWhere == "top"))
+                else if ((! signalFlipped && strOverWhere == "bottom") || (signalFlipped && strOverWhere == "top"))
                 {
                     units[k].lstBoxes[isOverBox].h = -dy;
                 }
-                else if ((!signalFlipped && strOverWhere == "bottomright") || (signalFlipped && strOverWhere == "topright"))
+                else if ((! signalFlipped && strOverWhere == "bottomright") || (signalFlipped && strOverWhere == "topright"))
                 {
                     units[k].lstBoxes[isOverBox].w = x - oldx;
                     units[k].lstBoxes[isOverBox].h = -dy;
-
                 }
-                else if ((!signalFlipped && strOverWhere == "bottomleft") || (signalFlipped && strOverWhere == "topleft"))
+                else if ((! signalFlipped && strOverWhere == "bottomleft") || (signalFlipped && strOverWhere == "topleft"))
                 {
                     units[k].lstBoxes[isOverBox].w += -dx;
                     units[k].lstBoxes[isOverBox].x = x;
                     units[k].lstBoxes[isOverBox].h = -dy;
                 }
-                else if ((!signalFlipped && strOverWhere == "topright") || (signalFlipped && strOverWhere == "bottomright"))
+                else if ((! signalFlipped && strOverWhere == "topright") || (signalFlipped && strOverWhere == "bottomright"))
                 {
                     units[k].lstBoxes[isOverBox].y += dy;
                     units[k].lstBoxes[isOverBox].h += dy;
                     units[k].lstBoxes[isOverBox].w = x - oldx;
-
                 }
-                else if ((!signalFlipped && strOverWhere == "topleft") || (signalFlipped && strOverWhere == "bottomleft"))
+                else if ((! signalFlipped && strOverWhere == "topleft") || (signalFlipped && strOverWhere == "bottomleft"))
                 {
                     units[k].lstBoxes[isOverBox].w += -dx;
                     units[k].lstBoxes[isOverBox].x = x;
                     units[k].lstBoxes[isOverBox].y += dy;
                     units[k].lstBoxes[isOverBox].h += dy;
-
                 }
                 else if (strOverWhere == "inside")
                 {
@@ -391,43 +369,34 @@ void WaveformAxes::mouseDrag(const MouseEvent& event)
                     else if (strOverWhere == "bottomright")
                         strOverWhere = "bottomleft";
                 }
-
             }
-
         }
-
     }
     else if (isOverThresholdSlider)
     {
-
         float thresholdSliderPosition;
-        
+
         if (signalFlipped)
-            thresholdSliderPosition = (getHeight() - float(event.y)) / float(getHeight());
+            thresholdSliderPosition = (getHeight() - float (event.y)) / float (getHeight());
         else
-            thresholdSliderPosition = float(event.y) / float(getHeight());
+            thresholdSliderPosition = float (event.y) / float (getHeight());
 
         if (thresholdSliderPosition > 1)
             thresholdSliderPosition = 1;
         else if (thresholdSliderPosition < -1) // Modified to allow negative thresholds.
             thresholdSliderPosition = -1;
 
-
         displayThresholdLevel = (0.5f - thresholdSliderPosition) * range;
         annotationComponent->displayThresholdLevel = displayThresholdLevel;
 
-        plot->setDisplayThresholdForChannel(channel, displayThresholdLevel);
-
+        plot->setDisplayThresholdForChannel (channel, displayThresholdLevel);
     }
 
     repaint();
-
 }
 
-
-void WaveformAxes::mouseExit(const MouseEvent& event)
+void WaveformAxes::mouseExit (const MouseEvent& event)
 {
-
     if (isOverThresholdSlider)
     {
         isOverThresholdSlider = false;
@@ -441,18 +410,15 @@ float WaveformAxes::getDisplayThreshold()
     return displayThresholdLevel;
 }
 
-void WaveformAxes::setDetectorThreshold(float t)
+void WaveformAxes::setDetectorThreshold (float t)
 {
     displayThresholdLevel = t;
     annotationComponent->displayThresholdLevel = t;
     annotationComponent->repaint();
 }
 
-
-
-void WaveformAxes::isOverUnitBox(float x, float y, int& UnitID, int& BoxID, String& where)
+void WaveformAxes::isOverUnitBox (float x, float y, int& UnitID, int& BoxID, String& where)
 {
-
     float h = getHeight();
     float w = getWidth();
     // Map box coordinates to screen coordinates.
@@ -478,58 +444,57 @@ void WaveformAxes::isOverUnitBox(float x, float y, int& UnitID, int& BoxID, Stri
             }
 
             if (rectx1 > rectx2)
-                std::swap(rectx1, rectx2);
+                std::swap (rectx1, rectx2);
             if (recty1 > recty2)
-                std::swap(recty1, recty2);
+                std::swap (recty1, recty2);
 
             if (x >= rectx1 - 10 & y >= recty1 - 10 & x <= rectx2 + 10 & y <= recty2 + 10)
             {
-
                 UnitID = units[k].unitId;
                 BoxID = boxiter;
                 if (x >= rectx1 - 10 & x <= rectx1 + 10 && y >= recty1 - 10 & y <= recty1 + 10)
                 {
                     where = "topleft";
-                    setMouseCursor(MouseCursor::TopLeftCornerResizeCursor);
+                    setMouseCursor (MouseCursor::TopLeftCornerResizeCursor);
                 }
                 else if (x >= rectx2 - 10 & x <= rectx2 + 10 && y >= recty1 - 10 & y <= recty1 + 10)
                 {
                     where = "topright";
-                    setMouseCursor(MouseCursor::TopRightCornerResizeCursor);
+                    setMouseCursor (MouseCursor::TopRightCornerResizeCursor);
                 }
                 else if (x >= rectx1 - 10 & x <= rectx1 + 10 && y >= recty2 - 10 & y <= recty2 + 10)
                 {
                     where = "bottomleft";
-                    setMouseCursor(MouseCursor::BottomLeftCornerResizeCursor);
+                    setMouseCursor (MouseCursor::BottomLeftCornerResizeCursor);
                 }
                 else if (x >= rectx2 - 10 & x <= rectx2 + 10 && y >= recty2 - 10 & y <= recty2 + 10)
                 {
                     where = "bottomright";
-                    setMouseCursor(MouseCursor::BottomRightCornerResizeCursor);
+                    setMouseCursor (MouseCursor::BottomRightCornerResizeCursor);
                 }
                 else if (x >= rectx1 - 10 & x <= rectx1 + 10)
                 {
                     where = "left";
-                    setMouseCursor(MouseCursor::LeftEdgeResizeCursor);
+                    setMouseCursor (MouseCursor::LeftEdgeResizeCursor);
                 }
                 else if (x >= rectx2 - 10 & x <= rectx2 + 10)
                 {
                     where = "right";
-                    setMouseCursor(MouseCursor::RightEdgeResizeCursor);
+                    setMouseCursor (MouseCursor::RightEdgeResizeCursor);
                 }
                 else if (y >= recty1 - 10 & y <= recty1 + 10)
                 {
-                    setMouseCursor(MouseCursor::TopEdgeResizeCursor);
+                    setMouseCursor (MouseCursor::TopEdgeResizeCursor);
                     where = "top";
                 }
                 else if (y >= recty2 - 10 & y <= recty2 + 10)
                 {
                     where = "bottom";
-                    setMouseCursor(MouseCursor::BottomEdgeResizeCursor);
+                    setMouseCursor (MouseCursor::BottomEdgeResizeCursor);
                 }
                 else
                 {
-                    setMouseCursor(MouseCursor::DraggingHandCursor);
+                    setMouseCursor (MouseCursor::DraggingHandCursor);
                     where = "inside";
                 }
                 return;
@@ -537,38 +502,38 @@ void WaveformAxes::isOverUnitBox(float x, float y, int& UnitID, int& BoxID, Stri
         }
     }
 
-    setMouseCursor(MouseCursor::NormalCursor); // not inside any boxes
+    setMouseCursor (MouseCursor::NormalCursor); // not inside any boxes
 }
 
-void WaveformAxes::AnnotationComponent::drawBoxes(Graphics& g)
+void WaveformAxes::AnnotationComponent::drawBoxes (Graphics& g)
 {
     // y and h are given in micro volts.
     // x and w and given in micro seconds.
 
     float h = getHeight();
     float w = getWidth();
-    
+
     // Map box coordinates to screen coordinates.
     // Assume time span is 40 samples at 30 Khz?
     float microsec_span = 40.0 / 30000.0 * 1e6;
     float microvolt_span = range / 2;
 
     int selectedUnitID, selectedBoxID;
-    electrode->sorter->getSelectedUnitAndBox(selectedUnitID, selectedBoxID);
+    electrode->sorter->getSelectedUnitAndBox (selectedUnitID, selectedBoxID);
 
     // Typical spike is 40 samples, at 30kHz ~ 1.3 ms or 1300 usecs.
     for (int k = 0; k < units->size(); k++)
     {
-        g.setColour(Colour(units->at(k).colorRGB[0], units->at(k).colorRGB[1], units->at(k).colorRGB[2]));
+        g.setColour (Colour (units->at (k).colorRGB[0], units->at (k).colorRGB[1], units->at (k).colorRGB[2]));
 
-        for (int boxiter = 0; boxiter < units->at(k).lstBoxes.size(); boxiter++)
+        for (int boxiter = 0; boxiter < units->at (k).lstBoxes.size(); boxiter++)
         {
-            Box B = units->at(k).lstBoxes[boxiter];
+            Box B = units->at (k).lstBoxes[boxiter];
 
             float thickness = 2;
-            if (units->at(k).getUnitId() == selectedUnitID && boxiter == selectedBoxID)
+            if (units->at (k).getUnitId() == selectedUnitID && boxiter == selectedBoxID)
                 thickness = 3;
-            else if (units->at(k).getUnitId() == isOverUnit && boxiter == isOverBox)
+            else if (units->at (k).getUnitId() == isOverUnit && boxiter == isOverBox)
                 thickness = 2;
             else
                 thickness = 1;
@@ -590,57 +555,49 @@ void WaveformAxes::AnnotationComponent::drawBoxes(Graphics& g)
                 drawRecty1 = recty1;
                 drawRecty2 = recty2;
             }
-            g.drawRect(rectx1, drawRecty1, rectx2 - rectx1, drawRecty2 - drawRecty1, thickness);
-            g.drawText(String(units->at(k).unitId), rectx1, drawRecty1 - 15, rectx2 - rectx1, 15, juce::Justification::centred, false);
-
+            g.drawRect (rectx1, drawRecty1, rectx2 - rectx1, drawRecty2 - drawRecty1, thickness);
+            g.drawText (String (units->at (k).unitId), rectx1, drawRecty1 - 15, rectx2 - rectx1, 15, juce::Justification::centred, false);
         }
     }
 }
 
-
 void WaveformAxes::refresh()
 {
     spikesReceivedSinceLastRedraw = 0;
-    
+
     repaint();
 
     annotationComponent->repaint();
 }
 
-
-void WaveformAxes::updateUnits(std::vector<BoxUnit> _units)
+void WaveformAxes::updateUnits (std::vector<BoxUnit> _units)
 {
     units = _units;
 
     annotationComponent->units = &units;
 }
 
-void WaveformAxes::paint(Graphics& g)
+void WaveformAxes::paint (Graphics& g)
 {
-    
-    drawWaveformGrid(g);
+    drawWaveformGrid (g);
 
     // if no spikes have been received then don't plot anything
-    if (!gotFirstSpike)
+    if (! gotFirstSpike)
     {
         return;
     }
 
     for (int spikeNum = 0; spikeNum < bufferSize; spikeNum++)
     {
-
         if (spikeNum != spikeIndex && spikeBuffer[spikeNum] != nullptr)
         {
-            g.setColour(Colours::grey);
-            plotSpike(spikeBuffer[spikeNum], g);
+            g.setColour (Colours::grey);
+            plotSpike (spikeBuffer[spikeNum], g);
         }
-
     }
 
-    g.setColour(Colours::white);
-    
-    if (spikeBuffer[spikeIndex] != nullptr)
-        plotSpike(spikeBuffer[spikeIndex], g); 
+    g.setColour (Colours::white);
 
-    
+    if (spikeBuffer[spikeIndex] != nullptr)
+        plotSpike (spikeBuffer[spikeIndex], g);
 }

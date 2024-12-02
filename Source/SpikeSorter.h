@@ -30,43 +30,49 @@
 #include "Sorter.h"
 #include "SpikePlot.h"
 
-#include <algorithm>    // Needed for std::sort
-#include <queue>
-#include <stdlib.h>
-#include <stdio.h>
+#include <algorithm> // Needed for std::sort
 #include <math.h>
+#include <queue>
+#include <stdio.h>
+#include <stdlib.h>
 
 class SpikeDisplayCache
 {
 public:
-    SpikeDisplayCache () {}
+    SpikeDisplayCache() {}
     virtual ~SpikeDisplayCache() {}
 
-    void setMonitor(std::string key, bool isMonitored) {
+    void setMonitor (std::string key, bool isMonitored)
+    {
         monitors[key] = isMonitored;
     };
 
-    bool isMonitored(std::string key) {
+    bool isMonitored (std::string key)
+    {
         return monitors[key];
     };
 
-    void setRange(std::string key, int channelIdx, double range) {
+    void setRange (std::string key, int channelIdx, double range)
+    {
         ranges[key][channelIdx] = range;
     };
 
-    double getRange(std::string key, int channelIdx) {
+    double getRange (std::string key, int channelIdx)
+    {
         return ranges[key][channelIdx];
     };
 
-    void setThreshold(std::string key,int channelIdx, double thresh) {
+    void setThreshold (std::string key, int channelIdx, double thresh)
+    {
         thresholds[key][channelIdx] = thresh;
     };
 
-    double getThreshold(std::string key, int channelIdx) {
+    double getThreshold (std::string key, int channelIdx)
+    {
         return thresholds[key][channelIdx];
     };
 
-    bool hasCachedDisplaySettings(std::string cacheKey)
+    bool hasCachedDisplaySettings (std::string cacheKey)
     {
         /*
         LOGD("*********AVAILABLE SETTINGS*********");
@@ -81,23 +87,23 @@ public:
         }
         LOGD("*************************************");
         */
-        return thresholds.count(cacheKey) > 0;
+        return thresholds.count (cacheKey) > 0;
     };
 
-    std::string findSimilarKey(std::string key, int streamIndex)
+    std::string findSimilarKey (std::string key, int streamIndex)
     {
-        std::vector<std::string> keys = extract_keys(ranges);
+        std::vector<std::string> keys = extract_keys (ranges);
 
         unsigned sourcePos = 0;
-        unsigned streamPos = key.find_first_of("|");
-        unsigned namePos = key.find_last_of("|");
+        unsigned streamPos = key.find_first_of ("|");
+        unsigned namePos = key.find_last_of ("|");
 
         // First check for a source ID change (match only stream + electrode name)
         for (int i = 0; i < keys.size(); i++)
         {
-            std::string partToMatch = key.substr(streamPos, key.length() - streamPos);
-            std::string possibleMatch = keys[i].substr(streamPos, keys[i].length() - streamPos);
-            if (partToMatch.compare(possibleMatch) == 0)
+            std::string partToMatch = key.substr (streamPos, key.length() - streamPos);
+            std::string possibleMatch = keys[i].substr (streamPos, keys[i].length() - streamPos);
+            if (partToMatch.compare (possibleMatch) == 0)
                 return keys[i];
         }
 
@@ -105,11 +111,11 @@ public:
         std::vector<std::string> matches;
         for (int i = 0; i < keys.size(); i++)
         {
-            int namePos2 = keys[i].find_last_of("|");
-            std::string partToMatch = key.substr(sourcePos, streamPos - sourcePos) + key.substr(namePos, key.length() - namePos);
-            std::string possibleMatch = keys[i].substr(sourcePos, streamPos - sourcePos) + keys[i].substr(namePos2, keys[i].length() - namePos2);
-            if (partToMatch.compare(possibleMatch) == 0)
-                matches.push_back(keys[i]);
+            int namePos2 = keys[i].find_last_of ("|");
+            std::string partToMatch = key.substr (sourcePos, streamPos - sourcePos) + key.substr (namePos, key.length() - namePos);
+            std::string possibleMatch = keys[i].substr (sourcePos, streamPos - sourcePos) + keys[i].substr (namePos2, keys[i].length() - namePos2);
+            if (partToMatch.compare (possibleMatch) == 0)
+                matches.push_back (keys[i]);
         }
 
         // Check if multiple matches, if so, default to stream index
@@ -123,7 +129,6 @@ public:
     };
 
 private:
-
     std::map<std::string, std::map<int, double>> ranges;
     std::map<std::string, std::map<int, double>> thresholds;
     std::map<std::string, bool> monitors;
@@ -131,25 +136,23 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpikeDisplayCache);
 };
 
-
 class Electrode
 {
 public:
-
     /** Constructor */
-    Electrode(SpikeSorter* sorter, SpikeChannel* channel, PCAComputingThread* computingThread);
+    Electrode (SpikeSorter* sorter, SpikeChannel* channel, PCAComputingThread* computingThread);
 
     /** Destructor */
-    ~Electrode() { }
+    ~Electrode() {}
 
     /** Returns true if stream name and local index are the same */
-    bool matchesChannel(SpikeChannel* channel);
+    bool matchesChannel (SpikeChannel* channel);
 
     /** Updates settings with new SpikeChannel object */
-    void updateSettings(SpikeChannel* channel);
+    void updateSettings (SpikeChannel* channel);
 
     /** Applies cached display settings if inputs change */
-    void applyCachedDisplaySettings(SpikeChannel* channel, std::string cacheKey);
+    void applyCachedDisplaySettings (SpikeChannel* channel, std::string cacheKey);
 
     /** Sets 'isActive' to false */
     void reset() { isActive = false; }
@@ -165,7 +168,7 @@ public:
     uint16 streamId;
 
     bool isActive;
-  
+
     std::unique_ptr<SpikePlot> plot;
     std::unique_ptr<Sorter> sorter;
 
@@ -173,37 +176,32 @@ public:
     PCAComputingThread* computingThread;
 
     std::string getKey() { return key; }
-    
 
 private:
-
     std::string key; // used for caching
-
 };
-
 
 class SpikeSorter : public GenericProcessor
 {
 public:
-
     /** Constructor */
     SpikeSorter();
 
     /** Destructor */
-    ~SpikeSorter() { }
+    ~SpikeSorter() {}
 
     /** Calls checkForEvents(true) */
-    void process(AudioBuffer<float>& buffer) override;
+    void process (AudioBuffer<float>& buffer) override;
 
     /** Handles incoming spikes */
-    void handleSpike(SpikePtr spike) override;
+    void handleSpike (SpikePtr spike) override;
 
     /** Called whenever the signal chain is altered. */
     void updateSettings() override;
-    
+
     /** Used to enable animation */
     bool startAcquisition() override;
-    
+
     /** Used to disable animation */
     bool stopAcquisition() override;
 
@@ -211,31 +209,29 @@ public:
     AudioProcessorEditor* createEditor() override;
 
     /** Returns an array of available electrodes*/
-    Array<Electrode*> getElectrodesForStream(uint16 streamId);
+    Array<Electrode*> getElectrodesForStream (uint16 streamId);
 
     /** Finds a matching electrode based on names and IDs */
-    Electrode* findMatchingElectrode(String name, String stream_name, int stream_source);
+    Electrode* findMatchingElectrode (String name, String stream_name, int stream_source);
 
     /** Saves all custom parameters */
-    void saveCustomParametersToXml(XmlElement* parentElement) override;
+    void saveCustomParametersToXml (XmlElement* parentElement) override;
 
     /** Loads all custom parameters*/
-    void loadCustomParametersFromXml(XmlElement* xml) override;
+    void loadCustomParametersFromXml (XmlElement* xml) override;
 
     /** Manages connections from SpikeChannels to SpikePlots */
     std::unique_ptr<SpikeDisplayCache> cache;
-   
-private:
 
+private:
     CriticalSection mut;
 
     OwnedArray<Electrode> electrodes;
     std::map<const SpikeChannel*, Electrode*> electrodeMap;
-    
+
     PCAComputingThread computingThread;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SpikeSorter);
-
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpikeSorter);
 };
 
-#endif  // __SPIKESORTER_H_3F920F95__
+#endif // __SPIKESORTER_H_3F920F95__

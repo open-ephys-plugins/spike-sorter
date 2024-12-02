@@ -29,10 +29,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "Containers.h"
 #include "WaveformStats.h"
 
-#include <algorithm>    // std::sort
+#include <algorithm> // std::sort
+#include <atomic>
 #include <list>
 #include <queue>
-#include <atomic>
 
 /** 
     Represents a Box in waveform amplitude space
@@ -40,32 +40,30 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 class Box
 {
 public:
-
     /** Default constructor */
     Box();
 
     /** Constructor for a single channel */
-    Box(int channel);
+    Box (int channel);
 
     /** Constructor with dimensions */
-    Box(float X, float Y, float W, float H, int ch=0);
+    Box (float X, float Y, float W, float H, int ch = 0);
 
     /** Returns true if a line segment is inside the box */
-    bool LineSegmentIntersection(PointD p11, PointD p12, PointD p21, PointD p22);
+    bool LineSegmentIntersection (PointD p11, PointD p12, PointD p21, PointD p22);
 
     /** Returns true if a waveform is inside the box */
-    bool isWaveFormInside(SorterSpikePtr so);
+    bool isWaveFormInside (SorterSpikePtr so);
 
     /** Microseconds */
     double x, w;
 
     /** Microvolts */
     double y, h;
-    
+
     /** Channel index*/
     int channel;
 };
-
 
 /** 
 
@@ -76,18 +74,17 @@ public:
 class BoxUnit
 {
 public:
-
     /** Default constructor */
-    BoxUnit() { }
+    BoxUnit() {}
 
     /** Constructor based on unit ID*/
-    BoxUnit(int id);
+    BoxUnit (int id);
 
     /** Constructor with a Box*/
-    BoxUnit(Box B, int id);
+    BoxUnit (Box B, int id);
 
     /** Returns true if spike waveform is inside all boxes*/
-    bool isWaveFormInsideAllBoxes(SorterSpikePtr so);
+    bool isWaveFormInsideAllBoxes (SorterSpikePtr so);
 
     /** Returns the global ID for this unit */
     int getUnitId();
@@ -103,12 +100,12 @@ public:
 
     /** Sets the unit's status to inactive */
     void deactivateUnit();
- 
+
     /** Toggle's the unit's active state */
     void toggleActive();
 
     /** Adds a box to this unit */
-    void addBox(Box b);
+    void addBox (Box b);
 
     /** Adds a box with default boundaries */
     void addBox();
@@ -117,34 +114,34 @@ public:
     int getNumBoxes();
 
     /** Changes the boundaries of a box at a particular index */
-    void modifyBox(int boxindex, Box b);
+    void modifyBox (int boxindex, Box b);
 
     /** Removes a box at a particular index */
-    bool deleteBox(int boxindex);
+    bool deleteBox (int boxindex);
 
     /** Returns the box at a particular index */
-    Box getBox(int box);
+    Box getBox (int box);
 
     /** Updates the box based on ID*/
-    void setBox(int boxid, Box B);
+    void setBox (int boxid, Box B);
 
     /** Sets the position of a box by ID*/
-    void setBoxPos(int boxid, PointD P);
+    void setBoxPos (int boxid, PointD P);
 
     /** Sets the size (width and height) of a box by ID */
-    void setBoxSize(int boxid, double W, double H);
+    void setBoxSize (int boxid, double W, double H);
 
     /** Moves a box by a particular step size*/
-    void moveBox(int boxid, int dx, int dy);
-    
+    void moveBox (int boxid, int dx, int dy);
+
     /** Returns a vector of boxes for this unit */
     std::vector<Box> getBoxes();
-    
+
     /** Adds a new waveform to this unit's stats counter */
-	void updateWaveform(SorterSpikePtr so);
+    void updateWaveform (SorterSpikePtr so);
 
     /** Sets the color for this unit */
-    static void setDefaultColors(uint8_t col[3], int ID);
+    static void setDefaultColors (uint8_t col[3], int ID);
 
     /** Changes the unit color after the ID is updated */
     void updateColor();
@@ -157,13 +154,12 @@ public:
 
     /** RGB color for this unit */
     uint8_t colorRGB[3];
-    
+
     /** Ongoing stats for this unit (not currently used) */
     WaveformStats stats;
-    
+
     /** True if the unit is active */
     bool isActive;
-
 };
 
 #endif // __BOX_UNIT_H

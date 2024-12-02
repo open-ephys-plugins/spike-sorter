@@ -28,74 +28,71 @@ PointD::PointD()
     X = Y = 0;
 }
 
-PointD::PointD(float x, float y)
+PointD::PointD (float x, float y)
 {
     X = x;
     Y = y;
 }
 
-PointD::PointD(const PointD& P)
+PointD::PointD (const PointD& P)
 {
     X = P.X;
     Y = P.Y;
 }
 
-PointD& PointD::operator+=(const PointD& rhs)
+PointD& PointD::operator+= (const PointD& rhs)
 {
     X += rhs.X;
     Y += rhs.Y;
     return *this;
 }
 
-PointD& PointD::operator-=(const PointD& rhs)
+PointD& PointD::operator-= (const PointD& rhs)
 {
     X -= rhs.X;
     Y -= rhs.Y;
     return *this;
 }
 
-const PointD PointD::operator+(const PointD& other) const
+const PointD PointD::operator+ (const PointD& other) const
 {
     PointD result = *this;
     result += other;
     return result;
 }
 
-const PointD PointD::operator-(const PointD& other) const
+const PointD PointD::operator- (const PointD& other) const
 {
     PointD result = *this;
     result -= other;
     return result;
 }
 
-const PointD PointD::operator*(const PointD& other) const
+const PointD PointD::operator* (const PointD& other) const
 {
     PointD result = *this;
     result.X *= other.X;
     result.Y *= other.Y;
     return result;
-
 }
 
-float PointD::cross(PointD c) const
+float PointD::cross (PointD c) const
 {
     return X * c.Y - Y * c.X;
 }
 
-
-SorterSpikeContainer::SorterSpikeContainer(const SpikeChannel* channel, uint16 sortedId_, int64 timestamp_, const float* waveform)
-    : chan(channel),
-      sortedId(sortedId_),
-      timestamp(timestamp_)
+SorterSpikeContainer::SorterSpikeContainer (const SpikeChannel* channel, uint16 sortedId_, int64 timestamp_, const float* waveform)
+    : chan (channel),
+      sortedId (sortedId_),
+      timestamp (timestamp_)
 {
     color[0] = color[1] = color[2] = 127;
     pcProj[0] = pcProj[1] = 0;
 
     int nSamples = chan->getNumChannels() * chan->getTotalSamples();
 
-    data.malloc(nSamples);
-    memcpy(data.getData(), waveform, nSamples*sizeof(float));
-
+    data.malloc (nSamples);
+    memcpy (data.getData(), waveform, nSamples * sizeof (float));
 }
 
 const float* SorterSpikeContainer::getData() const
@@ -113,14 +110,14 @@ int64 SorterSpikeContainer::getTimestamp() const
     return timestamp;
 }
 
-float SorterSpikeContainer::getMinimum(int channelIndex)
+float SorterSpikeContainer::getMinimum (int channelIndex)
 {
     int offset = channelIndex * chan->getTotalSamples() + chan->getPrePeakSamples() + 1;
 
     return data[offset];
 }
 
-float SorterSpikeContainer::getMaximum(int channelIndex)
+float SorterSpikeContainer::getMaximum (int channelIndex)
 {
     int offset = channelIndex * chan->getTotalSamples();
 
@@ -135,14 +132,13 @@ float SorterSpikeContainer::getMaximum(int channelIndex)
     return maximum;
 }
 
-bool SorterSpikeContainer::checkThresholds(Array<float> thresholds)
+bool SorterSpikeContainer::checkThresholds (Array<float> thresholds)
 {
-
     bool belowThresh = true;
 
     for (int i = 0; i < thresholds.size(); i++)
     {
-        belowThresh &= getMinimum(i) < thresholds[i];
+        belowThresh &= getMinimum (i) < thresholds[i];
     }
 
     return belowThresh;
