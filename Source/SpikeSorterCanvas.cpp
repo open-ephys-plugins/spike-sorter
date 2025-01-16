@@ -147,6 +147,8 @@ void SpikeSorterCanvas::setActiveElectrode (Electrode* electrode_)
 void SpikeSorterCanvas::removeUnitOrBox()
 {
     int unitID, boxID;
+    if (electrode == nullptr)
+        return;
     electrode->plot->getSelectedUnitAndBox (unitID, boxID);
 
     bool selectNewBoxUnit = false;
@@ -245,10 +247,10 @@ bool SpikeSorterCanvas::keyPressed (const KeyPress& key, Component* c)
     if (key.getKeyCode() == KeyPress::deleteKey || key.getKeyCode() == KeyPress::backspaceKey)
     {
         removeUnitOrBox();
-        return false;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 void SpikeSorterCanvas::buttonClicked (Button* button)
