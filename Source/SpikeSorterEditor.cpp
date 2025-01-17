@@ -33,15 +33,11 @@ SpikeSorterEditor::SpikeSorterEditor (GenericProcessor* parentNode)
 
 {
     tabText = "Spike Sorter";
+    addComboBoxParameterEditor (Parameter::STREAM_SCOPE, "electrode_index", 20, 30);
 
-    electrodeList = new ComboBox ("Electrode List");
-    electrodeList->addListener (this);
-    electrodeList->setBounds (20, 70, 140, 20);
-    addAndMakeVisible (electrodeList);
-
-    electrodeSelectionLabel = new Label ("Label", "Active Electrode:");
-    electrodeSelectionLabel->setBounds (17, 40, 180, 20);
-    addAndMakeVisible (electrodeSelectionLabel);
+    ParameterEditor* electrodeIndexEditor = getParameterEditor ("electrode_index");
+    electrodeIndexEditor->setLayout (ParameterEditor::Layout::nameOnTop);
+    electrodeIndexEditor->setSize (160, 40);
 }
 
 Visualizer* SpikeSorterEditor::createNewCanvas()
@@ -49,15 +45,14 @@ Visualizer* SpikeSorterEditor::createNewCanvas()
     SpikeSorter* processor = (SpikeSorter*) getProcessor();
     spikeSorterCanvas = new SpikeSorterCanvas (processor);
 
-    selectedStreamHasChanged();
+    updateView();
 
     return spikeSorterCanvas;
 }
 
 void SpikeSorterEditor::selectedStreamHasChanged()
 {
-    electrodeList->clear();
-
+    updateView();
     if (selectedStream == 0)
     {
         return;
@@ -72,70 +67,63 @@ void SpikeSorterEditor::selectedStreamHasChanged()
 
     for (auto electrode : currentElectrodes)
     {
-        electrodeList->addItem (electrode->name, ++id);
-
         if (electrode->plot->isVisible())
             viewedPlot = id;
     }
 
     int electrodeIndex = processor->getDataStream (selectedStream)->getParameter ("electrode_index")->getValue();
-
-    electrodeList->setSelectedId (electrodeIndex + 1, true);
 }
 
-void SpikeSorterEditor::comboBoxChanged (ComboBox* comboBox)
+void SpikeSorterEditor::updateView()
 {
-    if (comboBox == electrodeList)
+    if (selectedStream == 0)
+        return;
+
+    SpikeSorter* processor = (SpikeSorter*) getProcessor();
+    currentElectrodes = processor->getElectrodesForStream (selectedStream);
+    if (currentElectrodes.size() == 0)
     {
-        int index = electrodeList->getSelectedId() - 1;
+        spikeSorterCanvas->setActiveElectrode (nullptr);
+        return;
+    }
 
-        if (spikeSorterCanvas != nullptr)
-        {
-            if (currentElectrodes.size() == 0)
-            {
-                spikeSorterCanvas->setActiveElectrode (nullptr);
-                return;
-            }
-
-            spikeSorterCanvas->setActiveElectrode (currentElectrodes[index]);
-
-            for (auto& stream : getProcessor()->getDataStreams())
-                if (stream->getName() == currentElectrodes[index]->streamName
-                    && stream->getSourceNodeId() == currentElectrodes[index]->streamSourceId)
-                    stream->getParameter ("electrode_index")->setNextValue (index);
-        }
+    if (spikeSorterCanvas != nullptr)
+    {
+        int electrodeIndex = processor->getDataStream (selectedStream)->getParameter ("electrode_index")->getValue();
+        spikeSorterCanvas->setActiveElectrode (currentElectrodes[electrodeIndex]);
     }
 }
 
 void SpikeSorterEditor::updateSettings()
 {
-    selectedStreamHasChanged();
+    updateView();
 }
 
 void SpikeSorterEditor::nextElectrode()
 {
-    int numAvailable = electrodeList->getNumItems();
-
-    int currentID = electrodeList->getSelectedId();
+    SpikeSorter* processor = (SpikeSorter*) getProcessor();
+    int numAvailable = currentElectrodes.size();
+    int currentID = processor->getDataStream (selectedStream)->getParameter ("electrode_index")->getValue();
 
     int nextID = currentID + 1;
 
     if (nextID > numAvailable)
         nextID = 1;
 
-    electrodeList->setSelectedId (nextID, sendNotification);
+    processor->getDataStream (selectedStream)->getParameter ("electrode_index")->setNextValue (nextID);
 }
 
 void SpikeSorterEditor::previousElectrode()
 {
-    int numAvailable = electrodeList->getNumItems();
+    SpikeSorter* processor = (SpikeSorter*) getProcessor();
+    int numAvailable = currentElectrodes.size();
 
-    int currentID = electrodeList->getSelectedId();
+    int currentID = processor->getDataStream (selectedStream)->getParameter ("electrode_index")->getValue();
 
     int previousID = currentID - 1;
 
     if (previousID == 0)
         previousID = numAvailable;
 
-    electrodeList->setSelectedId (previousID, sendNotification);
+    processor->getDataStream (selectedStream)->getParameter ("electrode_index")->setNextValue (previousID);
 }

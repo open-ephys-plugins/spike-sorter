@@ -39,8 +39,7 @@ class SpikeSorterCanvas;
 
 */
 
-class SpikeSorterEditor : public VisualizerEditor,
-                          public ComboBox::Listener
+class SpikeSorterEditor : public VisualizerEditor
 {
 public:
     /** Constructor*/
@@ -52,11 +51,11 @@ public:
     /** Creates the SpikeSorterCanvas */
     Visualizer* createNewCanvas();
 
-    /** ComboBox::Listener callback*/
-    void comboBoxChanged (ComboBox* comboBox) override;
-
     /** Called when settings are updated */
     void updateSettings() override;
+
+    /** Updates the view */
+    void updateView();
 
     /** Selects the next available electrode */
     void nextElectrode();

@@ -115,8 +115,6 @@ void Electrode::updateSettings (SpikeChannel* channel)
 SpikeSorter::SpikeSorter() : GenericProcessor ("Spike Sorter")
 {
     cache = std::make_unique<SpikeDisplayCache>();
-
-    addIntParameter (Parameter::STREAM_SCOPE, "electrode_index", "Electrode Index", "The current electrode index being viewed", 0, 0, 1000);
 }
 
 AudioProcessorEditor* SpikeSorter::createEditor()
@@ -124,6 +122,19 @@ AudioProcessorEditor* SpikeSorter::createEditor()
     editor = std::make_unique<SpikeSorterEditor> (this);
 
     return editor.get();
+}
+
+void SpikeSorter::registerParameters()
+{
+    addCategoricalParameter (Parameter::STREAM_SCOPE, "electrode_index", "Active Electrode", "The current electrode index being viewed", {}, 0);
+}
+
+void SpikeSorter::parameterValueChanged (Parameter* parameter)
+{
+    if (parameter->getName() == "electrode_index")
+    {
+        ((SpikeSorterEditor*) getEditor())->updateView();
+    }
 }
 
 bool SpikeSorter::startAcquisition()
@@ -151,6 +162,8 @@ void SpikeSorter::updateSettings()
         electrode->reset();
     }
 
+    Array<String> electrodeNames;
+
     for (auto spikeChannel : spikeChannels)
     {
         if (spikeChannel->isValid())
@@ -175,8 +188,22 @@ void SpikeSorter::updateSettings()
                 Electrode* e = new Electrode (this, spikeChannel, &computingThread);
                 electrodes.add (e);
                 electrodeMap[spikeChannel] = e;
+                electrodeNames.add (e->name);
             }
         }
+    }
+
+    for (auto stream : getDataStreams())
+    {
+        // update the spike channel parameter with the available spike channels
+        Array<String> spikeChannelNames;
+        //spikeChannelNames.add ("No spike channel");
+        for (auto spikeChan : stream->getSpikeChannels())
+            spikeChannelNames.add (spikeChan->getName());
+
+        CategoricalParameter* spikeChanParam = (CategoricalParameter*) stream->getParameter ("electrode_index");
+        spikeChanParam->setCategories (spikeChannelNames);
+        parameterValueChanged (stream->getParameter ("electrode_index"));
     }
 }
 

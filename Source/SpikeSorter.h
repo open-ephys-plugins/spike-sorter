@@ -190,6 +190,12 @@ public:
     /** Destructor */
     ~SpikeSorter() {}
 
+    /** Registers parameters */
+    void registerParameters() override;
+
+    /** Handle parameter value change */
+    void parameterValueChanged (Parameter* parameter) override;
+
     /** Calls checkForEvents(true) */
     void process (AudioBuffer<float>& buffer) override;
 
