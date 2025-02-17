@@ -76,7 +76,7 @@ void SpikeSorterEditor::selectedStreamHasChanged()
 
 void SpikeSorterEditor::updateView()
 {
-    if (selectedStream == 0)
+    if (selectedStream == 0 || !spikeSorterCanvas)
         return;
 
     SpikeSorter* processor = (SpikeSorter*) getProcessor();
