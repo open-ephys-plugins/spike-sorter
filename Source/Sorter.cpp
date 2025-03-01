@@ -374,6 +374,9 @@ void Sorter::updateBoxUnits (std::vector<BoxUnit> _units)
 
 bool Sorter::checkBoxUnits (SorterSpikePtr spike)
 {
+    if (boxUnits.size() == 0)
+        return false;
+
     for (int k = 0; k < boxUnits.size(); k++)
     {
         if (boxUnits[k].isWaveFormInsideAllBoxes (spike))
@@ -386,10 +389,14 @@ bool Sorter::checkBoxUnits (SorterSpikePtr spike)
             return true;
         }
     }
+    return false;
 }
 
 bool Sorter::checkPCAUnits (SorterSpikePtr spike)
 {
+    if (pcaUnits.size() == 0)
+        return false;
+
     for (int k = 0; k < pcaUnits.size(); k++)
     {
         if (pcaUnits[k].isWaveFormInsidePolygon (spike))
@@ -401,6 +408,7 @@ bool Sorter::checkPCAUnits (SorterSpikePtr spike)
             return true;
         }
     }
+    return false;
 }
 
 bool Sorter::sortSpike (SorterSpikePtr spike, bool PCAfirst)

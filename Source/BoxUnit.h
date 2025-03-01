@@ -75,7 +75,7 @@ class BoxUnit
 {
 public:
     /** Default constructor */
-    BoxUnit() {}
+    BoxUnit() : lstBoxes(), isActive(false) {}
 
     /** Constructor based on unit ID*/
     BoxUnit (int id);
