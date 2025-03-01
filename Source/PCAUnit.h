@@ -42,7 +42,7 @@ class cPolygon
 public:
 
     /** Constructor */
-    cPolygon() { }
+    cPolygon() : pts(), offset() {}
 
     /** Returns true if 2D point is inside polygon */
     bool isPointInside(PointD p);
