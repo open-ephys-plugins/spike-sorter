@@ -107,8 +107,8 @@ void SpikeSorterEditor::nextElectrode()
 
     int nextID = currentID + 1;
 
-    if (nextID > numAvailable)
-        nextID = 1;
+    if (nextID >= numAvailable)
+        nextID = 0;
 
     processor->getDataStream (selectedStream)->getParameter ("electrode_index")->setNextValue (nextID);
 }
@@ -122,8 +122,8 @@ void SpikeSorterEditor::previousElectrode()
 
     int previousID = currentID - 1;
 
-    if (previousID == 0)
-        previousID = numAvailable;
+    if (previousID < 0)
+        previousID = numAvailable - 1;
 
     processor->getDataStream (selectedStream)->getParameter ("electrode_index")->setNextValue (previousID);
 }
