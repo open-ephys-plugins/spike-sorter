@@ -32,7 +32,7 @@ PCAProjectionAxes::PCAProjectionAxes (Electrode* electrode_) : GenericDrawAxes (
                                                                rangeY (250),
                                                                spikesReceivedSinceLastRedraw (0)
 {
-    projectionImage = Image (Image::RGB, imageDim, imageDim, true);
+    projectionImage = Image (Image::RGB, imageDim, imageDim, true, SoftwareImageType());
     bufferSize = 600;
     pcaMin[0] = pcaMin[1] = -5;
     pcaMax[0] = pcaMax[1] = 5;
