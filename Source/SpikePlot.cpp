@@ -152,11 +152,11 @@ void SpikePlot::setName (const String& name_)
 
 void SpikePlot::paint (Graphics& g)
 {
-    g.setColour (Colours::whitesmoke);
-    g.setFont (20);
+    g.setColour (findColour (ThemeColours::controlPanelText));
+    g.setFont (FontOptions ("Inter", "Regular", 20.0f));
     g.drawText (name, 10, 0, 200, 20, Justification::left, false);
 
-    g.setColour (Colours::grey);
+    g.setColour (findColour (ThemeColours::componentBackground));
     g.fillRoundedRectangle (0, 30, getWidth(), getHeight() - 30, 12.0f);
     g.setColour (Colours::black);
     g.fillRoundedRectangle (10, 40, getWidth() - 20, getHeight() - 50, 8.0f);

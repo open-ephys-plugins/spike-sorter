@@ -122,7 +122,7 @@ void SpikeSorterCanvas::resized()
 
 void SpikeSorterCanvas::paint (Graphics& g)
 {
-    g.fillAll (Colours::darkgrey);
+    g.fillAll (findColour (ThemeColours::componentParentBackground));
 }
 
 void SpikeSorterCanvas::refresh()

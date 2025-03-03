@@ -44,15 +44,17 @@ PCAProjectionAxes::PCAProjectionAxes (Electrode* electrode_) : GenericDrawAxes (
     isOverUnit = -1;
 
     rangeUpButton = new UtilityButton ("+");
+    rangeUpButton->setFont(FontOptions ("Fira Code", "Regular", 15.0f));
     rangeUpButton->setRadius (3.0f);
     rangeUpButton->addListener (this);
-    rangeUpButton->setBounds (35, 10, 20, 15);
+    rangeUpButton->setBounds (35, 10, 20, 20);
     addAndMakeVisible (rangeUpButton);
 
     rangeDownButton = new UtilityButton ("-");
+    rangeDownButton->setFont(FontOptions ("Fira Code", "Regular", 15.0f));
     rangeDownButton->setRadius (3.0f);
     rangeDownButton->addListener (this);
-    rangeDownButton->setBounds (10, 10, 20, 15);
+    rangeDownButton->setBounds (10, 10, 20, 20);
     addAndMakeVisible (rangeDownButton);
 
     redrawSpikes = true;
