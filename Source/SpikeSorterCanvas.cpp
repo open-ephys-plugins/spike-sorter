@@ -385,7 +385,7 @@ GenericDrawAxes::GenericDrawAxes (GenericDrawAxes::AxesType t)
     xlims[0] = 0;
     xlims[1] = 1;
 
-    font = Font ("Default", 12, Font::plain);
+    font = FontOptions (12.0f);
 }
 
 GenericDrawAxes::~GenericDrawAxes()

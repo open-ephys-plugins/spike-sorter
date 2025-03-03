@@ -110,13 +110,13 @@ void WaveformAxes::AnnotationComponent::drawThresholdSlider (Graphics& g)
     {
         float h = getHeight() - (getHeight() * (0.5f - displayThresholdLevel / range));
         g.drawLine (0, h, getWidth(), h);
-        g.drawText (String (roundFloatToInt (displayThresholdLevel)), 5, h + 3, 35, 10, Justification::left, false);
+        g.drawText (String (roundToInt (displayThresholdLevel)), 5, h + 3, 35, 10, Justification::left, false);
     }
     else
     {
         float h = getHeight() * (0.5f - displayThresholdLevel / range);
         g.drawLine (0, h, getWidth(), h);
-        g.drawText (String (roundFloatToInt (displayThresholdLevel)), 5, h + 3, 35, 10, Justification::left, false);
+        g.drawText (String (roundToInt (displayThresholdLevel)), 5, h + 3, 35, 10, Justification::left, false);
     }
 }
 

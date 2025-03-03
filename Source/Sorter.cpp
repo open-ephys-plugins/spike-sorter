@@ -559,7 +559,7 @@ void Sorter::loadCustomParametersFromXml (XmlElement* xml)
     selectedUnit = xml->getIntAttribute ("selectedUnit", 0);
     selectedBox = xml->getIntAttribute ("selectedBox", 0);
 
-    forEachXmlChildElement (*xml, sorterNode)
+    for (auto sorterNode : xml->getChildIterator())
     {
         if (sorterNode->hasTagName ("PCA"))
         {
@@ -578,7 +578,7 @@ void Sorter::loadCustomParametersFromXml (XmlElement* xml)
             pc2 = new float[waveformLength * numChannels];
             int dimcounter = 0;
 
-            forEachXmlChildElement (*sorterNode, dimNode)
+            for (auto dimNode : sorterNode->getChildIterator())
             {
                 if (dimNode->hasTagName ("PCA_DIM"))
                 {
@@ -588,7 +588,7 @@ void Sorter::loadCustomParametersFromXml (XmlElement* xml)
                 }
             }
 
-            forEachXmlChildElement (*sorterNode, unitNode)
+            for (auto unitNode : sorterNode->getChildIterator())
             {
                 if (unitNode->hasTagName ("UNIT"))
                 {
@@ -610,7 +610,7 @@ void Sorter::loadCustomParametersFromXml (XmlElement* xml)
                     pcaUnit.poly.offset.Y = unitNode->getDoubleAttribute ("PolygonOffsetY");
 
                     int pointCounter = 0;
-                    forEachXmlChildElement (*unitNode, polygonPoint)
+                    for (auto polygonPoint : unitNode->getChildIterator())
                     {
                         if (polygonPoint->hasTagName ("POLYGON_POINT"))
                         {
@@ -626,7 +626,7 @@ void Sorter::loadCustomParametersFromXml (XmlElement* xml)
         }
         else if (sorterNode->hasTagName ("BOXES"))
         {
-            forEachXmlChildElement (*sorterNode, unitNode)
+            for (auto unitNode : sorterNode->getChildIterator())
             {
                 if (unitNode->hasTagName ("UNIT"))
                 {
@@ -641,7 +641,7 @@ void Sorter::loadCustomParametersFromXml (XmlElement* xml)
                     boxUnit.colorRGB[1] = unitNode->getIntAttribute ("ColorG");
                     boxUnit.colorRGB[2] = unitNode->getIntAttribute ("ColorB");
 
-                    forEachXmlChildElement (*unitNode, boxNode)
+                    for (auto boxNode : unitNode->getChildIterator())
                     {
                         if (boxNode->hasTagName ("BOX"))
                         {

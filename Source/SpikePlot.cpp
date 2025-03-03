@@ -35,7 +35,7 @@ SpikePlot::SpikePlot (
                              name (electrode_->name)
 
 {
-    font = Font ("Default", 15, Font::plain);
+    font = FontOptions ("Inter", "Regular", 20.0f);
 
     switch (electrode->numChannels)
     {
@@ -106,7 +106,7 @@ void SpikePlot::saveCustomParametersToXml (XmlElement* xml)
 
 void SpikePlot::loadCustomParametersFromXml (XmlElement* xml)
 {
-    forEachXmlChildElement (*xml, mainNode)
+    for (auto mainNode : xml->getChildIterator())
     {
         if (mainNode->hasTagName ("PLOT"))
         {
@@ -118,7 +118,7 @@ void SpikePlot::loadCustomParametersFromXml (XmlElement* xml)
             std::string key = stream_source + "|" + stream_name + "|" + source + "|" + electrode_name;
 
             int i = 0;
-            forEachXmlChildElement (*mainNode, axisNode)
+            for (auto axisNode : mainNode->getChildIterator())
             {
                 if (axisNode->hasTagName ("AXIS"))
                 {
@@ -153,7 +153,7 @@ void SpikePlot::setName (const String& name_)
 void SpikePlot::paint (Graphics& g)
 {
     g.setColour (findColour (ThemeColours::controlPanelText));
-    g.setFont (FontOptions ("Inter", "Regular", 20.0f));
+    g.setFont (font);
     g.drawText (name, 10, 0, 200, 20, Justification::left, false);
 
     g.setColour (findColour (ThemeColours::componentBackground));

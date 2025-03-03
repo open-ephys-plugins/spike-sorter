@@ -149,7 +149,7 @@ private:
 
     String name;
     CriticalSection mut;
-    Font font;
+    FontOptions font;
 };
 
 #endif // SPIKEPLOT_H_

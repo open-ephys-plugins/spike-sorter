@@ -201,7 +201,7 @@ protected:
 
     AxesType type;
 
-    Font font;
+    FontOptions font;
 
     double ad16ToUv (int x, int gain);
 };
