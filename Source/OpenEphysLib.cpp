@@ -24,7 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "SpikeSorter.h"
 #include <PluginInfo.h>
 #include <string>
-#ifdef WIN32
+#ifdef _WIN32
 #include <Windows.h>
 #define EXPORT __declspec (dllexport)
 #else
@@ -38,7 +38,7 @@ extern "C" EXPORT void getLibInfo (Plugin::LibraryInfo* info)
 {
     info->apiVersion = PLUGIN_API_VER;
     info->name = "Spike Sorter";
-    info->libVersion = "0.3.0";
+    info->libVersion = "1.0.0";
     info->numPlugins = NUM_PLUGINS;
 }
 
